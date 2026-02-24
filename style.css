@@ -1,47 +1,73 @@
-/* 动态网格容器 */
+/* 核心重置 */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { background: #000; color: #ccc; font-family: "PingFang SC", "Microsoft YaHei", monospace; height: 100vh; overflow: hidden; }
+
+#game-app { display: flex; flex-direction: column; height: 100vh; }
+
+#status-bar { height: 40px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; padding: 0 20px; font-size: 0.8rem; color: #666; letter-spacing: 2px; }
+
+/* 舞台布局 */
+#interaction-stage { flex: 1; display: flex; padding: 15px; gap: 15px; overflow: hidden; }
+#grid-container { flex: 2; display: flex; flex-direction: column; }
+#scene-desc { min-height: 40px; margin-bottom: 15px; font-size: 0.9rem; line-height: 1.6; color: #999; }
+
+/* 动态网格 */
 .action-grid {
     display: grid;
-    /* 由 JS 动态设置 --cols 变量 */
-    grid-template-columns: repeat(var(--cols, 4), 1fr); 
+    grid-template-columns: repeat(var(--cols, 4), 1fr);
     gap: 8px;
-    padding: 12px;
     background: #080808;
+    padding: 10px;
     border-radius: 12px;
+    border: 1px solid #1a1a1a;
 }
 
 .action-btn {
     aspect-ratio: 1 / 1;
-    border-radius: 8px;
-    background: #111;
+    background: #121212;
     border: 1px solid #222;
+    border-radius: 8px;
+    color: #888;
     font-size: 0.75rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.2s;
 }
 
-/* 迷雾状态 */
-.is-hidden {
-    background: #1a1a1a;
-    border-color: #2a2a2a;
-    color: transparent !important; /* 隐藏文字 */
-    position: relative;
-}
+/* 迷雾样式 */
+.is-hidden { background: #1a1a1a; border-color: #252525; color: transparent !important; }
+.is-hidden::after { content: "?"; color: #333; font-size: 1.1rem; }
 
-.is-hidden::after {
-    content: "?";
-    position: absolute;
-    color: #444;
-    font-size: 1.2rem;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
+/* 元素类型颜色 */
+.type-player { background: #d4af37 !important; color: #000 !important; font-weight: bold; border-color: #fff !important; }
+.type-npc { color: #d4af37; }
+.type-exit { color: #6c6; }
+.type-empty { opacity: 0.3; }
 
-/* 揭开迷雾后的反馈动画 */
-.reveal-anim {
-    animation: revealPulse 0.5s ease-out;
+/* 侧边菜单 */
+#side-menu {
+    flex: 1;
+    background: #0d0d0d;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: slideIn 0.3s ease-out;
 }
+.menu-title { font-size: 0.8rem; color: #444; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 5px; }
+.menu-btn { background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+.menu-btn:hover { border-color: #d4af37; color: #fff; }
+.hidden { display: none; }
 
-@keyframes revealPulse {
-    0% { transform: scale(0.8); background: #d4af37; }
-    100% { transform: scale(1); background: #111; }
-}
+/* 日志框与拉伸条 */
+#log-resizer { height: 8px; background: #111; cursor: ns-resize; border-top: 1px solid #222; }
+#log-console { height: 30%; background: #050505; overflow-y: auto; padding: 15px; font-size: 0.85rem; }
+.log-entry { margin-bottom: 10px; line-height: 1.5; color: #777; border-left: 2px solid #1a1a1a; padding-left: 8px; }
+.system-msg { color: #d4af37; }
+
+@keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
