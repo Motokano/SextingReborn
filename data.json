@@ -1,57 +1,36 @@
 {
+  "systemActions": [
+    { "label": "检查身体", "effects": [{ "type": "log", "content": "身体处于低功耗模式，后脑接口微热。" }] },
+    { "label": "整理行囊", "effects": [{ "type": "log", "content": "包里除了一些导线，只剩半罐红牛。" }] }
+  ],
   "scenes": {
     "forest_center": {
-      "location": "坠梦林地 - 核心区",
+      "location": "坠梦林地 - 槐树下",
       "rows": 4, "cols": 4,
-      "description": "空地上矗立着巨大的青铜构件，其表面布满了复杂的几何纹路。",
+      "description": "亮如白昼的雾气在林间游走。一名独臂侠客正背对着你坐在机匣上。",
       "grid": [
-        { "type": "empty", "hidden": true }, 
-        { "type": "exit", "shortName": "西路", "fullName": "通向森林深处的小径", "target": "forest_deep", "hidden": true }, 
-        { "type": "empty", "hidden": true }, 
-        { "type": "empty", "hidden": true },
-        
-        { "type": "empty", "hidden": true }, 
-        { "type": "player", "shortName": "主角", "fullName": "你自己（编号：7-Delta）", "hidden": false }, 
-        { "type": "empty", "hidden": true }, 
+        { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true }, { "type": "player", "shortName": "我", "hidden": false }, { "type": "empty", "hidden": true }, 
         { 
-          "type": "npc", 
-          "shortName": "神秘客", 
-          "fullName": "背着沉重机匣的独臂武者", 
-          "hidden": true,
+          "type": "npc", "shortName": "侠客", "fullName": "背负重机匣的独臂武者", "hidden": true,
           "interactions": [
-            { "label": "搭话", "log": "武者睁开眼：‘天外来客？你身上有股死气。’" },
-            { "label": "观察机匣", "log": "机匣表面刻着：‘墨家禁制，擅动者死’。" }
+            { 
+              "label": "搭话", 
+              "once": "fainted_by_knight",
+              "effects": [
+                { "type": "log", "content": "你刚开口，侠客回首。其眼中流转的青色符文瞬间占据了你的视野..." },
+                { "type": "set_flag", "key": "fainted_by_knight" },
+                { "type": "faint", "duration": 5000 }
+              ]
+            },
+            {
+              "label": "打量",
+              "effects": [{ "type": "log", "content": "他身后的机匣发出轻微的泄压声，一股机油味扑面而来。" }]
+            }
           ]
         },
-        
-        { "type": "empty", "hidden": true }, 
-        { "type": "empty", "hidden": true }, 
-        { 
-          "type": "object", 
-          "shortName": "铜碑", 
-          "fullName": "刻满阵法回路的断裂铜碑", 
-          "hidden": true,
-          "interactions": [
-            { "label": "注入精神", "log": "你尝试用现代思维模拟其逻辑，铜碑发出了低沉的鸣响。" },
-            { "label": "搜索基座", "log": "你在基座缝隙里发现了一块报废的集成电路。" }
-          ]
-        }, 
-        { "type": "empty", "hidden": true },
-        
-        { "type": "empty", "hidden": true }, 
-        { "type": "empty", "hidden": true }, 
-        { "type": "empty", "hidden": true }, 
-        { "type": "empty", "hidden": true }
-      ]
-    },
-    "forest_deep": {
-      "location": "森林深处",
-      "rows": 2, "cols": 6,
-      "description": "这条走廊非常狭窄，头顶密布着不断咬合的齿轮组。",
-      "grid": [
-        { "type": "exit", "shortName": "返回", "fullName": "回到之前的空地", "target": "forest_center", "hidden": false },
-        { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "player", "shortName": "主角", "hidden": false }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true },
-        { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }
+        { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true }, { "type": "exit", "shortName": "离开", "target": "deep_forest", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }
       ]
     }
   }
