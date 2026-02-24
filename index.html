@@ -1,11 +1,26 @@
-<div id="game-container">
-    <header id="scene-header">加载中...</header>
-    
-    <section id="story-log">
-        </section>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>牢房</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-app">
+        <header id="status-bar">
+            <span id="loc-display">系统初始化...</span>
+        </header>
 
-    <footer id="interaction-panel">
-        <div id="action-grid" class="action-grid">
-            </div>
-    </footer>
-</div>
+        <main id="interaction-stage">
+            <div id="scene-desc"></div> <div id="action-grid"></div> </main>
+
+        <div id="log-resizer"></div>
+
+        <footer id="log-console">
+            <div id="log-content"></div>
+        </footer>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
