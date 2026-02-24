@@ -1,0 +1,21 @@
+{
+  "scenes": {
+    "forest_start": {
+      "name": "坠梦林地",
+      "description": "周围弥漫着混杂了泥土与陈旧机油的气息。远处的齿轮声沉重且迟缓。",
+      "actions": [
+        { "text": "观察环境", "target": "forest_detail" },
+        { "text": "感知自身", "type": "status_check" },
+        { "text": "尝试移动", "target": "tea_house", "condition": "discovered_exit" }
+      ]
+    },
+    "tea_house": {
+      "name": "古道茶棚",
+      "description": "一座破旧的木质茶棚，屋顶覆盖着带有齿轮花纹的黑瓦。",
+      "actions": [
+        { "text": "进入茶棚", "target": "inside_tea_house" },
+        { "text": "返回林地", "target": "forest_start" }
+      ]
+    }
+  }
+}
