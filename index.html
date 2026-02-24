@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>残机物语</title>
+    <title>残机物语：生存引擎</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="game-app">
         <header id="status-bar">
             <div id="time-display">--月--日 --:--</div>
-            <div id="loc-display">意识载入中...</div>
+            <div id="loc-display">意识校准中...</div>
         </header>
 
         <main id="stage">
@@ -19,17 +19,20 @@
                 <div id="action-grid" class="action-grid"></div>
             </div>
 
-            <aside id="side-menu" class="hidden">
-                <div class="menu-title">当前交互</div>
-                <div id="menu-options"></div>
+            <aside id="side-menu">
+                <div class="menu-section">
+                    <div class="menu-title">个人状态</div>
+                    <div id="self-options"></div>
+                </div>
+                <div class="menu-section" id="context-section">
+                    <div class="menu-title">当前格交互</div>
+                    <div id="context-options"></div>
+                </div>
             </aside>
         </main>
 
         <div id="log-resizer"></div>
-
-        <footer id="log-console">
-            <div id="log-content"></div>
-        </footer>
+        <footer id="log-console"><div id="log-content"></div></footer>
     </div>
     <script src="main.js"></script>
 </body>
