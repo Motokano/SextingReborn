@@ -1,30 +1,23 @@
 {
   "scenes": {
     "forest_center": {
-      "location": "坠梦林地 - 密林",
-      "rows": 4,
-      "cols": 4,
-      "description": "浓雾笼罩着四周，你看不清前方的路，只能凭直觉摸索。",
+      "location": "坠梦林地 - 中心",
+      "rows": 4, "cols": 4,
+      "description": "周围的雾气稍微稀薄了一些，脚下的地面是由某种黑色的复合金属铺成的。",
       "grid": [
-        { "type": "empty", "hidden": true }, 
-        { "type": "item", "name": "机械零件", "log": "你在泥土中摸到了硬物...", "hidden": true },
-        { "type": "empty", "hidden": true },
-        { "type": "exit", "name": "北路", "target": "mountain_pass", "hidden": true },
-        
-        { "type": "npc", "name": "守林人", "log": "一个佝偻的身影在雾中显现。", "hidden": true },
-        { "type": "empty", "hidden": true },
-        { "type": "empty", "hidden": true },
-        { "type": "empty", "hidden": true },
-        
-        { "type": "empty", "hidden": true },
-        { "type": "empty", "hidden": true },
-        { "type": "object", "name": "神秘石碑", "log": "石碑上刻着你不认识的符号。", "hidden": true },
-        { "type": "empty", "hidden": true },
-        
-        { "type": "empty", "hidden": true },
-        { "type": "exit", "name": "南路", "target": "camp", "hidden": false },
-        { "type": "empty", "hidden": true },
-        { "type": "empty", "hidden": true }
+        { "type": "empty", "hidden": true }, { "type": "exit", "name": "深处", "target": "forest_deep", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true }, { "type": "player", "name": "我", "hidden": false }, { "type": "empty", "hidden": true }, { "type": "npc", "name": "机械鸟", "log": "一只发条驱动的鸟正歪头看着你。", "hidden": true },
+        { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "object", "name": "刻字石", "log": "石块上写着：‘凡人禁行’。", "hidden": true }, { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }
+      ]
+    },
+    "forest_deep": {
+      "location": "坠梦林地 - 深处",
+      "rows": 2, "cols": 4,
+      "description": "这是一条窄长的通道，两旁整齐地排列着生锈的机械臂。",
+      "grid": [
+        { "type": "exit", "name": "返回", "target": "forest_center", "hidden": false }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true }, { "type": "player", "name": "我", "hidden": false }, { "type": "object", "name": "总控台", "log": "这似乎是某种动力系统的控制面板。", "hidden": true }, { "type": "empty", "hidden": true }
       ]
     }
   }
