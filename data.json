@@ -2,17 +2,17 @@
   "scenes": {
     "forest_wake": {
       "location": "坠梦林地 - 边缘",
-      "description": "你躺在冰冷的泥土中，四周雾气弥漫，只能看到模糊的树影。",
+      "description": "你躺在冰冷的泥土中。远处，一个巨大的青铜齿轮正半埋在土里，缓慢转动。",
       "baseActions": [
         { "text": "四处张望", "type": "explore", "id": "look_around" },
         { "text": "感知自身", "type": "status_check" }
       ],
       "unlocks": {
         "look_around": {
-          "descUpdate": "你揉了揉眼，迷雾似乎散去了些。你发现左侧有一棵巨大的机械古树，右侧草丛里闪烁着金属光泽。",
+          "descUpdate": "迷雾散去了。你看到前方有一座废弃的[机械石碑]，左侧草丛里似乎有亮光。",
           "newActions": [
-            { "text": "检查古树", "target": "mechanical_tree", "log": "你走向那棵轰鸣的古树。" },
-            { "text": "拨开草丛", "log": "你在草丛里发现了一枚断裂的铜片。", "type": "loot" }
+            { "text": "检查石碑", "target": "stone_tablet", "log": "你走向那座布满苔藓的石碑。" },
+            { "text": "搜寻草丛", "log": "你发现了一枚发热的铜芯零件。", "type": "loot" }
           ]
         }
       }
