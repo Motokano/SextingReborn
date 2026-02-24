@@ -1,57 +1,66 @@
 const game = {
-    data: null, // 存储从 JSON 加载的数据
-    currentScene: "forest_start",
-
-    // 1. 初始化：加载 JSON
+    db: null,
+    
     async init() {
-        try {
-            const response = await fetch('data.json');
-            this.data = await response.json();
-            this.renderScene(this.currentScene);
-        } catch (e) {
-            console.error("加载游戏数据失败:", e);
-        }
+        // 1. 加载解耦的场景数据
+        const resp = await fetch('data.json');
+        this.db = await resp.json();
+        
+        // 2. 绑定拉伸逻辑
+        this.initResizer();
+        
+        // 3. 加载初始场景
+        this.loadScene("forest_wake");
     },
 
-    // 2. 核心：渲染场景
-    renderScene(id) {
-        const scene = this.data.scenes[id];
-        this.currentScene = id;
-
-        // 更新顶部标题
-        document.getElementById('scene-header').innerText = scene.name;
+    loadScene(id) {
+        const scene = this.db.scenes[id];
+        document.getElementById('loc-display').innerText = scene.location;
+        document.getElementById('scene-desc').innerHTML = scene.description;
         
-        // 自动输出场景描述
-        this.say(scene.description);
-
-        // 清空旧按钮并生成新按钮
-        const panel = document.getElementById('action-grid');
-        panel.innerHTML = ""; 
-
+        const grid = document.getElementById('action-grid');
+        grid.innerHTML = "";
+        
         scene.actions.forEach(act => {
             const btn = document.createElement('button');
-            btn.className = "action-btn";
+            btn.className = "action-btn"; // 样式请参照之前的定义
             btn.innerText = act.text;
-            
-            // 点击逻辑
-            btn.onclick = () => {
-                if (act.target) {
-                    this.renderScene(act.target); // 切换场景
-                } else if (act.type === "status_check") {
-                    this.say("你感到一阵强烈的虚脱感..."); // 状态检查逻辑
-                }
-            };
-            panel.appendChild(btn);
+            btn.onclick = () => this.handleAction(act);
+            grid.appendChild(btn);
         });
+        
+        this.log(`进入了：${scene.location}`);
     },
 
-    say(text) {
-        const log = document.getElementById('story-log');
-        const entry = document.createElement('div');
-        entry.className = 'entry';
-        entry.innerHTML = `<p>${text}</p>`;
-        log.appendChild(entry);
-        log.scrollTop = log.scrollHeight;
+    handleAction(act) {
+        if (act.log) this.log(act.log);
+        if (act.target) this.loadScene(act.target);
+    },
+
+    log(msg) {
+        const container = document.getElementById('log-content');
+        const div = document.createElement('div');
+        div.className = "log-entry";
+        div.innerHTML = msg;
+        container.appendChild(div);
+        document.getElementById('log-console').scrollTop = container.scrollHeight;
+    },
+
+    // 日志框拉伸逻辑
+    initResizer() {
+        const resizer = document.getElementById('log-resizer');
+        const console = document.getElementById('log-console');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => { isResizing = true; });
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const h = window.innerHeight - e.clientY;
+            if (h > 100 && h < window.innerHeight * 0.8) {
+                console.style.height = `${h}px`;
+            }
+        });
+        document.addEventListener('mouseup', () => { isResizing = false; });
     }
 };
 
