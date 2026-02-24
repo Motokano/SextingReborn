@@ -2,18 +2,20 @@
   "scenes": {
     "forest_wake": {
       "location": "坠梦林地 - 边缘",
-      "description": "阳光穿不透浓雾。你躺在泥土中，耳边只有生锈齿轮咬合的声音。这种感觉不像是熬夜，倒像是灵魂被重组了。",
-      "actions": [
-        { "text": "检查口袋", "log": "口袋里只有一张揉皱的程序员证，和半罐温热的红牛。", "target": "forest_detail" },
-        { "text": "呼喊求救", "log": "你大声呼喊，回应你的是森林深处沉重的金属回响。" }
-      ]
-    },
-    "forest_detail": {
-      "location": "坠梦林地 - 巨树下",
-      "description": "你站起身，看到一棵巨大的古树，树干内部竟然被掏空，装满了还在转动的黄铜零件。",
-      "actions": [
-        { "text": "尝试攀爬", "log": "手触碰到齿轮的瞬间，一股微弱的电流让你缩回了手。", "target": "forest_wake" }
-      ]
+      "description": "你躺在冰冷的泥土中，四周雾气弥漫，只能看到模糊的树影。",
+      "baseActions": [
+        { "text": "四处张望", "type": "explore", "id": "look_around" },
+        { "text": "感知自身", "type": "status_check" }
+      ],
+      "unlocks": {
+        "look_around": {
+          "descUpdate": "你揉了揉眼，迷雾似乎散去了些。你发现左侧有一棵巨大的机械古树，右侧草丛里闪烁着金属光泽。",
+          "newActions": [
+            { "text": "检查古树", "target": "mechanical_tree", "log": "你走向那棵轰鸣的古树。" },
+            { "text": "拨开草丛", "log": "你在草丛里发现了一枚断裂的铜片。", "type": "loot" }
+          ]
+        }
+      }
     }
   }
 }
