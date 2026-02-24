@@ -1,103 +1,71 @@
 const game = {
-    db: null,
-    currentScene: null,
-    unlockedActions: [],
-
-    async init() {
-        try {
-            // 增加缓存刷新机制，防止读取旧的 JSON
-            const resp = await fetch('data.json?v=' + Date.now());
-            if (!resp.ok) throw new Error("无法获取 data.json");
-            this.db = await resp.json();
-            
-            this.initResizer();
-            this.loadScene("forest_wake");
-            console.log("游戏初始化成功");
-        } catch (err) {
-            document.getElementById('scene-desc').innerHTML = "<span style='color:red'>初始化失败: 找不到 data.json 或格式错误</span>";
-            console.error(err);
-        }
-    },
+    // ... init 等加载逻辑保持不变 ...
 
     loadScene(id) {
         if (!this.db.scenes[id]) return;
-        this.currentScene = JSON.parse(JSON.stringify(this.db.scenes[id])); // 深拷贝
-        this.unlockedActions = [];
+        // 使用深拷贝，防止迷雾揭开后无法重置（如果你需要存档功能的话）
+        this.currentScene = JSON.parse(JSON.stringify(this.db.scenes[id])); 
         this.render();
-        this.log(`到达了 ${this.currentScene.location}`, "system-msg");
+        this.log(`<b>[系统] 意识已同步：${this.currentScene.location}</b>`, "system-msg");
     },
 
     render() {
-        document.getElementById('loc-display').innerText = this.currentScene.location;
-        document.getElementById('scene-desc').innerText = this.currentScene.description;
-        
+        const scene = this.currentScene;
         const grid = document.getElementById('action-grid');
+        
+        // 关键：动态设置 CSS 变量
+        grid.style.setProperty('--cols', scene.cols || 4);
+        
+        document.getElementById('loc-display').innerText = scene.location;
+        document.getElementById('scene-desc').innerText = scene.description;
+        
         grid.innerHTML = "";
 
-        // 合并基础动作和解锁动作
-        const allActions = [...this.currentScene.baseActions, ...this.unlockedActions];
-        
-        allActions.forEach(act => {
+        scene.grid.forEach((cell, index) => {
             const btn = document.createElement('button');
-            btn.className = "action-btn";
-            btn.innerText = act.text;
-            btn.onclick = () => this.handleAction(act);
+            
+            // 如果是隐藏状态，添加迷雾类
+            if (cell.hidden) {
+                btn.className = "action-btn is-hidden";
+                btn.onclick = () => this.revealCell(index);
+            } else {
+                btn.className = `action-btn type-${cell.type} reveal-anim`;
+                btn.innerHTML = cell.type === 'empty' ? "" : cell.name;
+                btn.onclick = () => this.interact(cell);
+            }
+            
             grid.appendChild(btn);
         });
     },
 
-    handleAction(act) {
-        // 解锁逻辑
-        if (act.type === 'explore' && this.currentScene.unlocks[act.id]) {
-            const unlockData = this.currentScene.unlocks[act.id];
-            this.log(`<b>四处张望:</b> ${act.log || "你观察了四周。"}`);
-            
-            // 更新场景并解锁新方块
-            this.currentScene.description = unlockData.descUpdate;
-            this.unlockedActions = [...this.unlockedActions, ...unlockData.newActions];
-            
-            // 移除已使用的探索按钮
-            this.currentScene.baseActions = this.currentScene.baseActions.filter(a => a.id !== act.id);
-            this.render();
-        } 
-        else {
-            if (act.log) this.log(act.log);
-            if (act.target) this.loadScene(act.target);
-        }
-    },
-
-    log(msg, className = "") {
-        const container = document.getElementById('log-content');
-        const entry = document.createElement('div');
-        entry.className = `log-entry ${className}`;
-        entry.innerHTML = msg;
-        container.appendChild(entry);
-        document.getElementById('log-console').scrollTop = container.scrollHeight;
-    },
-
-    initResizer() {
-        const resizer = document.getElementById('log-resizer');
-        const consoleEl = document.getElementById('log-console');
-        let isResizing = false;
-
-        resizer.addEventListener('mousedown', () => isResizing = true);
-        resizer.addEventListener('touchstart', () => isResizing = true);
+    // 揭开迷雾的逻辑
+    revealCell(index) {
+        const cell = this.currentScene.grid[index];
+        cell.hidden = false; // 修改当前场景数据
         
-        document.addEventListener('mousemove', (e) => {
-            if (!isResizing) return;
-            const h = window.innerHeight - e.clientY;
-            if (h > 60 && h < window.innerHeight * 0.8) consoleEl.style.height = h + 'px';
-        });
+        // 叙事反馈
+        if (cell.type === 'empty') {
+            this.log("你摸索了一番，这里除了一些碎石什么也没有。");
+        } else {
+            this.log(`你拨开了浓雾，发现了：<b>${cell.name}</b>`);
+        }
+        
+        this.render(); // 重新渲染界面
+    },
 
-        document.addEventListener('touchmove', (e) => {
-            if (!isResizing) return;
-            const h = window.innerHeight - e.touches[0].clientY;
-            if (h > 60 && h < window.innerHeight * 0.8) consoleEl.style.height = h + 'px';
-        });
+    interact(cell) {
+        if (cell.type === 'empty') return;
+        if (cell.log) this.log(cell.log);
 
-        document.addEventListener('mouseup', () => isResizing = false);
-        document.addEventListener('touchend', () => isResizing = false);
+        switch(cell.type) {
+            case 'exit':
+                this.loadScene(cell.target);
+                break;
+            case 'item':
+                this.log(`你暂时收好了 [${cell.name}]。`);
+                // 后续可在此添加进包逻辑
+                break;
+            // ... 其他交互逻辑
+        }
     }
 };
-
-window.onload = () => game.init();
