@@ -3,18 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>残机物语</title>
+    <title>残机物语：枢轴引擎</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="game-app">
         <header id="status-bar">
-            <span id="loc-display">系统初始化...</span>
+            <span id="loc-display">意识同步中...</span>
         </header>
 
         <main id="interaction-stage">
-            <div id="scene-desc">正在同步意识数据...</div>
-            <div id="action-grid" class="action-grid"></div>
+            <div id="grid-container">
+                <div id="scene-desc">正在载入环境数据...</div>
+                <div id="action-grid" class="action-grid"></div>
+            </div>
+
+            <aside id="side-menu" class="hidden">
+                <div class="menu-title">个人终端</div>
+                <div id="menu-options"></div>
+            </aside>
         </main>
 
         <div id="log-resizer" title="拖动调整日志高度"></div>
