@@ -1,6 +1,8 @@
 const game = {
     db: null,
     currentScene: null,
+    playerIndex: 0,
+    state: { flags: {} }, // 全局状态/旗标
 
     async init() {
         try {
@@ -8,131 +10,139 @@ const game = {
             this.db = await resp.json();
             this.initResizer();
             this.loadScene("forest_center");
-        } catch (err) {
-            console.error("加载失败:", err);
-            document.getElementById('scene-desc').innerText = "数据加载失败，请检查 data.json 格式。";
-        }
+        } catch (err) { console.error("初始化错误:", err); }
     },
 
     loadScene(id) {
         if (!this.db.scenes[id]) return;
         this.currentScene = JSON.parse(JSON.stringify(this.db.scenes[id]));
-        document.getElementById('side-menu').classList.add('hidden');
+        this.playerIndex = this.currentScene.grid.findIndex(c => c.type === 'player');
         this.render();
-        this.log(`<b>[系统]</b> 进入区域：${this.currentScene.location}`, "system-msg");
+        this.log(`<b>[环境]</b> 载入新区域：${this.currentScene.location}`, "highlight");
     },
 
     render() {
-        const scene = this.currentScene;
         const grid = document.getElementById('action-grid');
-        
-        // 设置行列变量
-        grid.style.setProperty('--cols', scene.cols || 4);
-        grid.style.setProperty('--rows', scene.rows || 4);
-        
-        document.getElementById('loc-display').innerText = scene.location;
-        document.getElementById('scene-desc').innerText = scene.description;
+        grid.style.setProperty('--cols', this.currentScene.cols || 4);
+        grid.style.setProperty('--rows', this.currentScene.rows || 4);
+        document.getElementById('loc-display').innerText = this.currentScene.location;
+        document.getElementById('scene-desc').innerText = this.currentScene.description;
         grid.innerHTML = "";
 
-        scene.grid.forEach((cell, index) => {
+        this.currentScene.grid.forEach((cell, index) => {
             const btn = document.createElement('button');
-            if (cell.hidden) {
-                btn.className = "action-btn is-hidden";
-                btn.onclick = () => this.revealCell(index);
-            } else {
-                btn.className = `action-btn type-${cell.type}`;
-                btn.innerText = (cell.type === 'empty') ? "" : (cell.shortName || "");
-                btn.onclick = () => {
-                    // 1. 日志显示全名
-                    if (cell.fullName) this.log(`你注意到了：<span class="highlight">${cell.fullName}</span>`);
-                    // 2. 呼出右侧交互菜单
-                    this.showInteractionMenu(cell);
-                };
+            const isPlayerHere = (index === this.playerIndex);
+            btn.className = `action-btn type-${cell.type}`;
+            if (cell.hidden) btn.classList.add('is-hidden');
+            if (isPlayerHere) btn.classList.add('player-present');
+
+            if (isPlayerHere) {
+                btn.innerHTML = "<b style='color:#b08d57'>我</b>";
+            } else if (!cell.hidden && cell.type !== 'empty') {
+                btn.innerText = cell.shortName || "";
             }
+
+            btn.onclick = () => this.handleCellClick(index);
             grid.appendChild(btn);
         });
     },
 
-    revealCell(index) {
+    handleCellClick(index) {
         const cell = this.currentScene.grid[index];
-        cell.hidden = false;
-        this.log(cell.type === 'empty' ? "前方空无一物。" : `迷雾散去，你看到了 <span class="highlight">${cell.fullName || cell.shortName}</span>。`);
+        const dist = this.getDist(this.playerIndex, index);
+
+        if (dist === 0) { // 点击当前格：开启交互
+            this.openMenu(cell);
+        } else if (dist === 1) { // 移动
+            this.playerIndex = index;
+            if (cell.hidden) cell.hidden = false;
+            this.render();
+            if (cell.type !== 'empty') this.openMenu(cell);
+            else document.getElementById('side-menu').classList.add('hidden');
+        } else {
+            this.log("目标超出了目前的步伐限制。");
+        }
+    },
+
+    getDist(i1, i2) {
+        const c = this.currentScene.cols;
+        return Math.abs(Math.floor(i1/c) - Math.floor(i2/c)) + Math.abs(i1%c - i2%c);
+    },
+
+    openMenu(cell) {
+        const menu = document.getElementById('side-menu');
+        const opts = document.getElementById('menu-options');
+        menu.classList.remove('hidden');
+        opts.innerHTML = `<div style="font-size:11px; color:#999; margin-bottom:8px">${cell.fullName || "当前位置"}</div>`;
+
+        // 加载玩家系统菜单或物体交互菜单
+        const interactionList = (cell.type === 'player') ? this.db.systemActions : cell.interactions;
+
+        if (interactionList) {
+            interactionList.forEach(act => {
+                // 检查条件：如果 JSON 包含 once 且 flag 已存在，则不显示
+                if (act.once && this.state.flags[act.once]) return;
+
+                const btn = document.createElement('button');
+                btn.className = "menu-btn";
+                btn.innerText = act.label;
+                btn.onclick = () => this.executeAction(act);
+                opts.appendChild(btn);
+            });
+        }
+
+        const closeBtn = document.createElement('button');
+        closeBtn.className = "menu-btn";
+        closeBtn.style.marginTop = "10px";
+        closeBtn.innerText = "取消";
+        closeBtn.onclick = () => menu.classList.add('hidden');
+        opts.appendChild(closeBtn);
+    },
+
+    // 核心指令处理器
+    executeAction(action) {
+        if (action.effects) {
+            action.effects.forEach(eff => {
+                switch(eff.type) {
+                    case "log": this.log(eff.content, eff.class); break;
+                    case "change_scene": this.loadScene(eff.target); break;
+                    case "set_flag": this.state.flags[eff.key] = true; break;
+                    case "faint": this.runFaintEffect(eff.duration || 5000); break;
+                }
+            });
+        }
         this.render();
     },
 
-    showInteractionMenu(cell) {
-        const menu = document.getElementById('side-menu');
-        const options = document.getElementById('menu-options');
-        
-        menu.classList.remove('hidden');
-        options.innerHTML = ""; 
-
-        // 玩家特殊菜单
-        if (cell.type === 'player') {
-            const actions = [
-                { label: "检查自身", log: "你闭上眼感受，后脑的连线接口隐隐作痛。" },
-                { label: "整理背包", log: "包里只有那罐快过期的红牛和一些废铁。" }
-            ];
-            actions.forEach(act => this.createMenuBtn(options, act));
-        } 
-        // 场景物体菜单
-        else if (cell.interactions) {
-            cell.interactions.forEach(act => this.createMenuBtn(options, act));
-        } else {
-            options.innerHTML = "<div style='color:#444;font-size:12px'>没有可执行的操作</div>";
-        }
-
-        // 通用关闭按钮
-        const closeBtn = document.createElement('button');
-        closeBtn.className = "menu-btn";
-        closeBtn.style.marginTop = "20px";
-        closeBtn.innerText = "取消";
-        closeBtn.onclick = () => menu.classList.add('hidden');
-        options.appendChild(closeBtn);
+    runFaintEffect(ms) {
+        const app = document.getElementById('game-app');
+        app.classList.add('is-fainted'); // 触发全黑渐变
+        setTimeout(() => {
+            app.classList.remove('is-fainted'); // 5秒后恢复
+            this.log("<b>[系统重启]</b> 意识流重新建立，视觉传感器已恢复...", "highlight");
+        }, ms);
     },
 
-    createMenuBtn(parent, act) {
-        const btn = document.createElement('button');
-        btn.className = "menu-btn";
-        btn.innerText = act.label;
-        btn.onclick = () => {
-            if (act.log) this.log(act.log);
-            if (act.target) this.loadScene(act.target);
-            // 可以在此处扩展更多效果 (如 addItem, damagePlayer 等)
-        };
-        parent.appendChild(btn);
-    },
-
-    log(msg, className = "") {
-        const content = document.getElementById('log-content');
-        const entry = document.createElement('div');
-        entry.className = `log-entry ${className}`;
-        entry.innerHTML = msg;
-        content.appendChild(entry);
-        document.getElementById('log-console').scrollTop = content.scrollHeight;
+    log(msg, cls = "") {
+        const d = document.createElement('div');
+        d.className = `log-entry ${cls}`;
+        d.innerHTML = msg;
+        const c = document.getElementById('log-content');
+        c.appendChild(d);
+        document.getElementById('log-console').scrollTop = c.scrollHeight;
     },
 
     initResizer() {
         const resizer = document.getElementById('log-resizer');
         const consoleEl = document.getElementById('log-console');
         let isResizing = false;
-        const start = () => isResizing = true;
-        const stop = () => isResizing = false;
-        resizer.addEventListener('mousedown', start);
-        resizer.addEventListener('touchstart', start);
+        resizer.addEventListener('mousedown', () => isResizing = true);
         document.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
             const h = window.innerHeight - e.clientY;
-            if (h > 50 && h < window.innerHeight * 0.8) consoleEl.style.height = h + 'px';
+            if (h > 50 && h < window.innerHeight * 0.7) consoleEl.style.height = h + 'px';
         });
-        document.addEventListener('touchmove', (e) => {
-            if (!isResizing) return;
-            const h = window.innerHeight - e.touches[0].clientY;
-            if (h > 50 && h < window.innerHeight * 0.8) consoleEl.style.height = h + 'px';
-        });
-        document.addEventListener('mouseup', stop);
-        document.addEventListener('touchend', stop);
+        document.addEventListener('mouseup', () => isResizing = false);
     }
 };
-
 window.onload = () => game.init();
