@@ -1,4 +1,3 @@
-/* 核心重置 */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { background: #000; color: #ccc; font-family: "PingFang SC", "Microsoft YaHei", monospace; height: 100vh; overflow: hidden; }
 
@@ -6,48 +5,58 @@ body { background: #000; color: #ccc; font-family: "PingFang SC", "Microsoft YaH
 
 #status-bar { height: 40px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; padding: 0 20px; font-size: 0.8rem; color: #666; letter-spacing: 2px; }
 
-/* 舞台布局 */
+/* 舞台布局：左右分栏 */
 #interaction-stage { flex: 1; display: flex; padding: 15px; gap: 15px; overflow: hidden; }
-#grid-container { flex: 2; display: flex; flex-direction: column; }
-#scene-desc { min-height: 40px; margin-bottom: 15px; font-size: 0.9rem; line-height: 1.6; color: #999; }
 
-/* 动态网格 */
+#grid-container { 
+    flex: 2; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: auto; /* 地图过大时允许滚动 */
+    padding: 10px;
+    background: #050505;
+    border-radius: 8px;
+}
+
+#scene-desc { margin-bottom: 15px; font-size: 0.9rem; line-height: 1.5; color: #777; }
+
+/* 64x64 砖块网格 */
 .action-grid {
     display: grid;
-    grid-template-columns: repeat(var(--cols, 4), 1fr);
+    grid-template-columns: repeat(var(--cols, 4), 64px);
+    grid-template-rows: repeat(var(--rows, 4), 64px);
     gap: 8px;
-    background: #080808;
-    padding: 10px;
-    border-radius: 12px;
-    border: 1px solid #1a1a1a;
+    width: max-content; /* 紧贴内容 */
+    margin: 0 auto;
 }
 
 .action-btn {
-    aspect-ratio: 1 / 1;
-    background: #121212;
+    width: 64px;
+    height: 64px;
+    background: #111;
     border: 1px solid #222;
-    border-radius: 8px;
+    border-radius: 4px;
     color: #888;
-    font-size: 0.75rem;
+    font-size: 11px; /* 缩略名显示 */
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     transition: all 0.2s;
+    overflow: hidden;
+    padding: 2px;
 }
 
-/* 迷雾样式 */
-.is-hidden { background: #1a1a1a; border-color: #252525; color: transparent !important; }
-.is-hidden::after { content: "?"; color: #333; font-size: 1.1rem; }
+.is-hidden { background: #1a1a1a; color: transparent !important; }
+.is-hidden::after { content: "?"; color: #333; font-size: 1.2rem; }
 
-/* 元素类型颜色 */
+/* 元素类型 */
 .type-player { background: #d4af37 !important; color: #000 !important; font-weight: bold; border-color: #fff !important; }
 .type-npc { color: #d4af37; }
 .type-exit { color: #6c6; }
-.type-empty { opacity: 0.3; }
 
-/* 侧边菜单 */
+/* 右侧菜单 */
 #side-menu {
     flex: 1;
     background: #0d0d0d;
@@ -56,18 +65,20 @@ body { background: #000; color: #ccc; font-family: "PingFang SC", "Microsoft YaH
     padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    min-width: 150px;
     animation: slideIn 0.3s ease-out;
 }
-.menu-title { font-size: 0.8rem; color: #444; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 5px; }
-.menu-btn { background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+.menu-title { font-size: 0.75rem; color: #444; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 5px; }
+.menu-btn { background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 12px 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
 .menu-btn:hover { border-color: #d4af37; color: #fff; }
 .hidden { display: none; }
 
-/* 日志框与拉伸条 */
+/* 日志区 */
 #log-resizer { height: 8px; background: #111; cursor: ns-resize; border-top: 1px solid #222; }
 #log-console { height: 30%; background: #050505; overflow-y: auto; padding: 15px; font-size: 0.85rem; }
-.log-entry { margin-bottom: 10px; line-height: 1.5; color: #777; border-left: 2px solid #1a1a1a; padding-left: 8px; }
-.system-msg { color: #d4af37; }
+.log-entry { margin-bottom: 8px; color: #777; border-left: 2px solid #1a1a1a; padding-left: 10px; }
+.highlight { color: #eee; }
+.system-msg { color: #d4af37; font-weight: bold; }
 
-@keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
