@@ -1,0 +1,27 @@
+{
+  "plain": {
+    "name": "不知名的荒野", "cols": 4, 
+    "desc": "杂草丛生，远处能看到几处诡异的青铜立柱。",
+    "grid": [
+      { "type": "null", "hide": true }, 
+      { 
+        "type": "danger", "sn": "荆棘", "fn": "一片带刺的黑色荆棘", "hide": true,
+        "onStep": [{ "type": "log", "val": "荆棘划破了你的皮肤。" }, { "type": "hp", "val": -2 }]
+      }, 
+      { "type": "null", "hide": true }, { "type": "null", "hide": true },
+      
+      { "type": "null", "hide": true }, 
+      { "type": "null", "player_start": true }, 
+      { "type": "null", "hide": true }, 
+      { "type": "npc", "npc_id": "knight", "hide": true },
+      
+      { "type": "null", "hide": true }, { "type": "null", "hide": true }, { "type": "null", "hide": true }, { "type": "null", "hide": true },
+      { "type": "null", "hide": true }, 
+      { 
+        "type": "obj", "sn": "山口", "fn": "通往深山的小径", "hide": true, 
+        "acts": [{ "label": "出发", "cmd": [{ "type": "move", "target": "cave" }] }] 
+      }, 
+      { "type": "null", "hide": true }, { "type": "null", "hide": true }
+    ]
+  }
+}

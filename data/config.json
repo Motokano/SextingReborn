@@ -1,0 +1,7 @@
+{
+  "startScene": "plain",
+  "sys_acts": [
+    { "label": "检查身体", "cmd": [{ "type": "check_body" }] },
+    { "label": "翻看行囊", "cmd": [{ "type": "log", "val": "除了一张旧通知书，别无他物。" }] }
+  ]
+}

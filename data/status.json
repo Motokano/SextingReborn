@@ -1,0 +1,4 @@
+{
+  "starving": { "name": "饥肠辘辘", "onTick": [{ "type": "dmg_limb", "limb": "stomach", "val": -1 }] },
+  "warmth": { "name": "火光余温", "onTick": [{ "type": "mod_stat", "key": "stamina", "val": 2 }] }
+}
