@@ -1,42 +1,33 @@
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { background: #000; color: #ccc; font-family: "PingFang SC", "Microsoft YaHei", monospace; height: 100vh; overflow: hidden; }
-
-#game-app { display: flex; flex-direction: column; height: 100vh; }
-
-#status-bar { height: 45px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; padding: 0 20px; font-size: 0.85rem; color: #666; letter-spacing: 2px; }
-
-/* 交互区 */
-#interaction-stage { flex: 1; display: flex; flex-direction: column; padding: 30px 20px; overflow-y: auto; }
-
-#scene-desc { min-height: 80px; margin-bottom: 30px; line-height: 1.8; font-size: 1rem; color: #eee; transition: all 0.5s; }
-
-/* 砖块布局 */
-.action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+/* 修改 grid 布局为严格的 4x4 */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4列 */
+    grid-template-rows: repeat(4, 1fr);    /* 4行 */
+    gap: 8px; /* 间距更紧凑 */
+    padding: 10px;
+    background: #0a0a0a;
+    border-radius: 16px;
+    border: 1px solid #1a1a1a;
+}
 
 .action-btn {
     aspect-ratio: 1 / 1;
-    background: #111;
+    border-radius: 8px; /* 稍微圆润 */
+    font-size: 0.75rem; /* 字体缩小以适应方块 */
+    flex-direction: column; /* 图标和文字上下排布 */
+    background: #151515;
     border: 1px solid #222;
-    border-radius: 12px;
-    color: #888;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 10px;
+    color: #555;
 }
-.action-btn:hover { border-color: #d4af37; color: #fff; background: #1a1a1a; }
-.action-btn:active { transform: scale(0.95); background: #d4af37; color: #000; }
 
-/* 日志区 */
-#log-resizer { height: 8px; background: #0a0a0a; cursor: ns-resize; border-top: 1px solid #222; position: relative; }
-#log-resizer::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 30px; height: 2px; background: #333; border-radius: 2px; }
+/* 不同类型的方块颜色区分（可选，保持简洁可以用同色） */
+.type-npc { color: #d4af37; border-color: #443a1e; }
+.type-item { color: #5cacee; border-color: #1e3a4e; }
+.type-exit { color: #66cc66; border-color: #224422; }
+.type-empty { opacity: 0.2; cursor: default; }
 
-#log-console { height: 35%; background: #050505; overflow-y: auto; padding: 15px; border-top: 1px solid #111; }
-.log-entry { margin-bottom: 12px; font-size: 0.85rem; line-height: 1.5; color: #777; border-left: 2px solid #1a1a1a; padding-left: 10px; animation: slideIn 0.3s ease-out; }
-.system-msg { color: #d4af37; font-weight: bold; }
-
-@keyframes slideIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
+.action-btn:not(.type-empty):hover {
+    border-color: #fff;
+    color: #fff;
+    transform: translateY(-2px);
+}
