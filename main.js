@@ -1,27 +1,19 @@
 const Engine = {
-    db: { config: null, scenes: null, npcs: null, status: null }, // 数据仓库
+    db: { config: null, scenes: null },
     cur: null, pIdx: 0, flags: {}, 
     time: { month: 2, day: 24, hour: 8, minute: 0 },
     state: {
         limbs: { head: 35, chest: 75, l_arm: 60, r_arm: 60, l_leg: 60, r_leg: 60, stomach: 50 },
         maxLimbs: { head: 35, chest: 75, l_arm: 60, r_arm: 60, l_leg: 60, r_leg: 60, stomach: 50 },
-        stamina: 200, maxStamina: 200, energy: 100, maxEnergy: 100, qi: 0, 
-        fullness: 100, hydration: 100, fatigue: 0, buffs: []
+        stamina: 200, energy: 100, qi: 0, 
+        fullness: 100, hydration: 100, fatigue: 0
     },
 
     async init() {
-        try {
-            // 分别调用四个 JSON 文件
-            const files = ['config', 'scenes', 'npcs', 'status'];
-            const results = await Promise.all(files.map(f => fetch(`./data/${f}.json?v=${Date.now()}`).then(r => r.json())));
-            
-            files.forEach((f, i) => this.db[f] = results[i]);
-            
-            this.setupResizer();
-            this.loadScene(this.db.config.startScene);
-        } catch (err) {
-            console.error("数据加载失败，请确保目录下有 data 文件夹及对应 JSON", err);
-        }
+        const files = ['config', 'scenes'];
+        const res = await Promise.all(files.map(f => fetch(`./data/${f}.json?v=${Date.now()}`).then(r => r.json())));
+        files.forEach((f, i) => this.db[f] = res[i]);
+        this.loadScene(this.db.config.startScene);
     },
 
     loadScene(id) {
@@ -36,31 +28,17 @@ const Engine = {
         this.time.minute += mins;
         while (this.time.minute >= 60) { this.time.minute -= 60; this.time.hour++; }
         while (this.time.hour >= 24) { this.time.hour -= 24; this.time.day++; }
+        
+        // 数值自然损耗
+        this.state.fullness = Math.max(0, this.state.fullness - mins/80);
+        this.state.hydration = Math.max(0, this.state.hydration - mins/60);
+        this.state.fatigue = Math.min(100, this.state.fatigue + mins/120);
 
-        const ticks = Math.max(1, Math.floor(mins / 10));
-        for(let i=0; i<ticks; i++) {
-            this.state.fullness = Math.max(0, this.state.fullness - 0.4);
-            this.state.hydration = Math.max(0, this.state.hydration - 0.7);
-            this.state.fatigue = Math.min(100, this.state.fatigue + 0.2);
-            this.tickBuffs();
-        }
-        this.updateVisualTheme();
+        this.updateVisual();
         this.render();
     },
 
-    tickBuffs() {
-        this.state.buffs.forEach((b, idx) => {
-            const proto = this.db.status[b.id];
-            if (proto && proto.onTick) this.run(proto.onTick);
-            b.timer--;
-            if (b.timer <= 0) {
-                this.log(`<b>[状态消失]</b> ${proto.name}的效果结束了。`);
-                this.state.buffs.splice(idx, 1);
-            }
-        });
-    },
-
-    updateVisualTheme() {
+    updateVisual() {
         const app = document.getElementById('game-app');
         if (this.time.hour >= 19 || this.time.hour < 6) app.classList.add('night');
         else app.classList.remove('night');
@@ -69,29 +47,22 @@ const Engine = {
     },
 
     render() {
+        this.updateVisual();
         const g = document.getElementById('action-grid');
-        g.style.setProperty('--cols', this.cur.cols);
+        g.style.setProperty('--cols', 16);
         document.getElementById('scene-desc').innerText = this.cur.desc;
         g.innerHTML = "";
-        
-        if (this.state.limbs.head < 10 || this.state.fatigue > 80) document.getElementById('game-app').classList.add('weakened');
-        else document.getElementById('game-app').classList.remove('weakened');
 
         this.cur.grid.forEach((c, i) => {
-            const b = document.createElement('div');
+            const btn = document.createElement('div');
             const isP = (i === this.pIdx);
-            b.className = `btn ${c.type} ${c.hide ? 'hide' : ''} ${isP ? 'player-token' : ''}`;
-            
-            // 渲染显示逻辑：如果是 NPC，从 npcs.json 获取显示名
-            if (isP) b.innerText = "我";
-            else if (!c.hide && c.type !== 'null') {
-                const npcData = c.npc_id ? this.db.npcs[c.npc_id] : null;
-                b.innerText = npcData ? npcData.sn : (c.sn || "");
-            }
-            
-            b.onclick = () => this.click(i);
-            g.appendChild(b);
+            btn.className = `btn ${c.type || ''} ${c.blocking ? 'blocking' : ''} ${isP ? 'player-token' : ''}`;
+            if (isP) btn.innerText = "我";
+            else if (c.sn) btn.innerText = c.sn;
+            btn.onclick = () => this.click(i);
+            g.appendChild(btn);
         });
+        this.renderStats();
         this.updateMenu();
     },
 
@@ -99,11 +70,24 @@ const Engine = {
         const c = this.cur.grid[i], d = this.dist(this.pIdx, i);
         if (d === 0) this.updateMenu();
         else if (d === 1) {
-            this.pIdx = i; if (c.hide) c.hide = false;
-            this.advanceTime(10);
+            if (c.blocking) { this.log(`那里被 <b>${c.fn || c.sn}</b> 挡住了。`); return; }
+            const mult = c.timeMult || 1;
+            this.pIdx = i;
+            this.advanceTime(10 * mult);
             if (c.onStep) this.run(c.onStep);
             this.render();
         }
+    },
+
+    renderStats() {
+        const s = this.state;
+        const limbs = Object.entries(s.limbs).map(([k, v]) => `${k}:${v.toFixed(0)}`).join(' | ');
+        document.getElementById('stat-monitor').innerHTML = `
+            <b>肢体:</b> ${limbs}<br>
+            <b>体力:</b> ${s.stamina}/200 | <b>精力:</b> ${s.energy}/100<br>
+            <b>饱食:</b> ${s.fullness.toFixed(1)} | <b>饮水:</b> ${s.hydration.toFixed(1)}<br>
+            <b>疲劳:</b> ${s.fatigue.toFixed(1)} | <b>内力:</b> ${s.qi}
+        `;
     },
 
     updateMenu() {
@@ -117,79 +101,40 @@ const Engine = {
         const ctxSec = document.getElementById('context-section');
         const ctxOpts = document.getElementById('context-options');
         const c = this.cur.grid[this.pIdx];
-
-        // 获取当前格子的交互列表（来自场景定义或引用的 NPC 定义）
-        let acts = c.acts || [];
-        let fullName = c.fn || "当前位置";
-        
-        if (c.npc_id && this.db.npcs[c.npc_id]) {
-            const npc = this.db.npcs[c.npc_id];
-            acts = npc.acts;
-            fullName = npc.fn;
-        }
-
-        if (c.type !== 'null' && acts.length > 0) {
+        if (c.type !== 'null' && c.acts) {
             ctxSec.classList.remove('hidden');
-            ctxOpts.innerHTML = `<p style="font-size:11px;color:#999;margin-bottom:5px">${fullName}</p>`;
-            acts.forEach(a => {
-                if (a.once && this.flags[a.label]) return;
+            ctxOpts.innerHTML = `<p style="font-size:11px;color:#999;margin-bottom:5px">${c.fn}</p>`;
+            c.acts.forEach(a => {
                 const b = document.createElement('button'); b.className = "menu-btn"; b.innerText = a.label;
-                b.onclick = () => { this.advanceTime(10); this.flags[a.label]=true; this.run(a.cmd); this.render(); };
+                b.onclick = () => { this.run(a.cmd); this.render(); };
                 ctxOpts.appendChild(b);
             });
         } else ctxSec.classList.add('hidden');
     },
 
-    dist(a, b) { const w = this.cur.cols; return Math.abs(Math.floor(a/w)-Math.floor(b/w)) + Math.abs(a%w-b%w); },
+    dist(a, b) { return Math.abs(Math.floor(a/16)-Math.floor(b/16)) + Math.abs(a%16-b%16); },
 
     run(cmds) {
         cmds.forEach(c => {
-            switch(c.type) {
-                case 'log': this.log(c.val); break;
-                case 'move': this.loadScene(c.target); break;
-                case 'faint': this.faint(c.ms || 5000); break;
-                case 'dmg_limb': this.state.limbs[c.limb] = Math.max(0, this.state.limbs[c.limb] + c.val); this.flash(); break;
-                case 'mod_stat': this.state[c.key] = Math.max(0, Math.min(100, this.state[c.key] + c.val)); break;
-                case 'add_buff': this.state.buffs.push({id: c.id, timer: c.dur}); break;
-                case 'check_body': this.log(`<b>[感知]</b> ${this.getSensation()}`); break;
+            if (c.type === 'log') this.log(c.val);
+            if (c.type === 'move') this.loadScene(c.target);
+            if (c.type === 'hp') { // 恢复生命指令
+                Object.keys(this.state.limbs).forEach(l => {
+                    this.state.limbs[l] = Math.min(this.state.maxLimbs[l], this.state.limbs[l] + c.val);
+                });
+            }
+            if (c.type === 'sleep') {
+                this.advanceTime(480);
+                this.state.fatigue = Math.max(0, this.state.fatigue - 60);
+                this.run([{type:'hp', val: 20}]);
+                this.log("<b>这一觉睡得很沉，感觉气血恢复了许多。</b>");
             }
         });
-        this.render();
     },
-
-    getSensation() {
-        const l = this.state.limbs, st = this.state;
-        let s = [];
-        if (l.head < 20) s.push("脑袋嗡嗡作响。");
-        if (st.fullness < 20) s.push("腹中饥火烧肠。");
-        if (st.buffs.length > 0) s.push(`<br>【状态：${st.buffs.map(b=>this.db.status[b.id].name).join('、')}】`);
-        return s.length > 0 ? s.join(' ') : "筋骨尚且硬朗。";
-    },
-
-    flash() { const a = document.getElementById('game-app'); a.classList.add('damage-flash'); setTimeout(()=>a.classList.remove('damage-flash'),150); },
-
-    faint(ms) {
-        const a = document.getElementById('game-app'); a.classList.add('faint');
-        this.advanceTime(300);
-        setTimeout(() => { a.classList.remove('faint'); this.render(); }, ms);
-    },
-
     log(txt) {
         const e = document.createElement('div'); e.className = 'log'; e.innerHTML = txt;
         document.getElementById('log-content').appendChild(e);
         document.getElementById('log-console').scrollTop = 99999;
-    },
-
-    setupResizer() {
-        let active = false; const r = document.getElementById('log-resizer'), c = document.getElementById('log-console');
-        r.onmousedown = () => active = true;
-        document.onmousemove = (e) => {
-            if (active) {
-                const h = window.innerHeight - e.clientY;
-                if (h > 50 && h < window.innerHeight * 0.8) c.style.height = h + 'px';
-            }
-        };
-        document.onmouseup = () => active = false;
     }
 };
 window.onload = () => Engine.init();

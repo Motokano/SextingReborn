@@ -1,45 +1,14 @@
 {
-  "startScene": "forest",
-  "status_effects": {
-    "starving": { "name": "饥肠辘辘", "onTick": [{ "type": "dmg_limb", "limb": "stomach", "val": -1 }] },
-    "warmth": { "name": "火光余温", "onTick": [{ "type": "mod_stat", "key": "stamina", "val": 2 }] }
+  "home": {
+    "name": "家", "cols": 16, "desc": "简陋的土坯房。虽然破旧，但至少有屋顶。",
+    "grid": []
   },
-  "sys_acts": [
-    { "label": "检查身体", "cmd": [{ "type": "check_body" }] },
-    { "label": "翻看行囊", "cmd": [{ "type": "log", "val": "只有半罐红牛和一张入职通知书。" }] }
-  ],
-  "scenes": {
-    "forest": {
-      "name": "不知名的荒野", "cols": 4, "desc": "杂草丛生，远处能看到几处诡异的青铜立柱。",
-      "grid": [
-        { "type": "null", "hide": true }, 
-        { 
-          "type": "danger", "sn": "火堆", "fn": "余烬未熄的柴火堆", "hide": true,
-          "onStep": [{ "type": "log", "val": "一股暖意包裹了你。" }, { "type": "add_buff", "id": "warmth", "dur": 15 }],
-          "acts": [{ "label": "拨弄炭火", "cmd": [{ "type": "log", "val": "你用枯枝拨了拨，火星溅起。" }] }]
-        }, 
-        { "type": "null", "hide": true }, { "type": "null", "hide": true },
-        
-        { "type": "null", "hide": true }, { "type": "null", "player_start": true }, { "type": "null", "hide": true }, 
-        { 
-          "type": "npc", "sn": "侠客", "fn": "一名靠在树后的独臂客", "hide": true,
-          "acts": [
-            { "label": "搭话", "cmd": [{ "type": "log", "val": "侠客睁眼，眼中精芒逼人。" }, { "type": "faint", "ms": 3000 }] }
-          ]
-        },
-        
-        { "type": "null", "hide": true }, { "type": "null", "hide": true }, { "type": "null", "hide": true }, { "type": "null", "hide": true },
-        { "type": "null", "hide": true }, 
-        { "type": "obj", "sn": "山口", "fn": "通往深山的小径", "hide": true, "acts": [{ "label": "出发", "cmd": [{ "type": "move", "target": "deep" }] }] }, 
-        { "type": "null", "hide": true }, { "type": "null", "hide": true }
-      ]
-    },
-    "deep": {
-      "name": "幽深处", "cols": 2, "desc": "冷得刺骨。",
-      "grid": [
-        { "type": "null", "player_start": true }, 
-        { "type": "obj", "sn": "回头", "acts": [{ "label": "返回", "cmd": [{ "type": "move", "target": "forest" }] }] }
-      ]
-    }
+  "forest": {
+    "name": "树林", "cols": 16, "desc": "密密麻麻的树干挡住了大部分光线，穿行非常吃力。",
+    "grid": []
+  },
+  "lake": {
+    "name": "湖泊", "cols": 16, "desc": "碧绿的湖水延伸向远方。水面上波光粼粼，无法通行。",
+    "grid": []
   }
 }
