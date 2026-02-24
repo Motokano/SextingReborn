@@ -1,27 +1,30 @@
 {
   "scenes": {
-    "forest_wake": {
-      "location": "坠梦林地 - 边缘",
-      "description": "你在冰冷的机械摩擦声中苏醒。四周雾气弥漫，只能隐约看到一些高大的轮廓。",
-      "baseActions": [
-        { "text": "四处张望", "type": "explore", "id": "look_around", "log": "你努力直起身子，看向迷雾深处。" },
-        { "text": "感知自身", "log": "手脚冰凉，大脑因为长期的精神紧绷而阵阵刺痛。" }
-      ],
-      "unlocks": {
-        "look_around": {
-          "descUpdate": "迷雾稍微散去，你发现前方有一截断裂的[机械立柱]，左侧的草丛中似乎有微弱的火光。",
-          "newActions": [
-            { "text": "检查立柱", "target": "pillar_examine", "log": "你踉跄着走向那截金属支柱。" },
-            { "text": "靠近火光", "log": "你决定去查看那团可疑的亮光。", "target": "fire_place" }
-          ]
-        }
-      }
-    },
-    "pillar_examine": {
-      "location": "断裂的立柱",
-      "description": "这是一截精钢铸造的立柱，表面刻满了流云般的纹路，但内部却布满了精密的差分机齿轮。",
-      "baseActions": [
-        { "text": "返回原处", "target": "forest_wake" }
+    "forest_center": {
+      "location": "坠梦林地 - 密林",
+      "rows": 4,
+      "cols": 4,
+      "description": "浓雾笼罩着四周，你看不清前方的路，只能凭直觉摸索。",
+      "grid": [
+        { "type": "empty", "hidden": true }, 
+        { "type": "item", "name": "机械零件", "log": "你在泥土中摸到了硬物...", "hidden": true },
+        { "type": "empty", "hidden": true },
+        { "type": "exit", "name": "北路", "target": "mountain_pass", "hidden": true },
+        
+        { "type": "npc", "name": "守林人", "log": "一个佝偻的身影在雾中显现。", "hidden": true },
+        { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true },
+        
+        { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true },
+        { "type": "object", "name": "神秘石碑", "log": "石碑上刻着你不认识的符号。", "hidden": true },
+        { "type": "empty", "hidden": true },
+        
+        { "type": "empty", "hidden": true },
+        { "type": "exit", "name": "南路", "target": "camp", "hidden": false },
+        { "type": "empty", "hidden": true },
+        { "type": "empty", "hidden": true }
       ]
     }
   }
