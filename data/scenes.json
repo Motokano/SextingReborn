@@ -1,27 +1,41 @@
 {
-  "plain": {
-    "name": "不知名的荒野", "cols": 4, 
-    "desc": "杂草丛生，远处能看到几处诡异的青铜立柱。",
+  "home": {
+    "name": "温馨的小家", "cols": 8, "desc": "这是你在荒野中的避风港。",
     "grid": [
-      { "type": "null", "hide": true }, 
-      { 
-        "type": "danger", "sn": "荆棘", "fn": "一片带刺的黑色荆棘", "hide": true,
-        "onStep": [{ "type": "log", "val": "荆棘划破了你的皮肤。" }, { "type": "hp", "val": -2 }]
-      }, 
-      { "type": "null", "hide": true }, { "type": "null", "hide": true },
-      
-      { "type": "null", "hide": true }, 
-      { "type": "null", "player_start": true }, 
-      { "type": "null", "hide": true }, 
-      { "type": "npc", "npc_id": "knight", "hide": true },
-      
-      { "type": "null", "hide": true }, { "type": "null", "hide": true }, { "type": "null", "hide": true }, { "type": "null", "hide": true },
-      { "type": "null", "hide": true }, 
-      { 
-        "type": "obj", "sn": "山口", "fn": "通往深山的小径", "hide": true, 
-        "acts": [{ "label": "出发", "cmd": [{ "type": "move", "target": "cave" }] }] 
-      }, 
-      { "type": "null", "hide": true }, { "type": "null", "hide": true }
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null", "sn":"出门", "fn":"通往树林", "acts":[{"label":"去树林", "cmd":[{"type":"move", "target":"forest"}]}]}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null", "player_start":true}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null", "sn":"木床", "fn":"简陋的床", "acts":[{"label":"睡觉", "cmd":[{"type":"sleep"}]}]}
+    ]
+  },
+  "forest": {
+    "name": "茂密树林", "cols": 8, "desc": "这里的树木多得让人窒息。",
+    "grid": [
+      {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"null", "sn":"湖路", "fn":"通往湖泊", "acts":[{"label":"前进", "cmd":[{"type":"move", "target":"lake"}]}]}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3},
+      {"type":"tree", "sn":"树", "timeMult":3}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"tree", "sn":"树", "timeMult":3},
+      {"type":"tree", "sn":"树", "timeMult":3}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"tree", "sn":"树", "timeMult":3},
+      {"type":"tree", "sn":"树", "timeMult":3}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"tree", "sn":"树", "timeMult":3},
+      {"type":"tree", "sn":"树", "timeMult":3}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"tree", "sn":"树", "timeMult":3},
+      {"type":"tree", "sn":"树", "timeMult":3}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"tree", "sn":"树", "timeMult":3},
+      {"type":"tree", "sn":"树", "timeMult":3}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"tree", "sn":"树", "timeMult":3},
+      {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"null", "sn":"回返", "fn":"回家的路", "player_start":true, "acts":[{"label":"回家", "cmd":[{"type":"move", "target":"home"}]}]}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}, {"type":"tree", "sn":"树", "timeMult":3}
+    ]
+  },
+  "lake": {
+    "name": "静谧湖泊", "cols": 8, "desc": "上半部分是深不见底的湖水。",
+    "grid": [
+      {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true},
+      {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true},
+      {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true},
+      {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true}, {"type":"water", "sn":"湖", "blocking":true},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"},
+      {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null", "sn":"林路", "fn":"回树林", "player_start":true, "acts":[{"label":"回去", "cmd":[{"type":"move", "target":"forest"}]}]}, {"type":"null"}, {"type":"null"}, {"type":"null"}, {"type":"null"}
     ]
   }
 }
