@@ -1,80 +1,58 @@
-/* 基础复位 */
-* { margin: 0; padding: 0; box-box: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; color: #ccc; font-family: monospace; height: 100vh; overflow: hidden; }
 
-body {
-    background-color: #050505;
-    color: #d1d1d1;
-    font-family: "PingFang SC", "STHeiti", "Microsoft YaHei", serif;
+#game-app {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
     height: 100vh;
 }
 
-#game-container {
-    width: 100%;
-    max-width: 600px;
-    height: 90vh;
+/* 顶部状态 */
+#status-bar {
+    height: 40px;
+    border-bottom: 1px solid #222;
     display: flex;
-    flex-direction: column;
-    padding: 20px;
-    border: 1px solid #1a1a1a;
+    align-items: center;
+    padding: 0 15px;
+    font-size: 0.8rem;
+    color: #888;
 }
 
-/* 位置标题 */
-#scene-header {
-    padding-bottom: 20px;
-    border-bottom: 1px solid #222;
+/* 中部交互区：占据剩余空间 */
+#interaction-stage {
+    flex: 1; 
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 按钮居中，类似苦逼冒险者 */
     text-align: center;
 }
 
-.location-tag {
-    letter-spacing: 5px;
-    color: #666;
-    font-size: 0.9rem;
-}
+#scene-desc { margin-bottom: 40px; line-height: 1.8; color: #eee; }
 
-/* 叙事区 */
-#story-log {
-    flex: 1;
-    overflow-y: auto;
-    padding: 30px 10px;
-    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-}
-
-.entry p {
-    margin-bottom: 1.5rem;
-    line-height: 1.8;
-    font-size: 1.05rem;
-    animation: fadeIn 1s ease-in;
-}
-
-/* 交互按钮 */
-#action-panel {
+#action-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 10px;
-    padding-top: 20px;
-    border-top: 1px solid #222;
 }
 
-.action-btn {
-    background: none;
-    border: 1px solid #333;
-    color: #888;
-    padding: 15px 5px;
-    cursor: pointer;
+/* 拉伸条：这是灵魂 */
+#log-resizer {
+    height: 6px;
+    background: #1a1a1a;
+    cursor: ns-resize; /* 鼠标变为上下拉伸图标 */
+    border-top: 1px solid #333;
+}
+#log-resizer:hover { background: #d4af37; }
+
+/* 底部日志：初始高度 30% */
+#log-console {
+    height: 30%;
+    min-height: 100px;
+    background: #080808;
+    overflow-y: auto;
+    padding: 15px;
     font-size: 0.9rem;
-    transition: 0.3s;
 }
 
-.action-btn:hover {
-    color: #fff;
-    border-color: #666;
-    background-color: #111;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+.log-entry { margin-bottom: 10px; border-left: 2px solid #222; padding-left: 8px; }
