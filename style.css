@@ -1,33 +1,47 @@
-/* 修改 grid 布局为严格的 4x4 */
+/* 动态网格容器 */
 .action-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4列 */
-    grid-template-rows: repeat(4, 1fr);    /* 4行 */
-    gap: 8px; /* 间距更紧凑 */
-    padding: 10px;
-    background: #0a0a0a;
-    border-radius: 16px;
-    border: 1px solid #1a1a1a;
+    /* 由 JS 动态设置 --cols 变量 */
+    grid-template-columns: repeat(var(--cols, 4), 1fr); 
+    gap: 8px;
+    padding: 12px;
+    background: #080808;
+    border-radius: 12px;
 }
 
 .action-btn {
     aspect-ratio: 1 / 1;
-    border-radius: 8px; /* 稍微圆润 */
-    font-size: 0.75rem; /* 字体缩小以适应方块 */
-    flex-direction: column; /* 图标和文字上下排布 */
-    background: #151515;
+    border-radius: 8px;
+    background: #111;
     border: 1px solid #222;
-    color: #555;
+    font-size: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 不同类型的方块颜色区分（可选，保持简洁可以用同色） */
-.type-npc { color: #d4af37; border-color: #443a1e; }
-.type-item { color: #5cacee; border-color: #1e3a4e; }
-.type-exit { color: #66cc66; border-color: #224422; }
-.type-empty { opacity: 0.2; cursor: default; }
+/* 迷雾状态 */
+.is-hidden {
+    background: #1a1a1a;
+    border-color: #2a2a2a;
+    color: transparent !important; /* 隐藏文字 */
+    position: relative;
+}
 
-.action-btn:not(.type-empty):hover {
-    border-color: #fff;
-    color: #fff;
-    transform: translateY(-2px);
+.is-hidden::after {
+    content: "?";
+    position: absolute;
+    color: #444;
+    font-size: 1.2rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* 揭开迷雾后的反馈动画 */
+.reveal-anim {
+    animation: revealPulse 0.5s ease-out;
+}
+
+@keyframes revealPulse {
+    0% { transform: scale(0.8); background: #d4af37; }
+    100% { transform: scale(1); background: #111; }
 }
