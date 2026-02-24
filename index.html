@@ -1,32 +1,11 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>残机物语 - 极简原型</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="game-container">
-        <header id="scene-header">
-            <span class="location-tag">坠梦林地</span>
-        </header>
+<div id="game-container">
+    <header id="scene-header">加载中...</header>
+    
+    <section id="story-log">
+        </section>
 
-        <main id="story-log">
-            <div class="entry init">
-                <p>后颈传来的钝痛感提醒着你，这一切不是梦。</p>
-                <p>你撑起身体，发现身下不是熟悉的床铺，而是混杂着机油味与腐叶气息的泥土。</p>
-                <p>四周古树参天，每一棵树的树干上都嵌着锈迹斑斑的铜质齿轮，正随着微风发出沉重且迟缓的“咔...哒...”声。</p>
+    <footer id="interaction-panel">
+        <div id="action-grid" class="action-grid">
             </div>
-        </main>
-
-        <nav id="action-panel">
-            <button class="action-btn" onclick="say('你环顾四周，除了迷雾和那些诡异的树木，看不见出路。')">观察环境</button>
-            <button class="action-btn" onclick="say('太阳穴隐隐跳动，呼吸间带着一丝灼热感。')">感知自身</button>
-            <button class="action-btn" onclick="say('你尝试站起来，膝盖发出一声酸涩的抗议。')">起身尝试</button>
-        </nav>
-    </div>
-
-    <script src="main.js"></script>
-</body>
-</html>
+    </footer>
+</div>
