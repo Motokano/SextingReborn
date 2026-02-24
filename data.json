@@ -1,20 +1,18 @@
 {
   "scenes": {
-    "forest_start": {
-      "name": "坠梦林地",
-      "description": "周围弥漫着混杂了泥土与陈旧机油的气息。远处的齿轮声沉重且迟缓。",
+    "forest_wake": {
+      "location": "坠梦林地 - 边缘",
+      "description": "阳光穿不透浓雾。你躺在泥土中，耳边只有生锈齿轮咬合的声音。这种感觉不像是熬夜，倒像是灵魂被重组了。",
       "actions": [
-        { "text": "观察环境", "target": "forest_detail" },
-        { "text": "感知自身", "type": "status_check" },
-        { "text": "尝试移动", "target": "tea_house", "condition": "discovered_exit" }
+        { "text": "检查口袋", "log": "口袋里只有一张揉皱的程序员证，和半罐温热的红牛。", "target": "forest_detail" },
+        { "text": "呼喊求救", "log": "你大声呼喊，回应你的是森林深处沉重的金属回响。" }
       ]
     },
-    "tea_house": {
-      "name": "古道茶棚",
-      "description": "一座破旧的木质茶棚，屋顶覆盖着带有齿轮花纹的黑瓦。",
+    "forest_detail": {
+      "location": "坠梦林地 - 巨树下",
+      "description": "你站起身，看到一棵巨大的古树，树干内部竟然被掏空，装满了还在转动的黄铜零件。",
       "actions": [
-        { "text": "进入茶棚", "target": "inside_tea_house" },
-        { "text": "返回林地", "target": "forest_start" }
+        { "text": "尝试攀爬", "log": "手触碰到齿轮的瞬间，一股微弱的电流让你缩回了手。", "target": "forest_wake" }
       ]
     }
   }
