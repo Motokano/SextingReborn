@@ -2,20 +2,27 @@
   "scenes": {
     "forest_wake": {
       "location": "坠梦林地 - 边缘",
-      "description": "你躺在冰冷的泥土中。远处，一个巨大的青铜齿轮正半埋在土里，缓慢转动。",
+      "description": "你在冰冷的机械摩擦声中苏醒。四周雾气弥漫，只能隐约看到一些高大的轮廓。",
       "baseActions": [
-        { "text": "四处张望", "type": "explore", "id": "look_around" },
-        { "text": "感知自身", "type": "status_check" }
+        { "text": "四处张望", "type": "explore", "id": "look_around", "log": "你努力直起身子，看向迷雾深处。" },
+        { "text": "感知自身", "log": "手脚冰凉，大脑因为长期的精神紧绷而阵阵刺痛。" }
       ],
       "unlocks": {
         "look_around": {
-          "descUpdate": "迷雾散去了。你看到前方有一座废弃的[机械石碑]，左侧草丛里似乎有亮光。",
+          "descUpdate": "迷雾稍微散去，你发现前方有一截断裂的[机械立柱]，左侧的草丛中似乎有微弱的火光。",
           "newActions": [
-            { "text": "检查石碑", "target": "stone_tablet", "log": "你走向那座布满苔藓的石碑。" },
-            { "text": "搜寻草丛", "log": "你发现了一枚发热的铜芯零件。", "type": "loot" }
+            { "text": "检查立柱", "target": "pillar_examine", "log": "你踉跄着走向那截金属支柱。" },
+            { "text": "靠近火光", "log": "你决定去查看那团可疑的亮光。", "target": "fire_place" }
           ]
         }
       }
+    },
+    "pillar_examine": {
+      "location": "断裂的立柱",
+      "description": "这是一截精钢铸造的立柱，表面刻满了流云般的纹路，但内部却布满了精密的差分机齿轮。",
+      "baseActions": [
+        { "text": "返回原处", "target": "forest_wake" }
+      ]
     }
   }
 }
