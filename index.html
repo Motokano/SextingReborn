@@ -1,35 +1,36 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>残机物语：枢轴引擎</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="game-app">
-        <header id="status-bar">
-            <span id="loc-display">系统初始化...</span>
-        </header>
+!DOCTYPE html
+html lang=zh-CN
+head
+    meta charset=UTF-8
+    meta name=viewport content=width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no
+    title残机物语title
+    link rel=stylesheet href=style.css
+head
+body
+    div id=game-app
+        header id=status-bar
+            div id=time-display--月--日 ----div
+            div id=loc-display意识载入中...div
+        header
 
-        <main id="interaction-stage">
-            <div id="grid-container">
-                <div id="scene-desc">数据加载中...</div>
-                <div id="action-grid" class="action-grid"></div>
-            </div>
+        main id=stage
+            div id=grid-container
+                div id=scene-desc...div
+                div id=action-grid class=action-griddiv
+            div
 
-            <aside id="side-menu" class="hidden">
-                <div id="menu-title" class="menu-title">交互选项</div>
-                <div id="menu-options"></div>
-            </aside>
-        </main>
+            aside id=side-menu class=hidden
+                div class=menu-title当前交互div
+                div id=menu-optionsdiv
+            aside
+        main
 
-        <div id="log-resizer"></div>
+        div id=log-resizerdiv
 
-        <footer id="log-console">
-            <div id="log-content"></div>
-        </footer>
-    </div>
-    <script src="main.js"></script>
-</body>
-</html>
+        footer id=log-console
+            div id=log-contentdiv
+        footer
+    div
+    script src=main.jsscript
+body
+html

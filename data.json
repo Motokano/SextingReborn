@@ -1,36 +1,54 @@
 {
-  "systemActions": [
-    { "label": "检查身体", "effects": [{ "type": "log", "content": "身体处于低功耗模式，后脑接口微热。" }] },
-    { "label": "整理行囊", "effects": [{ "type": "log", "content": "包里除了一些导线，只剩半罐红牛。" }] }
+  "startScene": "plain",
+  "sys_acts": [
+    { "label": "检查身体", "repeatable": true, "cmd": [{ "type": "check_body" }] },
+    { "label": "翻看行囊", "repeatable": true, "cmd": [{ "type": "log", "val": "除了一张入职通知书和半罐温热的红牛，别无他物。" }] }
   ],
   "scenes": {
-    "forest_center": {
-      "location": "坠梦林地 - 槐树下",
-      "rows": 4, "cols": 4,
-      "description": "亮如白昼的雾气在林间游走。一名独臂侠客正背对着你坐在机匣上。",
+    "plain": {
+      "name": "不知名的荒野", "cols": 4, 
+      "desc": "空气中弥漫着泥土的腥味。远处偶尔传来沉重的机械合拢声。",
       "grid": [
-        { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true },
-        { "type": "empty", "hidden": true }, { "type": "player", "shortName": "我", "hidden": false }, { "type": "empty", "hidden": true }, 
+        { "type": "null", "hide": true }, 
         { 
-          "type": "npc", "shortName": "侠客", "fullName": "背负重机匣的独臂武者", "hidden": true,
-          "interactions": [
+          "type": "danger", "sn": "荆棘", "fn": "一片带刺的黑色荆棘", "hide": true,
+          "onStep": [{ "type": "log", "val": "<b>嘶——</b> 荆棘划破了你的皮肤，生疼。" }, { "type": "hp", "val": -2 }]
+        }, 
+        { "type": "null", "hide": true }, { "type": "null", "hide": true },
+        
+        { "type": "null", "hide": true }, { "type": "player", "sn": "我" }, { "type": "null", "hide": true }, 
+        { 
+          "type": "npc", "sn": "侠客", "fn": "背负重型机匣的独臂侠客", "hide": true,
+          "acts": [
             { 
-              "label": "搭话", 
-              "once": "fainted_by_knight",
-              "effects": [
-                { "type": "log", "content": "你刚开口，侠客回首。其眼中流转的青色符文瞬间占据了你的视野..." },
-                { "type": "set_flag", "key": "fainted_by_knight" },
-                { "type": "faint", "duration": 5000 }
+              "label": "尝试搭话", 
+              "startTime": "18:00", "endTime": "23:00",
+              "cmd": [
+                { "type": "log", "val": "在这个时辰，侠客的眼神显得格外冷冽。你还没开口便感到一阵眩晕..." },
+                { "type": "faint", "ms": 4000 }
               ]
             },
             {
-              "label": "打量",
-              "effects": [{ "type": "log", "content": "他身后的机匣发出轻微的泄压声，一股机油味扑面而来。" }]
+              "label": "默默走开", "repeatable": true,
+              "cmd": [{ "type": "log", "val": "你识趣地退后，没有打扰这位危险的人物。" }]
             }
           ]
         },
-        { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true },
-        { "type": "empty", "hidden": true }, { "type": "exit", "shortName": "离开", "target": "deep_forest", "hidden": true }, { "type": "empty", "hidden": true }, { "type": "empty", "hidden": true }
+        
+        { "type": "null", "hide": true }, { "type": "null", "hide": true }, { "type": "null", "hide": true }, { "type": "null", "hide": true },
+        { "type": "null", "hide": true }, 
+        { 
+          "type": "obj", "sn": "山路", "fn": "通往远处的崎岖小径", "hide": true, 
+          "acts": [{ "label": "出发", "repeatable": true, "cmd": [{ "type": "move", "target": "cave" }] }] 
+        }, 
+        { "type": "null", "hide": true }, { "type": "null", "hide": true }
+      ]
+    },
+    "cave": {
+      "name": "幽深山穴", "cols": 2, "desc": "山风在石壁间回响，冷得彻骨。",
+      "grid": [
+        { "type": "player" }, 
+        { "type": "obj", "sn": "回转", "acts": [{ "label": "原路返回", "repeatable": true, "cmd": [{ "type": "move", "target": "plain" }] }] }
       ]
     }
   }

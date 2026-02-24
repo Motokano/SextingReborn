@@ -1,148 +1,194 @@
-const game = {
-    db: null,
-    currentScene: null,
-    playerIndex: 0,
-    state: { flags: {} }, // 全局状态/旗标
+const Engine = {
+    db: null, cur: null, pIdx: 0, flags: {}, hp: 10, maxHp: 10,
+    time: { month: 2, day: 24, hour: 8, minute: 0 },
 
     async init() {
-        try {
-            const resp = await fetch('data.json?v=' + Date.now());
-            this.db = await resp.json();
-            this.initResizer();
-            this.loadScene("forest_center");
-        } catch (err) { console.error("初始化错误:", err); }
+        const r = await fetch('data.json?v=' + Date.now());
+        this.db = await r.json();
+        this.setupResizer();
+        this.load(this.db.startScene);
     },
 
-    loadScene(id) {
-        if (!this.db.scenes[id]) return;
-        this.currentScene = JSON.parse(JSON.stringify(this.db.scenes[id]));
-        this.playerIndex = this.currentScene.grid.findIndex(c => c.type === 'player');
+    load(id) {
+        this.cur = JSON.parse(JSON.stringify(this.db.scenes[id]));
+        const f = this.cur.grid.findIndex(c => c.type === 'player');
+        if (f !== -1) this.pIdx = f;
         this.render();
-        this.log(`<b>[环境]</b> 载入新区域：${this.currentScene.location}`, "highlight");
+        this.log(`<b>[环境]</b> 抵达了：${this.cur.name}`);
+    },
+
+    // 时间推进逻辑
+    advanceTime(mins) {
+        this.time.minute += mins;
+        while (this.time.minute >= 60) { this.time.minute -= 60; this.time.hour++; }
+        while (this.time.hour >= 24) { this.time.hour -= 24; this.time.day++; }
+        
+        // 视觉昼夜切换 (19:00 - 06:00 为夜)
+        const app = document.getElementById('game-app');
+        if (this.time.hour >= 19 || this.time.hour < 6) app.classList.add('night');
+        else app.classList.remove('night');
+        
+        this.renderStatus();
+    },
+
+    renderStatus() {
+        const t = this.time;
+        const timeStr = `${t.month}月${t.day}日 ${t.hour.toString().padStart(2, '0')}:${t.minute.toString().padStart(2, '0')}`;
+        document.getElementById('time-display').innerText = timeStr;
+        document.getElementById('loc-display').innerText = this.cur.name;
     },
 
     render() {
-        const grid = document.getElementById('action-grid');
-        grid.style.setProperty('--cols', this.currentScene.cols || 4);
-        grid.style.setProperty('--rows', this.currentScene.rows || 4);
-        document.getElementById('loc-display').innerText = this.currentScene.location;
-        document.getElementById('scene-desc').innerText = this.currentScene.description;
-        grid.innerHTML = "";
+        this.renderStatus();
+        const g = document.getElementById('action-grid');
+        g.style.setProperty('--cols', this.cur.cols);
+        document.getElementById('scene-desc').innerText = this.cur.desc;
+        g.innerHTML = "";
 
-        this.currentScene.grid.forEach((cell, index) => {
-            const btn = document.createElement('button');
-            const isPlayerHere = (index === this.playerIndex);
-            btn.className = `action-btn type-${cell.type}`;
-            if (cell.hidden) btn.classList.add('is-hidden');
-            if (isPlayerHere) btn.classList.add('player-present');
+        // 伤重视觉反馈
+        const app = document.getElementById('game-app');
+        if (this.hp <= 3) app.classList.add('weakened');
+        else app.classList.remove('weakened');
 
-            if (isPlayerHere) {
-                btn.innerHTML = "<b style='color:#b08d57'>我</b>";
-            } else if (!cell.hidden && cell.type !== 'empty') {
-                btn.innerText = cell.shortName || "";
-            }
-
-            btn.onclick = () => this.handleCellClick(index);
-            grid.appendChild(btn);
+        this.cur.grid.forEach((c, i) => {
+            const b = document.createElement('div');
+            const isP = (i === this.pIdx);
+            b.className = `btn ${c.type} ${c.hide ? 'hide' : ''} ${isP ? 'player' : ''}`;
+            
+            // 文字渲染：仅当前索引显示“我”，其余格子显示缩略名
+            if (isP) b.innerText = "我";
+            else if (!c.hide && c.type !== 'null') b.innerText = c.sn || "";
+            
+            b.onclick = () => this.click(i);
+            g.appendChild(b);
         });
     },
 
-    handleCellClick(index) {
-        const cell = this.currentScene.grid[index];
-        const dist = this.getDist(this.playerIndex, index);
-
-        if (dist === 0) { // 点击当前格：开启交互
-            this.openMenu(cell);
-        } else if (dist === 1) { // 移动
-            this.playerIndex = index;
-            if (cell.hidden) cell.hidden = false;
+    click(i) {
+        const c = this.cur.grid[i], d = this.dist(this.pIdx, i);
+        if (d === 0) {
+            this.menu(c);
+        } else if (d === 1) {
+            this.pIdx = i;
+            if (c.hide) c.hide = false;
+            
+            this.advanceTime(10); // 移动消耗10分钟
+            
+            if (c.type !== 'null') this.log(`你走向了 <b>${c.fn || c.sn}</b>。`);
+            
+            // 检查碰撞（被动触发）
+            if (c.onStep) this.run(c.onStep);
+            
             this.render();
-            if (cell.type !== 'empty') this.openMenu(cell);
+            if (c.type !== 'null') this.menu(c);
             else document.getElementById('side-menu').classList.add('hidden');
-        } else {
-            this.log("目标超出了目前的步伐限制。");
         }
     },
 
-    getDist(i1, i2) {
-        const c = this.currentScene.cols;
-        return Math.abs(Math.floor(i1/c) - Math.floor(i2/c)) + Math.abs(i1%c - i2%c);
+    dist(a, b) {
+        const w = this.cur.cols;
+        return Math.abs(Math.floor(a/w)-Math.floor(b/w)) + Math.abs(a%w-b%w);
     },
 
-    openMenu(cell) {
-        const menu = document.getElementById('side-menu');
-        const opts = document.getElementById('menu-options');
-        menu.classList.remove('hidden');
-        opts.innerHTML = `<div style="font-size:11px; color:#999; margin-bottom:8px">${cell.fullName || "当前位置"}</div>`;
+    menu(c) {
+        const m = document.getElementById('side-menu'), o = document.getElementById('menu-options');
+        m.classList.remove('hidden');
+        o.innerHTML = `<p style="font-size:12px;color:#999;margin-bottom:8px">${c.fn || "当前位置"}</p>`;
+        
+        // 区分“我”和物体的交互
+        const isSelf = (this.cur.grid[this.pIdx].type === 'player' && c.type === 'player');
+        const acts = isSelf ? this.db.sys_acts : (c.acts || []);
+        
+        acts.forEach(a => {
+            // 判定1：时间窗口
+            if (!this.checkTime(a)) return;
+            // 判定2：是否单次触发
+            if (!a.repeatable && this.flags[a.label]) return;
 
-        // 加载玩家系统菜单或物体交互菜单
-        const interactionList = (cell.type === 'player') ? this.db.systemActions : cell.interactions;
+            const b = document.createElement('button');
+            b.className = "menu-btn";
+            b.innerText = a.label;
+            b.onclick = () => {
+                this.advanceTime(10); // 互动消耗10分钟
+                this.flags[a.label] = true;
+                this.run(a.cmd);
+                m.classList.add('hidden');
+            };
+            o.appendChild(b);
+        });
 
-        if (interactionList) {
-            interactionList.forEach(act => {
-                // 检查条件：如果 JSON 包含 once 且 flag 已存在，则不显示
-                if (act.once && this.state.flags[act.once]) return;
-
-                const btn = document.createElement('button');
-                btn.className = "menu-btn";
-                btn.innerText = act.label;
-                btn.onclick = () => this.executeAction(act);
-                opts.appendChild(btn);
-            });
-        }
-
-        const closeBtn = document.createElement('button');
-        closeBtn.className = "menu-btn";
-        closeBtn.style.marginTop = "10px";
-        closeBtn.innerText = "取消";
-        closeBtn.onclick = () => menu.classList.add('hidden');
-        opts.appendChild(closeBtn);
+        const cl = document.createElement('button'); cl.className="menu-btn"; cl.innerText="取消操作";
+        cl.style.marginTop = "10px"; cl.style.opacity = "0.5";
+        cl.onclick = () => m.classList.add('hidden'); o.appendChild(cl);
     },
 
-    // 核心指令处理器
-    executeAction(action) {
-        if (action.effects) {
-            action.effects.forEach(eff => {
-                switch(eff.type) {
-                    case "log": this.log(eff.content, eff.class); break;
-                    case "change_scene": this.loadScene(eff.target); break;
-                    case "set_flag": this.state.flags[eff.key] = true; break;
-                    case "faint": this.runFaintEffect(eff.duration || 5000); break;
-                }
-            });
-        }
+    checkTime(a) {
+        if (!a.startTime || !a.endTime) return true;
+        const now = this.time.hour * 60 + this.time.minute;
+        const [sh, sm] = a.startTime.split(':').map(Number);
+        const [eh, em] = a.endTime.split(':').map(Number);
+        const start = sh * 60 + sm, end = eh * 60 + em;
+        return (start <= end) ? (now >= start && now <= end) : (now >= start || now <= end);
+    },
+
+    run(cmds) {
+        cmds.forEach(c => {
+            if (c.type === 'log') this.log(c.val);
+            if (c.type === 'faint') this.faint(c.ms || 5000);
+            if (c.type === 'move') this.load(c.target);
+            if (c.type === 'hp') {
+                this.hp = Math.max(0, Math.min(this.maxHp, this.hp + c.val));
+                if (c.val < 0) this.flash();
+                if (this.hp === 0) this.faint(8000);
+            }
+            if (c.type === 'check_body') this.log(`<b>[感知]</b> ${this.getSensation()}`);
+        });
         this.render();
     },
 
-    runFaintEffect(ms) {
+    getSensation() {
+        const r = this.hp / this.maxHp;
+        if (r >= 1) return "你感到呼吸平稳，四肢充实，状态很好。";
+        if (r > 0.6) return "身体隐约有些酸痛，但这只是长途跋涉的代价。";
+        if (r > 0.3) return "呼吸变得浑浊，每走一步都要耗费极大的毅力。";
+        return "意识正在涣散，眼前的世界在剧烈摇晃，你随时可能倒下。";
+    },
+
+    flash() {
+        const a = document.getElementById('game-app');
+        a.classList.add('damage-flash');
+        setTimeout(() => a.classList.remove('damage-flash'), 150);
+    },
+
+    faint(ms) {
         const app = document.getElementById('game-app');
-        app.classList.add('is-fainted'); // 触发全黑渐变
-        setTimeout(() => {
-            app.classList.remove('is-fainted'); // 5秒后恢复
-            this.log("<b>[系统重启]</b> 意识流重新建立，视觉传感器已恢复...", "highlight");
+        app.classList.add('faint');
+        this.advanceTime(240); // 昏迷跳过4小时
+        setTimeout(() => { 
+            app.classList.remove('faint'); 
+            this.hp = Math.max(this.hp, 2); 
+            this.log("你在剧烈的头痛中慢慢睁开了眼。");
+            this.render();
         }, ms);
     },
 
-    log(msg, cls = "") {
-        const d = document.createElement('div');
-        d.className = `log-entry ${cls}`;
-        d.innerHTML = msg;
-        const c = document.getElementById('log-content');
-        c.appendChild(d);
+    log(txt) {
+        const e = document.createElement('div'); e.className = 'log'; e.innerHTML = txt;
+        const c = document.getElementById('log-content'); c.appendChild(e);
         document.getElementById('log-console').scrollTop = c.scrollHeight;
     },
 
-    initResizer() {
-        const resizer = document.getElementById('log-resizer');
-        const consoleEl = document.getElementById('log-console');
-        let isResizing = false;
-        resizer.addEventListener('mousedown', () => isResizing = true);
-        document.addEventListener('mousemove', (e) => {
-            if (!isResizing) return;
-            const h = window.innerHeight - e.clientY;
-            if (h > 50 && h < window.innerHeight * 0.7) consoleEl.style.height = h + 'px';
-        });
-        document.addEventListener('mouseup', () => isResizing = false);
+    setupResizer() {
+        let active = false;
+        const r = document.getElementById('log-resizer'), c = document.getElementById('log-console');
+        r.onmousedown = () => active = true;
+        document.onmousemove = (e) => {
+            if (active) {
+                const h = window.innerHeight - e.clientY;
+                if (h > 50 && h < window.innerHeight * 0.8) c.style.height = h + 'px';
+            }
+        };
+        document.onmouseup = () => active = false;
     }
 };
-window.onload = () => game.init();
+window.onload = () => Engine.init();
