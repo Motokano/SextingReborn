@@ -1,0 +1,6 @@
+﻿id,condition_type,limb,ratio,stat,op,val,text
+l_leg_gone,limb,l_leg,0,,,,你的左腿已经完全变形，只能拖着断肢勉强挪动。
+r_leg_gone,limb,r_leg,0,,,,右腿支离破碎，剧痛让你每次落脚都颤抖不已。
+head_trauma,limb,head,0.4,,,,脑袋像是被重锤击中，视线支离破碎。
+starving,stat,,,fullness,lt,15,饥饿让你的肠胃绞在一起，阵阵发虚。
+healthy,default,,,,,,肢体还算听使唤，只是呼吸略显急促。

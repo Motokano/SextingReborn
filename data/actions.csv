@@ -1,0 +1,11 @@
+﻿id,label,repeatable,turn_cost,effect,heal_amount,cmd_json
+check_self,检查身体,1,1,,,"[{""type"":""log"",""val"":""你花了些时间检查自己的状况。""},{""type"":""check_body_text""}]"
+old_man_wisdom,恭敬请教,,1,,,"[{""type"":""log"",""val"":""老者缓缓睁眼：‘保全肢体，方有生机。’""},{""type"":""mod_stat"",""key"":""hydration"",""val"":20}]"
+bed_sleep,睡觉,1,0,,,"[{""type"":""log"",""val"":""<b>你进入了睡眠...</b>""},{""type"":""advance_time"",""val"":480},{""type"":""recover_limbs_ratio"",""val"":0.1},{""type"":""mod_stat"",""key"":""fatigue"",""val"":-50}]"
+old_man_dialogue,对话,,1,,,"[{""type"":""log"",""val"":""你试图搭话，老者只是冷哼一声：‘哼！’，随后便不再理你。""}]"
+fire_burn,,,,,,"[{""type"":""log"",""val"":""<b>烫！</b> 火苗灼烧了你的小腿。""},{""type"":""hp_limb"",""limb"":""l_leg"",""val"":-10},{""type"":""hp_limb"",""limb"":""r_leg"",""val"":-10}]"
+take,捡起,1,,,,"[{""type"":""take_item_from_ground""}]"
+eat_apple,吃掉苹果,1,,,,"[{""type"":""remove_from_inventory"",""item_id"":""apple""},{""type"":""mod_stat"",""key"":""fullness"",""val"":15},{""type"":""log"",""val"":""你吃下了一个苹果，补充了些许能量。""}]"
+eat_apple_from_ground,吃掉地上的苹果,1,,,,"[{""type"":""remove_from_ground""},{""type"":""mod_stat"",""key"":""fullness"",""val"":15},{""type"":""log"",""val"":""你直接吃掉了地上的苹果。""}]"
+use_bandage,使用绷带,1,3,heal_limb,30,
+open_storage,打开仓库,1,0,open_container,,

@@ -1,0 +1,11 @@
+{
+  "name": "sexting",
+  "private": true,
+  "scripts": {
+    "dev": "live-server --port=5500 --open=index.html --no-browser=false",
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

@@ -1,0 +1,18 @@
+[
+    {
+        "id": "human",
+        "name": "人类",
+        "base_stats": {
+            "limbs": { "head": 35, "chest": 75, "stomach": 50, "l_arm": 60, "r_arm": 60, "l_leg": 60, "r_leg": 60 },
+            "maxLimbs": { "head": 35, "chest": 75, "stomach": 50, "l_arm": 60, "r_arm": 60, "l_leg": 60, "r_leg": 60 },
+            "fullness": 100,
+            "hydration": 100,
+            "fatigue": 0,
+            "buffs": [],
+            "inventory": {},
+            "inventory_size": 12,
+            "max_weight": 65,
+            "current_weight": 0
+        }
+    }
+]

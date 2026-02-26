@@ -1,16 +1,85 @@
 {
-  "action_sleep": [
-    { "type": "log", "val": "<b>你进入了睡眠...</b>" },
-    { "type": "advance_time", "val": 480 },
-    { "type": "recover_limbs_ratio", "val": 0.1 },
-    { "type": "mod_stat", "key": "fatigue", "val": -50 }
-  ],
-  "action_fire_burn": [
-    { "type": "log", "val": "<b>烫！</b> 火苗灼烧了你的小腿。" },
-    { "type": "hp_limb", "limb": "l_leg", "val": -10 },
-    { "type": "hp_limb", "limb": "r_leg", "val": -10 }
-  ],
-  "action_check_self": [
-    { "type": "check_body_text" }
-  ]
+    "check_self": {
+        "label": "检查身体",
+        "repeatable": true,
+        "turn_cost": 1,
+        "cmd": [
+            { "type": "log", "val": "你花了些时间检查自己的状况。" },
+            { "type": "check_body_text" }
+        ]
+    },
+    "old_man_wisdom": {
+        "label": "恭敬请教",
+        "repeatable": false,
+        "turn_cost": 1,
+        "cmd": [
+            { "type": "log", "val": "老者缓缓睁眼：‘保全肢体，方有生机。’" },
+            { "type": "mod_stat", "key": "hydration", "val": 20 }
+        ]
+    },
+    "bed_sleep": {
+        "label": "睡觉",
+        "repeatable": true,
+        "turn_cost": 0,
+        "cmd": [
+            { "type": "log", "val": "<b>你进入了睡眠...</b>" },
+            { "type": "advance_time", "val": 480 },
+            { "type": "recover_limbs_ratio", "val": 0.1 },
+            { "type": "mod_stat", "key": "fatigue", "val": -50 }
+        ]
+    },
+    "old_man_dialogue": {
+        "label": "对话",
+        "repeatable": false,
+        "turn_cost": 1,
+        "cmd": [
+            { "type": "log", "val": "你试图搭话，老者只是冷哼一声：‘哼！’，随后便不再理你。" }
+        ]
+    },
+    "fire_burn": {
+        "cmd": [
+            { "type": "log", "val": "<b>烫！</b> 火苗灼烧了你的小腿。" },
+            { "type": "hp_limb", "limb": "l_leg", "val": -10 },
+            { "type": "hp_limb", "limb": "r_leg", "val": -10 }
+        ]
+    },
+    "take": {
+        "id": "take",
+        "label": "捡起",
+        "repeatable": true,
+        "cmd": [{ "type": "take_item_from_ground" }]
+    },
+    "eat_apple": {
+        "id": "eat_apple",
+        "label": "吃掉苹果",
+        "repeatable": true,
+        "cmd": [
+            { "type": "remove_from_inventory", "item_id": "apple" },
+            { "type": "mod_stat", "key": "fullness", "val": 15 },
+            { "type": "log", "val": "你吃下了一个苹果，补充了些许能量。" }
+        ]
+    },
+    "eat_apple_from_ground": {
+        "id": "eat_apple_from_ground",
+        "label": "吃掉地上的苹果",
+        "repeatable": true,
+        "cmd": [
+            { "type": "remove_from_ground" },
+            { "type": "mod_stat", "key": "fullness", "val": 15 },
+            { "type": "log", "val": "你直接吃掉了地上的苹果。" }
+        ]
+    },
+    "use_bandage": {
+        "label": "使用绷带",
+        "repeatable": true,
+        "turn_cost": 3,
+        "effect": "heal_limb",
+        "heal_amount": 30
+    },
+    "open_storage": {
+        "label": "打开仓库",
+        "repeatable": true,
+        "turn_cost": 0,
+        "effect": "open_container"
+    }
 }

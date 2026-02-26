@@ -1,0 +1,8 @@
+﻿id,sn,fn,type,weight,tags,action_ids,blocking,stack_limit,capacity
+bed,木床,铺着厚干草的床,,,,bed_sleep,,,
+campfire,篝火,明亮的火堆,fire,,,,,,
+water,湖面,深水区,water,,,,1,,
+stone,石块,一块普通的灰色石块，有点重。,,2.5,material,take,,5,
+apple,苹果,一个看起来很可口的红苹果。,,0.2,food;consumable,take;eat_apple_from_ground,,10,
+bandage,绷带,一块干净的布制绷带，可以用来包扎伤口。,,0.1,consumable;medical,use_bandage,,20,
+storage_box,仓库,,,,building;container,open_storage,,,100

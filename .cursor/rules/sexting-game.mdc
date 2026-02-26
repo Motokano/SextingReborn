@@ -1,0 +1,11 @@
+---
+description: 残机物语项目结构与扩展方式
+alwaysApply: true
+---
+
+# 残机物语 (Sexting) 项目规则
+
+- **技术栈**：原生 HTML/CSS/JS，无构建；游戏逻辑在 `main.js`（Engine），界面在 `ui.js`（UI），内容全部在 `data/*.json`。
+- **扩展内容**：优先改 JSON（scenes、objects、npcs、actions、buffs、races、config）；新指令在 `Engine.run()` 的 switch 里加 `case`，新动作效果在 `Engine.performAction()` 里加分枝。
+- **数据约定**：物品查 `Engine.db.objects` 或 `Engine.db.items`；容器用场景格子的 `inventory`，ID 为 `grid_<index>`；文案为中文，JSON 为 UTF-8。
+- **接手时**：先读 `AGENTS.md` 与 `main.js`，再按需改 data 或 Engine/UI。

@@ -1,0 +1,2 @@
+﻿id,name,limbs_head,limbs_chest,limbs_stomach,limbs_l_arm,limbs_r_arm,limbs_l_leg,limbs_r_leg,fullness,hydration,fatigue,inventory_size,max_weight
+human,人类,35,75,50,60,60,60,60,100,100,0,12,65

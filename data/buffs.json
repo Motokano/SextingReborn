@@ -6,7 +6,27 @@
     { "id": "starving", "condition": { "stat": "fullness", "val": 15, "op": "lt" }, "text": "饥饿让你的肠胃绞在一起，阵阵发虚。" },
     { "id": "healthy", "condition": "default", "text": "肢体还算听使唤，只是呼吸略显急促。" }
   ],
-  "effects": {
-    "well_rested": { "name": "神清气爽", "desc": "充足的睡眠让你感到充满力量。", "onTick": [{ "type": "mod_stat", "key": "stamina", "val": 5 }] }
+  "definitions": {
+    "B001_WELL_RESTED": {
+      "name": "神清气爽",
+      "desc": "充足的睡眠让你感到充满力量。",
+      "type": "buff",
+      "duration": 24,
+      "effects": {
+        "on_tick": [{ "type": "mod_stat", "key": "fatigue", "val": -0.5 }]
+      }
+    },
+    "D002_PERIOD_PAIN": {
+      "name": "经痛",
+      "desc": "小腹传来一阵阵难以忍受的绞痛。",
+      "type": "debuff",
+      "duration": 48,
+      "requirements": {
+        "required_tags": ["女性"]
+      },
+      "effects": {
+        "on_tick": [{ "type": "mod_stat", "key": "fatigue", "val": 2 }]
+      }
+    }
   }
 }

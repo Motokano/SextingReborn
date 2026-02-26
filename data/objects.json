@@ -1,11 +1,37 @@
 {
   "bed": {
     "sn": "木床", "fn": "铺着厚干草的床",
-    "acts": [{"label": "睡觉", "cmd": [{"type": "call_action", "id": "action_sleep"}]}]
+    "action_ids": ["bed_sleep"]
   },
   "campfire": {
     "sn": "篝火", "fn": "明亮的火堆", "type": "fire",
-    "onStep": [{"type": "call_action", "id": "action_fire_burn"}]
+    "onStep": [{"type": "call_action", "id": "fire_burn"}]
   },
-  "water": { "sn": "湖面", "fn": "深水区", "type": "water", "blocking": true }
+  "water": { "sn": "湖面", "fn": "深水区", "type": "water", "blocking": true },
+  "stone": {
+    "sn": "石块", "fn": "一块普通的灰色石块，有点重。",
+    "weight": 2.5, "tags": ["material"], "action_ids": ["take"], "stack_limit": 5
+  },
+  "apple": {
+    "sn": "苹果", "fn": "一个看起来很可口的红苹果。",
+    "weight": 0.2, "tags": ["food", "consumable"], "action_ids": ["take", "eat_apple_from_ground"], "stack_limit": 10
+  },
+  "bandage": {
+    "sn": "绷带", "fn": "一块干净的布制绷带，可以用来包扎伤口。",
+    "weight": 0.1,
+    "tags": ["consumable", "medical"],
+    "stack_limit": 20,
+    "use_target": "self_or_npc",
+    "use_scope": "single_limb",
+    "use_limb_filter": "alive_only",
+    "effect_id": "heal_limb",
+    "effect_params": { "heal": 20, "time_cost": 30 }
+  },
+  "storage_box": {
+    "sn": "仓库",
+    "tags": ["building", "container"],
+    "capacity": 100,
+    "inventory": {},
+    "action_ids": ["open_storage"]
+  }
 }

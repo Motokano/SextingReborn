@@ -1,0 +1,3 @@
+﻿id,name,desc,type,duration,required_tags,forbidden_tags,on_add_json,on_tick_json,on_remove_json
+B001_WELL_RESTED,神清气爽,充足的睡眠让你感到充满力量。,buff,24,,,,"[{""type"":""mod_stat"",""key"":""fatigue"",""val"":-0.5}]",
+D002_PERIOD_PAIN,经痛,小腹传来一阵阵难以忍受的绞痛。,debuff,48,女性,,,"[{""type"":""mod_stat"",""key"":""fatigue"",""val"":2}]",

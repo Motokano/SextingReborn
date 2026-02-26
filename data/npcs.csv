@@ -1,0 +1,3 @@
+﻿id,sn,fn,race,type,is_player,tags,action_ids
+hero,我,,human,,1,人类;男性,
+old_man,老者,白发苍苍的神秘老者,human,npc,,人类;男性,old_man_dialogue;old_man_wisdom
