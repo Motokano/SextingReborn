@@ -6,10 +6,10 @@
       {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
       {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
       {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
-      {"type":"null"},{"type":"null"},{"type":"null"},{"npc_id":"old_man"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"object_id":"breathing_manual"},{"object_id":"sword_manual"},{"type":"null"},{"object_id":"mining_manual"},{"object_id":"probe_manual"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"npc_id":"old_man"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
       {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
-      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
-      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"object_id":"storage_box"},{"type":"null"},{"object_id":"bed"}
+      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"object_id":"storage_box"},{"type":"null","groundInventory":{"bandage":2}},{"object_id":"bed"}
     ]
   },
   "forest": {

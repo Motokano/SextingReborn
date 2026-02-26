@@ -1,6 +1,7 @@
 {
   "hero": {
-    "is_player": true, "sn": "我",
+    "is_player": true,
+    "sn": "我",
     "tags": ["人类", "男性"],
     "race": "human"
   },
@@ -10,6 +11,7 @@
     "type": "npc",
     "tags": ["人类", "男性"],
     "race": "human",
+    "attributes": { "age": "old" },
     "action_ids": ["old_man_dialogue", "old_man_wisdom"]
   }
 }

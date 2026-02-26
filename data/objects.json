@@ -10,7 +10,7 @@
   "water": { "sn": "湖面", "fn": "深水区", "type": "water", "blocking": true },
   "stone": {
     "sn": "石块", "fn": "一块普通的灰色石块，有点重。",
-    "weight": 2.5, "tags": ["material"], "action_ids": ["take"], "stack_limit": 5
+    "weight": 2.5, "tags": ["material","indestructible","fireproof"], "action_ids": ["take"], "stack_limit": 5
   },
   "apple": {
     "sn": "苹果", "fn": "一个看起来很可口的红苹果。",
@@ -33,5 +33,25 @@
     "capacity": 100,
     "inventory": {},
     "action_ids": ["open_storage"]
+  },
+  "sword_manual": {
+    "sn": "剑谱",
+    "fn": "一本破旧的剑谱，页角发黄。",
+    "action_ids": ["read_sword_manual"]
+  },
+  "breathing_manual": {
+    "sn": "呼吸法入门",
+    "fn": "一本讲调息的小册子。",
+    "action_ids": ["read_breathing_manual"]
+  },
+  "mining_manual": {
+    "sn": "挖矿要诀",
+    "fn": "记载采掘与辨矿的薄册。",
+    "action_ids": ["read_mining_manual"]
+  },
+  "probe_manual": {
+    "sn": "探查心得",
+    "fn": "关于观察与探查的笔记。",
+    "action_ids": ["read_probe_manual"]
   }
 }

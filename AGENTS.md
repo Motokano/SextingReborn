@@ -34,13 +34,43 @@
 |------|------|
 | `config.json` | `startScene`, `startIndex`, `sys_actions`（全局「个人动作」如检查身体） |
 | `scenes.json` | 场景表。每场景：`name`, `desc`, `cols`, `grid`（格子数组） |
-| `npcs.json` | NPC/玩家定义：`sn`, `fn`, `is_player`, `race`, `tags`, `action_ids` |
+| `npcs.json` | NPC/玩家定义：`sn`, `fn`, `is_player`, `race`, `tags`, `attributes`（个体属性，见 3.1）, `action_ids` |
 | `objects.json` | 物体：`sn`, `fn`, `weight`, `blocking`, `onStep`, `action_ids`；容器有 `capacity` |
 | `actions.json` | 动作：`label`, `turn_cost`, `cmd`（指令数组）；或 `effect`（如 `heal_limb`, `open_container`） |
 | `buffs.json` | `definitions`（buff/debuff：duration、effects、requirements）、`sensations`（身体描述） |
 | `races.json` | 种族及 `base_stats`（肢体、饱食、饮水、疲劳、背包、负重等） |
+| `character_attributes.json` | 个体属性定义：各属性（如年龄、体型）的可选值及对数值的修正（`_mult` / `_mod`） |
 
-玩家由 `npcs` 中 `is_player: true` 的条目指定，其 `race` 对应 `races.json`，`Engine.state` 由此初始化。
+玩家由 `npcs` 中 `is_player: true` 的条目指定，其 `race` 对应 `races.json`，`Engine.state` 由种族 `base_stats` 初始化，再经 `Engine.applyCharacterAttributes(state, playerDef)` 按 NPC/玩家的 `attributes` 施加个体修正。
+
+---
+
+### 3.1 标签 vs 个体属性（人物/NPC）
+
+- **标签 (tags)**：如 `["人类","男性"]`，用于判定（如 buff 的 `required_tags` / `forbidden_tags`），不直接改数值。种族 `race` 决定一套**基础属性**（来自 `races.json` 的 `base_stats`），可视为“种族标签带来的基础”。
+- **个体属性 (attributes)**：在 `npcs.json` 中为每个角色单独写，如 `"attributes": { "age": "old" }`。在 `data/character_attributes.json` 中为每种属性的每个取值定义**修正**（如老年：负重系数 0.8、疲劳增长 1.2 倍、移动时间 1.2 倍）。初始化/获取状态时，先套用种族 `base_stats`，再按 `attributes` 应用这些修正。
+
+---
+
+### 3.2 人物属性列表（state 中与扩展用）
+
+| 属性 | 说明 | 来源 |
+|------|------|------|
+| `limbs` | 各部位当前血量（head, chest, stomach, l_arm, r_arm, l_leg, r_leg） | 种族 base_stats |
+| `maxLimbs` | 各部位上限 | 种族 base_stats |
+| `fullness` | 饱食度 0–100 | 种族 base_stats |
+| `hydration` | 饮水度 0–100 | 种族 base_stats |
+| `fatigue` | 疲劳 0–100 | 种族 base_stats |
+| `inventory` | 背包物品 { item_id: count } | 种族 base_stats |
+| `inventory_size` | 背包格数（可被个体属性 `inventory_size_mod` 修正） | 种族 base_stats + 个体 _mod |
+| `max_weight` | 负重上限（可被个体属性 `max_weight_mult` 修正） | 种族 base_stats + 个体 _mult |
+| `current_weight` | 当前负重 | 运行时 |
+| `buffs` | 当前身上的 buff 列表 | 种族 base_stats（空数组）+ 运行时 |
+| `fatigue_gain_mult` | 疲劳增长速度倍数（由个体属性写入） | 个体属性 |
+| `move_time_mult` | 移动一格时间倍数（由个体属性写入） | 个体属性 |
+| `fullness_decay_mult` / `hydration_decay_mult` | 饱食/饮水衰减倍数（可选） | 个体属性 |
+
+个体属性修正规则：`*_mult` 对已有数值做乘法（如 `max_weight_mult: 0.8`）；若无对应基础项则写入 state（如 `fatigue_gain_mult`）；`*_mod` 对已有数值做加减（如 `inventory_size_mod: -2`）。
 
 ---
 
@@ -51,7 +81,9 @@
 - **移动**：点击相邻格或 WASD/方向键；每格耗 10 分钟（腿伤有系数），触发 `advanceTime` 和当前格 `onStep`。
 - **时间**：`Engine.advanceTime(mins)` 推进时间，扣饱食/饮水、加疲劳，并推进 buff 的 `on_tick` 与 duration。
 - **动作**：`Engine.performAction(actionId, context)` 会推进时间、执行 `action.cmd` 或特殊 effect（睡觉、治疗肢体、打开容器等）。
-- **指令**：`Engine.run(cmds)` 支持 `log`、`move`、`advance_time`、`mod_stat`、`hp_limb`、`add_to_inventory`、`remove_from_inventory`、`take_item_from_ground`、`move_item_to_container`、`move_item_from_container`、`recover_limbs_ratio`、`call_action`、`add_buff`、`remove_buff`、`check_body_text`。指令可带 `condition`（如 `has_buff`/`not_has_buff`）。
+- **指令**：`Engine.run(cmds)` 支持 `log`、`move`、`advance_time`、`mod_stat`、`hp_limb`、`add_to_inventory`、`remove_from_inventory`（支持 `count`）、`take_item_from_ground`（可选 `item_id` 表示从地上物品栏捡起）、`drop_to_ground`（`item_id`、`count`）、`move_item_to_container`、`move_item_from_container`、`recover_limbs_ratio`、`call_action`、`add_buff`、`remove_buff`、`check_body_text`。指令可带 `condition`（如 `has_buff`/`not_has_buff`）。
+- **地上物品**：每格地块有 8 格地面物品栏（`groundInventory`），与地块上的存储容器独立。阻挡格不可放置。篝火格每时间推进会烧毁地上非 `fireproof` 标签物品；每 3 天会随机消失一件非 `indestructible` 标签的地上物品。物品标签见 `objects.json`（如 `fireproof`、`indestructible`）。
+- **状态与属性**：`state` 含 饱食/饮水/疲劳（每 10 分钟约 -0.35、-0.35、+0.21）、精力/内力（energy/energy_max, neili/neili_max）、心情(-50~50)、营养(0~100)、六大属性先天/后天（str_innate/str_acq 等）、combat_skill_slots（12 类）。饮水=0 时每 30 分钟脱水 debuff 全体肢 -1。**查看自身**：仅当 `Engine.hasCombatAwareness(state)` 为真（即拥有特殊技能「战斗感知」）时显示完整战斗相关模块（肢体+生存程度等）；否则只显示生存四项，且不展示具体数值。**战斗感知**与第一个战斗技能通过家中「剑谱」阅读事件解锁：执行动作「阅读」后获得战斗感知并学会 基本剑法（等级 1/500、熟练度 0%，仅内部存储，UI 仅用程度描述）。指令：`grant_combat_awareness`、`learn_combat_skill`（`slot`、`skill_id`、`level`、`level_max`、`proficiency`）、`set_combat_skill`（`slot`、`skill_id`）。技能进度存于 `state.combat_skill_progress[skill_id]`。
 
 ---
 

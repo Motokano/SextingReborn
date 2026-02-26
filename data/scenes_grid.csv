@@ -1,4 +1,4 @@
-﻿scene_id,index,type,sn,fn,object_id,npc_id,action_ids,acts_json,onStep_json,blocking
+scene_id,index,type,sn,fn,object_id,npc_id,action_ids,acts_json,onStep_json,blocking
 home,0,null,,,,,,,,
 home,1,null,,,,,,,,
 home,2,null,,,,,,,,
@@ -25,7 +25,7 @@ home,22,null,,,,,,,,
 home,23,null,,,,,,,,
 home,24,null,,,,,,,,
 home,25,null,,,,,,,,
-home,26,null,,,,,,,,
+home,26,,,,sword_manual,,,,
 home,27,null,,,,,,,,
 home,28,null,,,,,,,,
 home,29,null,,,,,,,,

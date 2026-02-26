@@ -1,0 +1,53 @@
+{
+  "description": "个体属性定义：标签带来种族等基础，此处定义每个个体差异对数值的修正。NPC/玩家在 npcs 中通过 attributes 引用下方 value 的 key。",
+  "attribute_definitions": {
+    "age": {
+      "name": "年龄",
+      "values": {
+        "young": {
+          "name": "年轻",
+          "modifiers": {
+            "max_weight_mult": 0.9,
+            "fatigue_gain_mult": 0.9,
+            "move_time_mult": 0.95
+          }
+        },
+        "adult": {
+          "name": "成年",
+          "modifiers": {}
+        },
+        "old": {
+          "name": "老年",
+          "modifiers": {
+            "max_weight_mult": 0.8,
+            "fatigue_gain_mult": 1.2,
+            "move_time_mult": 1.2
+          }
+        }
+      }
+    },
+    "size": {
+      "name": "体型",
+      "values": {
+        "small": {
+          "name": "瘦小",
+          "modifiers": {
+            "max_weight_mult": 0.7,
+            "inventory_size_mod": -2
+          }
+        },
+        "medium": {
+          "name": "中等",
+          "modifiers": {}
+        },
+        "large": {
+          "name": "魁梧",
+          "modifiers": {
+            "max_weight_mult": 1.2,
+            "inventory_size_mod": 2
+          }
+        }
+      }
+    }
+  }
+}

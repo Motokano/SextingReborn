@@ -1,18 +1,55 @@
 [
-    {
-        "id": "human",
-        "name": "人类",
-        "base_stats": {
-            "limbs": { "head": 35, "chest": 75, "stomach": 50, "l_arm": 60, "r_arm": 60, "l_leg": 60, "r_leg": 60 },
-            "maxLimbs": { "head": 35, "chest": 75, "stomach": 50, "l_arm": 60, "r_arm": 60, "l_leg": 60, "r_leg": 60 },
-            "fullness": 100,
-            "hydration": 100,
-            "fatigue": 0,
-            "buffs": [],
-            "inventory": {},
-            "inventory_size": 12,
-            "max_weight": 65,
-            "current_weight": 0
-        }
+  {
+    "id": "human",
+    "name": "人类",
+    "base_stats": {
+      "limbs": {"head": 35, "chest": 75, "stomach": 50, "l_arm": 60, "r_arm": 60, "l_leg": 60, "r_leg": 60},
+      "maxLimbs": {"head": 35, "chest": 75, "stomach": 50, "l_arm": 60, "r_arm": 60, "l_leg": 60, "r_leg": 60},
+      "fullness": 100,
+      "hydration": 100,
+      "fatigue": 0,
+      "buffs": [],
+      "inventory": {},
+      "has_backpack": false,
+      "inventory_size": 12,
+      "max_weight": 65,
+      "current_weight": 0,
+      "mood": 0,
+      "nutrition": 100,
+      "energy": 100,
+      "energy_max": 100,
+      "neili": 0,
+      "neili_max": 0,
+      "age": 25,
+      "height_cm": 170,
+      "weight_kg": 65,
+      "sex": 0,
+      "luck": 0,
+      "charm": 50,
+      "sex_ability": 50,
+      "resolve": 0,
+      "str_innate": 10,
+      "str_acq": 0,
+      "breath_innate": 10,
+      "breath_acq": 0,
+      "sinew_innate": 10,
+      "sinew_acq": 0,
+      "reflex_innate": 10,
+      "reflex_acq": 0,
+      "rec_innate": 10,
+      "rec_acq": 0,
+      "flex_innate": 10,
+      "flex_acq": 0,
+      "combat_awareness": false,
+      "survival_skills": {},
+      "production_skills": {},
+      "support_skills": {},
+      "combat_skill_progress": {},
+      "combat_skill_slots": {
+        "剑法": null, "刀法": null, "暗器": null, "枪法": null,
+        "掌法": null, "拳法": null, "腿法": null, "棍法": null,
+        "指法": null, "身法": null, "内功": null, "招架": null
+      }
     }
+  }
 ]
