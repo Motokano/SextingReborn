@@ -154,6 +154,12 @@ const Movement = {
             Engine.pIdx = i;
             const timeCost = Math.max(1, Math.floor(10 * legMult * (Engine.state.move_time_mult || 1)));
             Movement.advanceTime(timeCost);
+            // 触发当前格或物体自带的 onStep（如篝火烫伤等环境效果）
+            if (c.onStep && Array.isArray(c.onStep) && c.onStep.length > 0) {
+                Engine.run(c.onStep);
+            } else if (ref && ref.onStep && Array.isArray(ref.onStep) && ref.onStep.length > 0) {
+                Engine.run(ref.onStep);
+            }
             if (Engine.describeTile) Engine.describeTile(c, ref);
             Engine.render();
         } else if (d === 0) Engine.render();
