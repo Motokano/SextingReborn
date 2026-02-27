@@ -19,6 +19,9 @@ body.dragging-v, body.dragging-v * { cursor: row-resize !important; user-select:
 #status-bar { height: 45px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-weight: bold; color: var(--accent); }
 #stage { flex: 1; display: flex; overflow: hidden; }
 
+/* Layout columns */
+#left-column { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
 /* Panels */
 #grid-scroll-view { flex: 1; overflow: auto; padding: 20px; background: #e8e4d8; }
 #info-panel { flex: 0 0 var(--info-panel-width); min-width: 260px; background: var(--card); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
@@ -36,6 +39,45 @@ body.dragging-v, body.dragging-v * { cursor: row-resize !important; user-select:
     border-top: none;
     margin-top: 0;
     padding-top: 0;
+}
+
+/* NPC block: visually separated card */
+#npc-section {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px;
+    background: #fdfaf4;
+}
+#npc-section .menu-title {
+    margin-bottom: 4px;
+}
+#npc-section .sub-section {
+    margin-top: 8px;
+}
+
+#npc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.npc-list-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    text-align: left;
+    background: var(--btn);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.npc-list-btn:hover {
+    border-color: var(--accent);
+    background: #f8f6f0;
 }
 
 .panel-header { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; height: 36px; font-weight: bold; color: var(--accent); border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -165,6 +207,7 @@ body.dragging-v, body.dragging-v * { cursor: row-resize !important; user-select:
 .choice-modal-header { margin-bottom: 1rem; }
 .choice-modal-title { margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--accent); }
 .choice-modal-subtitle { margin: 0; font-size: 12px; color: var(--dim); }
+.choice-modal-subtitle.fishing-bite { color: var(--accent); font-weight: bold; font-size: 14px; }
 .choice-options { max-width: 100%; margin-top: 0.5rem; }
 .choice-modal-footer { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: right; }
 .choice-cancel-btn { margin: 0; font-size: 12px; }
@@ -193,6 +236,35 @@ body.dragging-v, body.dragging-v * { cursor: row-resize !important; user-select:
 .choice-modal--combat .choice-modal-footer { text-align: right; }
 .choice-modal--combat .choice-cancel-btn { padding: 8px 16px; font-size: 12px; }
 
+/* Choice modal – 手动挖矿小游戏布局 */
+.choice-modal--manual .modal-content {
+    max-width: 420px;
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+}
+.choice-modal--manual .choice-modal-header {
+    margin-bottom: 0.75rem;
+}
+.choice-modal--manual .choice-modal-title {
+    font-size: 1rem;
+}
+.choice-modal--manual .choice-options--manual {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    grid-template-columns: none;
+    margin-top: 0.25rem;
+}
+.choice-modal--manual .choice-option-btn {
+    padding: 9px 14px;
+}
+.choice-modal--manual .choice-modal-footer {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+}
+
 /* Storage modal – list style */
 .storage-modal-content { max-width: 420px; text-align: left; padding: 1.25rem 1.5rem; }
 .storage-modal-title { margin: 0 0 1rem 0; font-size: 1.1rem; color: var(--accent); }
@@ -211,3 +283,27 @@ body.dragging-v, body.dragging-v * { cursor: row-resize !important; user-select:
 .storage-list-btn:hover { border-color: var(--accent); background: #f8f6f0; }
 .storage-modal-footer { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: right; }
 .storage-close-btn { padding: 8px 16px; font-size: 12px; }
+
+/* Item tooltip */
+.item-tooltip {
+    position: fixed;
+    z-index: 1500;
+    max-width: 260px;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.5;
+    pointer-events: none;
+}
+.item-tooltip-name {
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 2px;
+}
+.item-tooltip-desc {
+    color: var(--text);
+}

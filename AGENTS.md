@@ -18,11 +18,18 @@
 |------|------|
 | `index.html` | 页面结构：顶栏、主舞台网格、信息面板、日志、弹窗（睡眠/选择/仓库） |
 | `style.css` | 样式 |
-| `main.js` | **引擎** `Engine`：加载 data、场景、时间、状态、`run(cmds)` 指令、移动与交互 |
+| `main.js` | **引擎入口**：仅定义 `Engine`、`Engine.init()`、`Engine.run(cmds)` 并委托到各模块；不实现具体游戏逻辑 |
 | `ui.js` | **界面** `UI`：渲染菜单/背包/体征、弹窗、面板拖拽、日志/信息面板弹出窗 |
+| `*-utils.js` | 工具：`inventory-utils`、`character-utils`、`skill-utils`（纯查询/计算，可传 state） |
+| `*-actions.js` | run 命令实现：`inventory-actions`、`crafting-actions`、`status-actions`、`skill-actions`、`buff-actions`；与 `game-actions.js` 一起合并进 `Engine.runHandlers` |
+| `effects.js` | 效果与肢体伤害：`Effects.apply`、`Effects.applyLimbDamage` |
+| `movement.js` | 移动、时间、场景、地面效果：`Movement.advanceTime`、`loadScene`、`click`、`dist` 等 |
+| `menu-controller.js` | 菜单与上下文选项：`MenuController.update()` |
+| `item-controller.js` | 物品操作：`ItemController.showItemActions`、`useItem` |
+| `action-dispatcher.js` | 玩家动作分发：`ActionDispatcher.perform`（特例如 heal_limb、open_container、bed_sleep 等） |
 | `data/*.json` | 全部游戏内容与配置，见下文 |
 
-脚本顺序：先 `ui.js` 再 `main.js`；`window.onload` 调用 `Engine.init()`。
+脚本顺序：见 `index.html`；`ui.js` → `cognition.js` → `game-actions.js` → 各 utils/actions/effects/movement/menu/item/action-dispatcher → `main.js`；`window.onload` 调用 `Engine.init()`。
 
 ---
 
@@ -92,8 +99,8 @@
 - **新场景/新格子/新出口**：改 `data/scenes.json`。
 - **新物体/新 NPC**：改 `data/objects.json`、`data/npcs.json`，在场景 `grid` 中引用 `object_id`/`npc_id`。
 - **新动作**：在 `data/actions.json` 增加条目，用 `cmd` 或 `effect`；在物体/NPC/格子的 `action_ids` 或 `acts` 中引用。
-- **新指令类型**：在 `main.js` 的 `Engine.run()` 的 `switch(c.type)` 中增加 `case`。
-- **新 effect**：在 `Engine.performAction()` 中增加分支（如 `heal_limb`、`open_container`、`bed_sleep`）。
+- **新指令类型**：在对应的 `*-actions.js` 中实现（如背包→inventory-actions，制作→crafting-actions，状态→status-actions，技能→skill-actions，buff→buff-actions），该模块导出对象已在 main 中合并进 `Engine.runHandlers`；仅当新增类型为与 log/move/advance_time/call_action/check_body_text 同级的核心类型时，才在 main 的 run 的 switch 中加 case。
+- **新 effect**：在 `action-dispatcher.js` 的 `ActionDispatcher.perform()` 中增加分支（如 `heal_limb`、`open_container`、`bed_sleep`）。
 - **新 buff/身体感受**：改 `data/buffs.json`（`definitions`、`sensations`）。
 - **新种族/初始状态**：改 `data/races.json`。
 - **UI 变更**：`index.html` 结构、`ui.js` 渲染与事件、`style.css` 样式。

@@ -30,8 +30,21 @@
   "storage_box": {
     "sn": "仓库",
     "tags": ["building", "container"],
-    "capacity": 100,
-    "inventory": {},
+    "capacity": 200,
+    "inventory": {
+      "iron_ore": 20,
+      "black_iron_ore": 20,
+      "yellow_copper_ore": 20,
+      "tin_shiny_ore": 30,
+      "lime_stone_ore": 20,
+      "heavy_lead_ore": 10,
+      "manganese_ore": 20,
+      "chrome_sand_ore": 20,
+      "tungsten_ore": 10,
+      "white_quartz_ore": 20,
+      "mixed_bronze_ore": 20,
+      "phosphor_iron_ore": 20
+    },
     "action_ids": ["open_storage"]
   },
   "sword_manual": {
@@ -53,5 +66,326 @@
     "sn": "探查心得",
     "fn": "关于观察与探查的笔记。",
     "action_ids": ["read_probe_manual"]
+  },
+  "almanac_manual": {
+    "sn": "旧黄历",
+    "fn": "一本破旧的黄历，上面密密麻麻写着某种“宜忌”。",
+    "action_ids": ["read_almanac_manual"]
+  },
+  "gathering_manual": {
+    "sn": "采集手册",
+    "fn": "一本讲解野外采集与辨认常见植物的薄册。",
+    "action_ids": ["read_gathering_manual"]
+  },
+  "logging_manual": {
+    "sn": "伐木入门",
+    "fn": "一本讲解如何观察树形与下斧角度的小册子。",
+    "action_ids": ["read_logging_manual"]
+  },
+  "fishing_manual": {
+    "sn": "垂钓要略",
+    "fn": "一本讲选位、下钩与起竿时机的小册子。",
+    "action_ids": ["read_fishing_manual"]
+  },
+  "farming_manual": {
+    "sn": "种植入门",
+    "fn": "一本讲节气、播种与收割时机的薄册。",
+    "action_ids": ["read_farming_manual"]
+  },
+  "hunting_manual": {
+    "sn": "狩猎心得",
+    "fn": "一本讲辨踪、下套与取肉剥皮的小册子。",
+    "action_ids": ["read_hunting_manual"]
+  },
+  "workbench": {
+    "sn": "工作台",
+    "fn": "简陋的台子，可以在这里制作些简单用具。",
+    "tags": ["building", "craft"],
+    "action_ids": ["craft_fishing_rod"]
+  },
+  "time_pole": {
+    "sn": "歪斜木杆",
+    "fn": "一根随手削出的木杆，斜插在地上，上面刻着歪七扭八的刻痕，大概能看个时辰。",
+    "tags": ["building", "time"],
+    "action_ids": ["setup_time_pole"]
+  },
+  "fishing_rod": {
+    "sn": "鱼竿",
+    "fn": "用粗木和脂木绑成的简易鱼竿，能下钩钓鱼。",
+    "weight": 0.5,
+    "tags": ["tool", "fishing"],
+    "stack_limit": 1
+  },
+  "iron_ore": {
+    "sn": "铁矿石",
+    "fn": "一块含铁的矿石，沉甸甸的，看起来适合拿去炼铁。",
+    "weight": 1.8,
+    "tags": ["material","ore","metal","hard","weapon_grade","armor_grade","heavy","difficult_smelt"],
+    "stack_limit": 20
+  },
+  "black_iron_ore": {
+    "sn": "铁矿石",
+    "fn": "一块发黑的矿石，隐约带着金属光泽，似乎也能炼出铁来。",
+    "weight": 1.7,
+    "tags": ["material","ore","metal","tough","tool_grade","conductive","impure","difficult_work"],
+    "stack_limit": 20
+  },
+  "yellow_copper_ore": {
+    "sn": "黄铜矿石",
+    "fn": "一块泛着黄光的矿石，敲碎后能看到金属光泽。",
+    "weight": 1.3,
+    "tags": ["material","ore","metal","conductive","easy_smelt","tool_grade","soft","corrosion_prone"],
+    "stack_limit": 20
+  },
+  "tin_shiny_ore": {
+    "sn": "锡矿石",
+    "fn": "一些发亮的矿块，单看有些脆弱，但也许可以和别的金属混用。",
+    "weight": 0.9,
+    "tags": ["material","ore","metal","easy_smelt","alloy_additive","soft","brittle"],
+    "stack_limit": 30
+  },
+  "lime_stone_ore": {
+    "sn": "石灰石",
+    "fn": "灰白色的石头，磨一磨就掉渣，常被用作建筑与熔剂。",
+    "weight": 2.0,
+    "tags": ["material","stone","common","easy_work","smelting_flux","construction_grade","soft","low_strength"],
+    "stack_limit": 20
+  },
+  "heavy_lead_ore": {
+    "sn": "铅矿石",
+    "fn": "一块暗灰色的矿石，同样大小比别的更重，适合做配重。",
+    "weight": 3.0,
+    "tags": ["material","ore","metal","very_heavy","easy_smelt","weight_core","soft","toxic"],
+    "stack_limit": 10
+  },
+  "manganese_ore": {
+    "sn": "锰矿石",
+    "fn": "紫里发黑的矿块，处理得当可以让钢材更结实。",
+    "weight": 1.6,
+    "tags": ["material","ore","metal","alloy_additive","weapon_grade","brittle","difficult_smelt"],
+    "stack_limit": 20
+  },
+  "chrome_sand_ore": {
+    "sn": "铬铁砂",
+    "fn": "一撮黑色铁砂，据说能让金属不那么容易生锈。",
+    "weight": 1.4,
+    "tags": ["material","ore","metal","corrosion_resistant","armor_grade","difficult_smelt","difficult_work","heavy"],
+    "stack_limit": 20
+  },
+  "tungsten_ore": {
+    "sn": "钨矿石",
+    "fn": "特别坚硬的灰黑矿石，普通火候难以熔化。",
+    "weight": 2.8,
+    "tags": ["material","ore","metal","very_hard","heat_resistant","tool_grade","very_heavy","difficult_smelt","brittle"],
+    "stack_limit": 10
+  },
+  "white_quartz_ore": {
+    "sn": "石英石",
+    "fn": "亮晶晶的白石块，用来磨刀或当绝缘材料都很合适。",
+    "weight": 1.8,
+    "tags": ["material","crystal","stone","hard","insulating","abrasive","brittle","difficult_work"],
+    "stack_limit": 20
+  },
+  "mixed_bronze_ore": {
+    "sn": "杂色矿石",
+    "fn": "花里胡哨的一块矿石，似乎混着多种金属成分。",
+    "weight": 1.5,
+    "tags": ["material","ore","metal","alloy_source","easy_smelt","impure","unstable_alloy"],
+    "stack_limit": 20
+  },
+  "phosphor_iron_ore": {
+    "sn": "怪铁矿石",
+    "fn": "发青的铁锈块，看起来很硬，却让人有种“一碰就碎”的不安感。",
+    "weight": 1.6,
+    "tags": ["material","ore","metal","hard","weapon_grade","brittle","impure"],
+    "stack_limit": 20
+  },
+  "rough_log": {
+    "sn": "粗木柴",
+    "fn": "一截粗糙的木头，可以当柴火，也能勉强支撑些简单结构。",
+    "weight": 2.0,
+    "tags": ["material","wood","fuel","low_grade"],
+    "stack_limit": 20
+  },
+  "straight_log": {
+    "sn": "直木料",
+    "fn": "比较笔直的木料，适合做梁柱或长柄，不过搬起来有点吃力。",
+    "weight": 2.5,
+    "tags": ["material","wood","construction_grade","heavy"],
+    "stack_limit": 15
+  },
+  "resin_wood": {
+    "sn": "脂木",
+    "fn": "带树脂味的木头，很容易点燃，火旺但烟也大。",
+    "weight": 1.8,
+    "tags": ["material","wood","fuel","smoky"],
+    "stack_limit": 20
+  },
+  "wild_berry": {
+    "sn": "野果",
+    "fn": "几颗不知名的野果，看起来还算新鲜。",
+    "weight": 0.1,
+    "tags": ["material","forage","food","fruit"],
+    "stack_limit": 30
+  },
+  "sour_berry": {
+    "sn": "酸野果",
+    "fn": "带着酸味的野果，更适合解渴而不是填肚子。",
+    "weight": 0.1,
+    "tags": ["material","forage","food","fruit"],
+    "stack_limit": 30
+  },
+  "bitter_herb": {
+    "sn": "苦草根",
+    "fn": "味道发苦的草根，似乎有点药性。",
+    "weight": 0.05,
+    "tags": ["material","forage","herb","medicine"],
+    "stack_limit": 30
+  },
+  "cooling_herb": {
+    "sn": "清凉草",
+    "fn": "摸上去略带凉意的草叶，闻起来有股清凉气味。",
+    "weight": 0.05,
+    "tags": ["material","forage","herb"],
+    "stack_limit": 30
+  },
+  "warming_root": {
+    "sn": "暖身根",
+    "fn": "略带辛辣味的根块，煮汤后能稍微暖暖身子。",
+    "weight": 0.2,
+    "tags": ["material","forage","herb"],
+    "stack_limit": 20
+  },
+  "stimulant_leaf": {
+    "sn": "提神叶",
+    "fn": "带有苦味的叶片，嚼上一点似乎能缓解些许困意。",
+    "weight": 0.02,
+    "tags": ["material","forage","herb"],
+    "stack_limit": 40
+  },
+  "sleep_flower": {
+    "sn": "安神花",
+    "fn": "香味有些特别的小花，闻久了让人有点犯困。",
+    "weight": 0.02,
+    "tags": ["material","forage","herb"],
+    "stack_limit": 40
+  },
+  "toxic_mushroom": {
+    "sn": "可疑蘑菇",
+    "fn": "颜色怪异的蘑菇，看着就不太安全。",
+    "weight": 0.15,
+    "tags": ["material","forage","herb","poisonous"],
+    "stack_limit": 20
+  },
+  "mild_mushroom": {
+    "sn": "野蘑菇",
+    "fn": "看起来比较普通的野蘑菇，简单处理后应该可以入口。",
+    "weight": 0.15,
+    "tags": ["material","forage","food","mushroom"],
+    "stack_limit": 20
+  },
+  "wild_nut": {
+    "sn": "野坚果",
+    "fn": "几颗硬壳野坚果，敲开有些费力，但很顶饱。",
+    "weight": 0.05,
+    "tags": ["material","forage","food","nut"],
+    "stack_limit": 40
+  },
+  "berry_bush": {
+    "sn": "灌木丛",
+    "fn": "一丛普通的灌木，看不出什么特别之处。",
+    "tags": ["node","gather"],
+    "plant_id": "wild_berry",
+    "action_ids": ["gather_berries"]
+  },
+  "herb_patch": {
+    "sn": "杂草丛",
+    "fn": "一片杂乱的杂草，从远处看和别处没什么两样。",
+    "tags": ["node","gather"],
+    "plant_id": "bitter_herb",
+    "action_ids": ["gather_herbs"]
+  },
+  "iron_vein": {
+    "sn": "岩壁",
+    "fn": "一面普通的岩壁，看上去和周围没什么不同。",
+    "tags": ["node", "mining"],
+    "ore_item_id": "iron_ore",
+    "action_ids": ["mine_manual", "mine_auto"]
+  },
+  "logging_tree": {
+    "sn": "树干",
+    "fn": "一棵看上去普普通通的树干，和旁边的树没什么区别。",
+    "tags": ["node","logging"],
+    "wood_item_id": "rough_log",
+    "action_ids": ["chop_manual","chop_auto"]
+  },
+  "river_fish": {
+    "sn": "河鱼",
+    "fn": "从水里捞上来的鱼，烤或煮能填肚子。",
+    "weight": 0.5,
+    "tags": ["material","fish","food"],
+    "stack_limit": 10
+  },
+  "pond_carp": {
+    "sn": "塘鲤",
+    "fn": "肉多刺少的鱼，适合熬汤。",
+    "weight": 0.8,
+    "tags": ["material","fish","food"],
+    "stack_limit": 10
+  },
+  "wheat_ear": {
+    "sn": "麦穗",
+    "fn": "脱粒后可磨面或煮粥。",
+    "weight": 0.2,
+    "tags": ["material","crop","food"],
+    "stack_limit": 30
+  },
+  "root_vegetable": {
+    "sn": "块根",
+    "fn": "煮熟能填肚子，耐放。",
+    "weight": 0.3,
+    "tags": ["material","crop","food"],
+    "stack_limit": 20
+  },
+  "raw_meat": {
+    "sn": "生肉",
+    "fn": "需烤熟或煮透后食用。",
+    "weight": 0.6,
+    "tags": ["material","game","food"],
+    "stack_limit": 15
+  },
+  "hide": {
+    "sn": "兽皮",
+    "fn": "鞣制后可做皮甲或铺盖。",
+    "weight": 0.5,
+    "tags": ["material","game","craft"],
+    "stack_limit": 10
+  },
+  "bone": {
+    "sn": "兽骨",
+    "fn": "可熬汤或磨成骨器。",
+    "weight": 0.3,
+    "tags": ["material","game","craft"],
+    "stack_limit": 20
+  },
+  "fishing_spot": {
+    "sn": "水边",
+    "fn": "一段平静的水面，看上去和别处没什么两样。",
+    "tags": ["node","fishing"],
+    "fish_item_id": "river_fish",
+    "action_ids": ["fish_manual","fish_auto"]
+  },
+  "crop_patch": {
+    "sn": "田垄",
+    "fn": "一片翻过的地，上面长着些作物，和普通野草混在一起。",
+    "tags": ["node","farming"],
+    "crop_item_id": "wheat_ear",
+    "action_ids": ["harvest_crops"]
+  },
+  "game_trail": {
+    "sn": "林间",
+    "fn": "树林里的一小片空地，地上有些杂乱的痕迹。",
+    "tags": ["node","hunting"],
+    "action_ids": ["hunt_manual","hunt_auto"]
   }
 }

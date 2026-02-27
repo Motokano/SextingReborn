@@ -14,10 +14,20 @@
         </header>
 
         <main id="stage">
-            <div id="grid-scroll-view">
-                <div id="grid-container">
-                    <div id="scene-desc">...</div>
-                    <div id="action-grid" class="action-grid"></div>
+            <div id="left-column">
+                <div id="grid-scroll-view">
+                    <div id="grid-container">
+                        <div id="scene-desc">...</div>
+                        <div id="action-grid" class="action-grid"></div>
+                    </div>
+                </div>
+                <div class="panel-resizer" id="log-panel-resizer"></div>
+                <div id="log-panel">
+                    <div class="panel-header">
+                        <span>日志</span>
+                        <button id="log-panel-popout-btn" class="popout-btn">↗</button>
+                    </div>
+                    <div id="log-content"></div>
                 </div>
             </div>
 
@@ -29,6 +39,17 @@
                     <button id="info-panel-popout-btn" class="popout-btn">↗</button>
                 </div>
                 <div id="info-panel-content">
+                    <div class="menu-section" id="npc-section" style="display:none;">
+                        <div class="menu-title">可互动 NPC</div>
+                        <div class="sub-section">
+                            <div class="sub-title">附近的人</div>
+                            <div id="npc-list"></div>
+                        </div>
+                        <div class="sub-section" id="npc-actions-section">
+                            <div class="sub-title" id="npc-actions-title">人物信息 / 动作</div>
+                            <div id="npc-actions"></div>
+                        </div>
+                    </div>
                     <div class="menu-section debug-panel" id="state-section">
                         <button type="button" class="menu-title panel-toggle" aria-expanded="true" data-target="state-content"><span class="toggle-icon">▼</span> <span id="self-view-title">当前状态</span></button>
                         <div id="state-content" class="collapsible expanded">
@@ -78,16 +99,6 @@
             </aside>
         </main>
 
-        <div class="panel-resizer" id="log-panel-resizer"></div>
-        
-        <div id="log-panel">
-            <div class="panel-header">
-                <span>日志</span>
-                <button id="log-panel-popout-btn" class="popout-btn">↗</button>
-            </div>
-            <div id="log-content"></div>
-        </div>
-
         <div id="sleep-modal" class="modal-overlay hidden">
             <div class="modal-content">
                 <h2>选择睡眠时间</h2>
@@ -134,8 +145,24 @@
                 </div>
             </div>
         </div>
+        <div id="item-tooltip" class="item-tooltip hidden"></div>
     </div>
     <script src="ui.js"></script>
+    <script src="cognition.js"></script>
+    <script src="game-actions.js"></script>
+    <script src="inventory-utils.js"></script>
+    <script src="character-utils.js"></script>
+    <script src="skill-utils.js"></script>
+    <script src="inventory-actions.js"></script>
+    <script src="crafting-actions.js"></script>
+    <script src="status-actions.js"></script>
+    <script src="skill-actions.js"></script>
+    <script src="buff-actions.js"></script>
+    <script src="effects.js"></script>
+    <script src="movement.js"></script>
+    <script src="menu-controller.js"></script>
+    <script src="item-controller.js"></script>
+    <script src="action-dispatcher.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

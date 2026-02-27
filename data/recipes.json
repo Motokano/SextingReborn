@@ -1,0 +1,10 @@
+{
+  "fishing_rod": {
+    "sn": "简易鱼竿",
+    "materials": {
+      "rough_log": 1,
+      "resin_wood": 1
+    },
+    "product": { "item_id": "fishing_rod", "count": 1 }
+  }
+}

@@ -1,0 +1,14 @@
+---
+description: main.js 仅作解释器与入口；run 命令在 *-actions.js 中实现并注册
+alwaysApply: true
+---
+
+# 游戏引擎拆分规则 (main.js 为解释器)
+
+- **main.js** 只做三件事：定义 `Engine`（db、state、time、cur、pIdx 等）、`Engine.init()`、`Engine.run(cmds)`，以及**委托**到各模块。不在 main 中实现具体游戏逻辑（采矿公式、背包加减、效果实现、肢体伤害等）。
+- **Engine.run(cmds)**：对每条指令先 `checkCondition(c.condition)`；若 `Engine.runHandlers[c.type]` 存在则调用 `Engine.runHandlers[c.type](c)`；否则只处理核心类型：`log`、`move`、`advance_time`、`call_action`、`check_body_text`。其余类型必须通过 runHandlers 注册。
+- **新增 run 命令**：在对应的 `*-actions.js` 中实现（如背包相关 → `inventory-actions.js`，制作 → `crafting-actions.js`，状态/肢体 → `status-actions.js`，技能 → `skill-actions.js`，buff → `buff-actions.js`），该模块导出一个对象（如 `InventoryActions`），在 main.js 末尾通过 `Object.assign` 合并进 `Engine.runHandlers`。不要往 main 的 run 里加新 case（除非是上述五种核心类型）。
+- **新增玩家可见「动作」**：在 `data/actions.json` 中加条目（label、cmd、effect 等）；若用到新命令类型，在对应 *-actions.js 中实现并注册；若需特殊交互（如选部位、弹窗），在 `action-dispatcher.js` 的 `ActionDispatcher.perform()` 中加分支（如 `heal_limb`、`open_container`、`bed_sleep`）。
+- **认知/感知**：保持在 `cognition.js`（如 `Cognition.describeTile`）。
+- **UI**：保持在 `ui.js`；菜单内容与上下文选项由 `menu-controller.js`（`MenuController.update()`）和 `action-dispatcher.js` 驱动。
+- **脚本加载顺序**（index.html）：`ui.js` → `cognition.js` → `game-actions.js` → `inventory-utils.js` → `character-utils.js` → `skill-utils.js` → `inventory-actions.js` → `crafting-actions.js` → `status-actions.js` → `skill-actions.js` → `buff-actions.js` → `effects.js` → `movement.js` → `menu-controller.js` → `item-controller.js` → `action-dispatcher.js` → `main.js`。保证 runHandlers 合并时各 Action 对象已存在。

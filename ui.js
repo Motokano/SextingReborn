@@ -1,6 +1,137 @@
 const UI = {
     COMBAT_SKILL_SLOT: { basic_sword: '剑法' },
 
+    getOreMeta(itemId) {
+        const mats = Engine.db.materials || {};
+        return mats[itemId] || null;
+    },
+
+    getForageMeta(itemId) {
+        const fm = Engine.db.forage || {};
+        return fm[itemId] || null;
+    },
+
+    getItemDisplayName(itemId, state) {
+        const obj = (Engine.db.objects && Engine.db.objects[itemId]) || (Engine.db.items && Engine.db.items[itemId]);
+        let meta = UI.getOreMeta(itemId) || UI.getForageMeta(itemId);
+        if (!meta) return obj ? obj.sn : itemId;
+        const miningLv = (state && state.production_skills && state.production_skills.mining && state.production_skills.mining.level) || 0;
+        const loggingLv = (state && state.production_skills && state.production_skills.logging && state.production_skills.logging.level) || 0;
+        const gatheringLv = (state && state.survival_skills && state.survival_skills.gathering && state.survival_skills.gathering.level) || 0;
+        const fishingLv = (state && state.survival_skills && state.survival_skills.fishing && state.survival_skills.fishing.level) || 0;
+        const farmingLv = (state && state.production_skills && state.production_skills.farming && state.production_skills.farming.level) || 0;
+        const huntingLv = (state && state.survival_skills && state.survival_skills.hunting && state.survival_skills.hunting.level) || 0;
+        const basicAt = meta.reveal_basic_at || 999;
+        const advAt = meta.reveal_advanced_at || 999;
+        const tags = meta.tags || [];
+        let lv = miningLv;
+        if (tags.includes('forage')) lv = gatheringLv;
+        else if (tags.includes('wood')) lv = loggingLv;
+        else if (tags.includes('fish')) lv = fishingLv;
+        else if (tags.includes('crop')) lv = farmingLv;
+        else if (tags.includes('game')) lv = huntingLv;
+        if (lv >= advAt && meta.sn_advanced) return meta.sn_advanced;
+        if (lv >= basicAt && meta.sn_basic) return meta.sn_basic;
+        return meta.sn_unknown || (obj ? obj.sn : itemId);
+    },
+
+    getObjectDisplayName(ref, state) {
+        if (!ref) return '';
+        // 地块本身只展示朴素环境，不主动暴露可采集信息
+        return ref.sn || '';
+    },
+
+    renderNpcList() {
+        const section = document.getElementById('npc-section');
+        const container = document.getElementById('npc-list');
+        const actionsContainer = document.getElementById('npc-actions');
+        if (!section || !container || !actionsContainer) return;
+        const grid = (Engine.cur && Engine.cur.grid) || [];
+        const npcIds = [];
+        grid.forEach(c => {
+            if (c && c.npc_id && !npcIds.includes(c.npc_id)) npcIds.push(c.npc_id);
+        });
+        if (npcIds.length === 0) {
+            section.style.display = 'none';
+            container.innerHTML = '';
+            actionsContainer.innerHTML = '';
+            return;
+        }
+        section.style.display = '';
+        container.innerHTML = '';
+        actionsContainer.innerHTML = '<p class="menu-hint">选择一位角色以查看其信息与可做的事。</p>';
+        npcIds.forEach(id => {
+            const def = Engine.db.npcs[id];
+            if (!def) return;
+            const btn = document.createElement('button');
+            btn.className = 'npc-list-btn';
+            btn.innerText = def.sn || id;
+            btn.onclick = () => {
+                const acts = def.action_ids || [];
+                const fullName = def.sn || '人物';
+                UI.renderMenu('npc-actions', acts, fullName);
+            };
+            container.appendChild(btn);
+        });
+    },
+
+    getItemDescription(itemId, state) {
+        const obj = (Engine.db.objects && Engine.db.objects[itemId]) || (Engine.db.items && Engine.db.items[itemId]);
+        let meta = UI.getOreMeta(itemId) || UI.getForageMeta(itemId);
+        if (!meta) return (obj && obj.fn) ? obj.fn : '';
+        const miningLv = (state && state.production_skills && state.production_skills.mining && state.production_skills.mining.level) || 0;
+        const loggingLv = (state && state.production_skills && state.production_skills.logging && state.production_skills.logging.level) || 0;
+        const gatheringLv = (state && state.survival_skills && state.survival_skills.gathering && state.survival_skills.gathering.level) || 0;
+        const fishingLv = (state && state.survival_skills && state.survival_skills.fishing && state.survival_skills.fishing.level) || 0;
+        const farmingLv = (state && state.production_skills && state.production_skills.farming && state.production_skills.farming.level) || 0;
+        const huntingLv = (state && state.survival_skills && state.survival_skills.hunting && state.survival_skills.hunting.level) || 0;
+        const basicAt = meta.reveal_basic_at || 999;
+        const advAt = meta.reveal_advanced_at || 999;
+        const tags = meta.tags || [];
+        let lv = miningLv;
+        if (tags.includes('forage')) lv = gatheringLv;
+        else if (tags.includes('wood')) lv = loggingLv;
+        else if (tags.includes('fish')) lv = fishingLv;
+        else if (tags.includes('crop')) lv = farmingLv;
+        else if (tags.includes('game')) lv = huntingLv;
+        if (lv >= advAt && meta.fn_advanced) return meta.fn_advanced;
+        if (lv >= basicAt && meta.fn_basic) return meta.fn_basic;
+        return meta.fn_unknown || (obj && obj.fn) || '';
+    },
+
+    showItemTooltip(itemId, anchorEl) {
+        const tooltip = document.getElementById('item-tooltip');
+        if (!tooltip || !anchorEl) return;
+        const baseId = Engine.getBaseItemId ? Engine.getBaseItemId(itemId) : itemId;
+        const name = UI.getItemDisplayName(baseId, Engine.state);
+        const desc = UI.getItemDescription(baseId, Engine.state);
+        tooltip.innerHTML = `<div class="item-tooltip-name">${name}</div>${desc ? `<div class="item-tooltip-desc">${desc}</div>` : ''}`;
+        const rect = anchorEl.getBoundingClientRect();
+        let x = rect.right + 8;
+        let y = rect.top;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        tooltip.classList.remove('hidden');
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.left = '0px';
+        tooltip.style.top = '0px';
+        const tw = tooltip.offsetWidth;
+        const th = tooltip.offsetHeight;
+        if (x + tw + 16 > vw) x = rect.left - tw - 8;
+        if (x < 8) x = 8;
+        if (y + th + 16 > vh) y = vh - th - 16;
+        if (y < 8) y = 8;
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+        tooltip.style.visibility = 'visible';
+    },
+
+    hideItemTooltip() {
+        const tooltip = document.getElementById('item-tooltip');
+        if (!tooltip) return;
+        tooltip.classList.add('hidden');
+    },
+
     renderMenu(containerId, actions, fullName) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -111,7 +242,7 @@ const UI = {
 
     survivalSkillName(id) { const n = { breathing: '呼吸' }; return n[id] || id; },
     productionSkillName(id) { const n = { mining: '挖矿' }; return n[id] || id; },
-    supportSkillName(id) { const n = { probe: '探查' }; return n[id] || id; },
+    supportSkillName(id) { const n = { probe: '探查', almanac: '看黄历' }; return n[id] || id; },
     skillName(skillId) {
         const names = { basic_sword: '基本剑法' };
         return names[skillId] || skillId;
@@ -135,8 +266,14 @@ const UI = {
         const slots = state.combat_skill_slots || {};
         const progress = state.combat_skill_progress || {};
         const slotOrder = ['剑法', '刀法', '暗器', '枪法', '掌法', '拳法', '腿法', '棍法', '指法', '身法', '内功', '招架'];
+        const unlockedSlots = new Set();
+        Object.entries(UI.COMBAT_SKILL_SLOT || {}).forEach(([skillId, slotName]) => {
+            if (!progress[skillId]) return;
+            unlockedSlots.add(slotName);
+        });
         container.innerHTML = '';
         slotOrder.forEach(slotName => {
+            if (!unlockedSlots.has(slotName)) return;
             const skillId = slots[slotName];
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -232,15 +369,19 @@ const UI = {
             return;
         }
         Object.entries(ground).forEach(([itemId, count]) => {
-            const item = (Engine.db.objects && Engine.db.objects[itemId]) || (Engine.db.items && Engine.db.items[itemId]);
+            const baseId = Engine.getBaseItemId ? Engine.getBaseItemId(itemId) : itemId;
+            const item = (Engine.db.objects && Engine.db.objects[baseId]) || (Engine.db.items && Engine.db.items[baseId]);
             if (!item) return;
             const btn = document.createElement('button');
             btn.className = 'action-brick';
-            btn.innerHTML = count > 1 ? `${item.sn} x${count}<br><span style="font-size:10px;">捡起</span>` : `${item.sn}<br><span style="font-size:10px;">捡起</span>`;
+            const name = UI.getItemDisplayName(baseId, Engine.state);
+            btn.innerHTML = count > 1 ? `${name} x${count}<br><span style="font-size:10px;">捡起</span>` : `${name}<br><span style="font-size:10px;">捡起</span>`;
             btn.onclick = () => {
                 Engine.run([{ type: 'take_item_from_ground', item_id: itemId }]);
                 Engine.render();
             };
+            btn.onmouseenter = () => UI.showItemTooltip(baseId, btn);
+            btn.onmouseleave = () => UI.hideItemTooltip();
             container.appendChild(btn);
         });
     },
@@ -274,10 +415,13 @@ const UI = {
 
             const btn = document.createElement('button');
             btn.className = "action-brick";
+            const name = UI.getItemDisplayName(baseId, state);
             let countBadge = count > 1 ? `<span style="font-size:10px;color:#888;position:absolute;right:4px;bottom:2px;">x${count}</span>` : '';
-            btn.innerHTML = `${item.sn}${countBadge}`;
+            btn.innerHTML = `${name}${countBadge}`;
             btn.style.position = 'relative';
             btn.onclick = () => Engine.showItemActions(itemId);
+            btn.onmouseenter = () => UI.showItemTooltip(baseId, btn);
+            btn.onmouseleave = () => UI.hideItemTooltip();
             container.appendChild(btn);
         });
     },
@@ -327,6 +471,198 @@ const UI = {
         modal.classList.remove('hidden');
     },
 
+    showManualMiningModal(ctx) {
+        const steps = [
+            [
+                { id: 'crack', text: '顺着裂缝下锤', score: 2, log: '你顺着已有的裂缝下锤，石屑四溅。' },
+                { id: 'flat', text: '随便找块平面敲一敲', score: 0, log: '你在岩壁上选了块看似顺眼的地方敲了几下。' }
+            ],
+            [
+                { id: 'follow', text: '沿着刚才的痕迹再敲', score: 2, log: '你沿着之前的痕迹继续用力，裂纹隐约向里延伸。' },
+                { id: 'change', text: '换个地方试试', score: -1, log: '你换了个地方试敲，手感有些发闷。' }
+            ],
+            [
+                { id: 'steady', text: '稳稳再来一锤', score: 2, log: '你调整呼吸，再次稳稳落锤，岩壁发出清脆的回响。' },
+                { id: 'rush', text: '趁势猛砸几下', score: -1, log: '你有些心急，连砸几下，只敲下一堆碎渣。' }
+            ]
+        ];
+        let step = 0;
+        let totalScore = 0;
+        const runStep = () => {
+            if (step >= steps.length) {
+                const baseDiff = ctx.difficulty || 2;
+                let diffAdj = baseDiff;
+                if (totalScore >= 4) diffAdj = Math.max(1, baseDiff - 1);
+                else if (totalScore <= -1) diffAdj = baseDiff + 1;
+                const turnCost = ctx.turnCost || 3;
+                Engine.advanceTime(turnCost * 10);
+                Engine.run([
+                    { type: 'mine_ore', mode: 'manual', difficulty: diffAdj, ore_item_id: ctx.oreItemId || 'iron_ore', cycles: 1 },
+                    { type: 'mod_stat', key: 'fatigue', val: 2 }
+                ]);
+                Engine.render();
+                return;
+            }
+            const opts = steps[step];
+            const options = opts.map(o => ({ key: o.id, text: o.text }));
+            const title = '手动挖矿';
+            const subtitle = step === 0 ? '仔细选择下锤的位置与方式。' : '继续顺着刚才的手感调整力度与角度。';
+            const subtitleEl = document.getElementById('choice-modal-subtitle');
+            if (subtitleEl) {
+                subtitleEl.textContent = subtitle;
+                subtitleEl.style.display = '';
+            }
+            UI.showChoiceModal(title, options, (key) => {
+                const chosen = opts.find(o => o.id === key);
+                if (chosen) {
+                    totalScore += chosen.score;
+                    if (chosen.log) Engine.log(chosen.log);
+                }
+                step += 1;
+                runStep();
+            }, 'manual');
+        };
+        runStep();
+    },
+
+    showManualLoggingModal(ctx) {
+        const steps = [
+            [
+                { id: 'root', text: '靠近树根下斧', score: 2, log: '你把斧口尽量贴近树根，争取让受力更稳定。' },
+                { id: 'waist', text: '从腰部偏上砍下去', score: 0, log: '你选在腰部附近试砍，虽不算理想，好歹能下刀。' }
+            ],
+            [
+                { id: 'steady', text: '每斧都找准角度', score: 2, log: '你刻意调整角度，让每一斧都顺着木纹落下。' },
+                { id: 'rush', text: '图省事猛砍几下', score: -1, log: '你图快连砍几下，斧口有几次明显打滑。' }
+            ],
+            [
+                { id: 'rhythm', text: '按节奏抬斧落斧', score: 2, log: '你跟着自己的呼吸节奏挥斧，动作渐渐变得顺手。' },
+                { id: 'random', text: '想到哪儿砍哪儿', score: -1, log: '你一会儿砍这里一会儿砍那里，树干上坑坑洼洼。' }
+            ]
+        ];
+        let step = 0;
+        let totalScore = 0;
+        const runStep = () => {
+            if (step >= steps.length) {
+                const baseDiff = ctx.difficulty || 2;
+                let diffAdj = baseDiff;
+                if (totalScore >= 4) diffAdj = Math.max(1, baseDiff - 1);
+                else if (totalScore <= -1) diffAdj = baseDiff + 1;
+                const turnCost = ctx.turnCost || 3;
+                Engine.advanceTime(turnCost * 10);
+                Engine.run([
+                    { type: 'chop_wood', mode: 'manual', difficulty: diffAdj, wood_item_id: ctx.woodItemId || 'rough_log', cycles: 1 },
+                    { type: 'mod_stat', key: 'fatigue', val: 3 }
+                ]);
+                Engine.render();
+                return;
+            }
+            const opts = steps[step];
+            const options = opts.map(o => ({ key: o.id, text: o.text }));
+            const title = '手动伐木';
+            const subtitle = step === 0 ? '先决定从哪里下斧。' : '继续根据反馈调整力道与节奏。';
+            const subtitleEl = document.getElementById('choice-modal-subtitle');
+            if (subtitleEl) {
+                subtitleEl.textContent = subtitle;
+                subtitleEl.style.display = '';
+            }
+            UI.showChoiceModal(title, options, (key) => {
+                const chosen = opts.find(o => o.id === key);
+                if (chosen) {
+                    totalScore += chosen.score;
+                    if (chosen.log) Engine.log(chosen.log);
+                }
+                step += 1;
+                runStep();
+            }, 'manual');
+        };
+        runStep();
+    },
+
+    showManualFishingModal(ctx) {
+        const modal = document.getElementById('choice-modal');
+        const titleEl = document.getElementById('choice-modal-title');
+        const subtitleEl = document.getElementById('choice-modal-subtitle');
+        const optionsContainer = document.getElementById('choice-options');
+        const cancelBtn = document.getElementById('choice-cancel-btn');
+        if (!modal || !titleEl || !optionsContainer) return;
+
+        titleEl.innerText = '手动钓鱼';
+        if (subtitleEl) {
+            subtitleEl.textContent = '注意浮漂，鱼咬钩时及时提竿！';
+            subtitleEl.style.display = '';
+        }
+        optionsContainer.innerHTML = '';
+        optionsContainer.className = 'action-brick-container choice-options choice-options--manual';
+
+        let biteTime = 0;
+        let biteTimer = null;
+        let windowTimer = null;
+        const perfectWindowMs = 800;
+        const biteDelayMs = 2000 + Math.random() * 3000;
+
+        const finish = (manual_result) => {
+            if (biteTimer) clearTimeout(biteTimer);
+            if (windowTimer) clearTimeout(windowTimer);
+            if (subtitleEl) subtitleEl.classList.remove('fishing-bite');
+            modal.classList.add('hidden');
+            modal.classList.remove('choice-modal--manual');
+            const turnCost = ctx.turnCost || 3;
+            Engine.advanceTime(turnCost * 10);
+            Engine.run([
+                { type: 'catch_fish', mode: 'manual', difficulty: ctx.difficulty || 2, fish_item_id: ctx.fishItemId || 'river_fish', cycles: 1, manual_result },
+                { type: 'mod_stat', key: 'fatigue', val: 1 }
+            ]);
+            Engine.render();
+        };
+
+        const liftBtn = document.createElement('button');
+        liftBtn.className = 'choice-option-btn';
+        liftBtn.innerText = '提竿';
+        liftBtn.onclick = () => {
+            if (biteTimer) clearTimeout(biteTimer);
+            if (windowTimer) clearTimeout(windowTimer);
+            const now = Date.now();
+            let manual_result = 'miss';
+            if (biteTime > 0) {
+                if (now - biteTime <= perfectWindowMs) {
+                    manual_result = 'perfect';
+                    if (subtitleEl) subtitleEl.textContent = '正好！鱼被稳稳提了上来。';
+                } else {
+                    manual_result = 'late';
+                    if (subtitleEl) subtitleEl.textContent = '慢了，鱼已脱钩。';
+                }
+            } else {
+                manual_result = 'early';
+                if (subtitleEl) subtitleEl.textContent = '太早了，鱼还没咬钩。';
+            }
+            finish(manual_result);
+        };
+        optionsContainer.appendChild(liftBtn);
+
+        biteTimer = setTimeout(() => {
+            biteTime = Date.now();
+            biteTimer = null;
+            if (subtitleEl) {
+                subtitleEl.textContent = '咬钩了！快提竿！';
+                subtitleEl.classList.add('fishing-bite');
+            }
+            windowTimer = setTimeout(() => {}, perfectWindowMs);
+        }, biteDelayMs);
+
+        const cancelListener = () => {
+            if (biteTimer) clearTimeout(biteTimer);
+            if (windowTimer) clearTimeout(windowTimer);
+            if (subtitleEl) subtitleEl.classList.remove('fishing-bite');
+            modal.classList.add('hidden');
+            modal.classList.remove('choice-modal--manual');
+            Engine.log("你收竿作罢。");
+        };
+        cancelBtn.onclick = cancelListener;
+        modal.classList.add('choice-modal--manual');
+        modal.classList.remove('hidden');
+    },
+
     showChoiceModal(title, options, callback, layout) {
         const modal = document.getElementById('choice-modal');
         const titleEl = document.getElementById('choice-modal-title');
@@ -335,15 +671,26 @@ const UI = {
 
         titleEl.innerText = title;
         const subtitleEl = document.getElementById('choice-modal-subtitle');
-        if (subtitleEl) subtitleEl.textContent = layout === 'combat-skill' ? '选择要装备至此槽位的技能' : '';
-        if (subtitleEl) subtitleEl.style.display = layout === 'combat-skill' ? '' : 'none';
+        if (subtitleEl && layout === 'combat-skill') {
+            subtitleEl.textContent = '选择要装备至此槽位的技能';
+            subtitleEl.style.display = '';
+        } else if (subtitleEl && layout !== 'manual') {
+            // 对于手动挖矿等调用者会自己设置 subtitle，这里不干预
+            subtitleEl.textContent = '';
+            subtitleEl.style.display = 'none';
+        }
         optionsContainer.innerHTML = '';
-        optionsContainer.className = 'action-brick-container choice-options' + (layout === 'combat-skill' ? ' choice-options--list' : '');
+        let extraClass = '';
+        if (layout === 'combat-skill') extraClass = ' choice-options--list';
+        else if (layout === 'manual') extraClass = ' choice-options--manual';
+        optionsContainer.className = 'action-brick-container choice-options' + extraClass;
+        modal.classList.remove('choice-modal--combat', 'choice-modal--manual');
         if (layout === 'combat-skill') modal.classList.add('choice-modal--combat');
+        if (layout === 'manual') modal.classList.add('choice-modal--manual');
 
         const cleanup = () => {
             modal.classList.add('hidden');
-            modal.classList.remove('choice-modal--combat');
+            modal.classList.remove('choice-modal--combat', 'choice-modal--manual');
             cancelBtn.removeEventListener('click', cancelListener);
             document.removeEventListener('keydown', esckeyListener);
         };
@@ -357,7 +704,7 @@ const UI = {
             if (e.key === "Escape") cancelListener();
         };
 
-        const isList = layout === 'combat-skill';
+        const isList = layout === 'combat-skill' || layout === 'manual';
         options.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = isList ? 'choice-option-btn' : 'action-brick';
@@ -405,7 +752,8 @@ const UI = {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'storage-list-btn';
-                btn.textContent = count > 1 ? `${item.sn} ×${count}` : item.sn;
+                const name = UI.getItemDisplayName(baseId, Engine.state);
+                btn.textContent = count > 1 ? `${name} ×${count}` : name;
                 btn.onclick = () => {
                     const cmd = { item_id: key, count: 1, container_id: containerObject.id };
                     if (type === 'player') cmd.type = 'move_item_to_container';
@@ -413,6 +761,8 @@ const UI = {
                     Engine.run([cmd]);
                     refresh();
                 };
+                btn.onmouseenter = () => UI.showItemTooltip(baseId, btn);
+                btn.onmouseleave = () => UI.hideItemTooltip();
                 li.appendChild(btn);
                 element.appendChild(li);
             });
@@ -446,7 +796,31 @@ const UI = {
     updateStatus(time, sceneName) {
         const tEl = document.getElementById('time-display');
         const lEl = document.getElementById('loc-display');
-        if (tEl) tEl.innerText = `${time.month}月${time.day}日 ${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}`;
+        if (tEl) {
+            const dayIndex = (Engine.state && Engine.state.day_index) || 1;
+            let timePart = '';
+            if (Engine.state && Engine.state.has_time_building) {
+                const hh = time.hour.toString().padStart(2, '0');
+                const mm = time.minute.toString().padStart(2, '0');
+                timePart = `${hh}:${mm}`;
+            } else {
+                const h = time.hour;
+                let period = '';
+                if (h >= 0 && h < 6) period = '凌晨';
+                else if (h < 12) period = '早上';
+                else if (h < 14) period = '中午';
+                else if (h < 18) period = '下午';
+                else period = '晚上';
+                timePart = period;
+            }
+            let text = `第${dayIndex}天 ${timePart}`;
+            const hasAlmanacSkill = Engine.getSkillProgress && Engine.getSkillProgress('support', 'almanac');
+            const almanac = Engine.state && Engine.state.todayAlmanac;
+            if (hasAlmanacSkill && almanac && almanac.text) {
+                text += `｜${almanac.text}`;
+            }
+            tEl.innerText = text;
+        }
         if (lEl) lEl.innerText = sceneName;
     },
 

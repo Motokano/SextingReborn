@@ -118,5 +118,180 @@
             {"type": "log", "val": "你领会探查之法，对周遭多了一丝敏锐。"},
             {"type": "learn_support_skill", "skill_id": "probe", "level": 1, "level_max": 100, "proficiency": 0}
         ]
+    },
+    "read_almanac_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你翻看这本旧黄历，渐渐摸索出其中“宜忌”的门道。"},
+          {"type": "learn_support_skill", "skill_id": "almanac", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "setup_time_pole": {
+      "label": "摆弄",
+      "repeatable": false,
+      "turn_cost": 5,
+      "cmd": [
+          {"type": "log", "val": "你把一根木杆歪歪斜斜地插在屋前，又在上面刻了几道粗糙的刻痕，打算拿它来估摸日影。"},
+          {"type": "set_has_time_building", "val": true}
+      ]
+    },
+    "read_gathering_manual": {
+        "label": "阅读",
+        "repeatable": false,
+        "turn_cost": 2,
+        "cmd": [
+            {"type": "log", "val": "你翻看采集手册，开始留意哪些东西似乎可以采摘。"},
+            {"type": "learn_survival_skill", "skill_id": "gathering", "level": 1, "level_max": 100, "proficiency": 0}
+        ]
+    },
+    "read_logging_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你读着伐木入门的示意图，开始在脑中比划下斧的角度。"},
+          {"type": "learn_production_skill", "skill_id": "logging", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_fishing_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你翻看垂钓要略，开始留意水纹与下钩时机。"},
+          {"type": "learn_survival_skill", "skill_id": "fishing", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_farming_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你记下种植入门的节气与手法，跃跃欲试。"},
+          {"type": "learn_production_skill", "skill_id": "farming", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_hunting_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你领会狩猎心得里的辨踪与下套之法。"},
+          {"type": "learn_survival_skill", "skill_id": "hunting", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "mine_manual": {
+        "label": "手动挖矿",
+        "repeatable": true,
+        "turn_cost": 3,
+        "effect": "manual_mining",
+        "difficulty": 2,
+        "ore_item_id": "iron_ore"
+    },
+    "mine_auto": {
+        "label": "自动挖矿",
+        "repeatable": true,
+        "turn_cost": 6,
+        "cmd": [
+            { "type": "log", "val": "你开始按固定节奏挖掘，省心但收获有限。" },
+            { "type": "mine_ore", "mode": "auto", "difficulty": 2, "ore_item_id": "iron_ore", "cycles": 4 },
+            { "type": "mod_stat", "key": "fatigue", "val": 1 }
+        ]
+    },
+    "chop_manual": {
+      "label": "手动伐木",
+      "repeatable": true,
+      "turn_cost": 3,
+      "effect": "manual_logging",
+      "difficulty": 2,
+      "wood_item_id": "rough_log"
+    },
+    "chop_auto": {
+      "label": "自动伐木",
+      "repeatable": true,
+      "turn_cost": 6,
+      "cmd": [
+          { "type": "log", "val": "你按着记下的节奏反复挥斧，让身体去记住动作。" },
+          { "type": "chop_wood", "mode": "auto", "difficulty": 2, "wood_item_id": "rough_log", "cycles": 4 },
+          { "type": "mod_stat", "key": "fatigue", "val": 2 }
+      ]
+    },
+    "gather_berries": {
+        "label": "采摘野果",
+        "repeatable": true,
+        "turn_cost": 2,
+        "cmd": [
+            { "type": "log", "val": "你伸手拨开枝叶，小心挑拣看起来尚可的野果。" },
+            { "type": "add_to_inventory", "item_id": "wild_berry", "count": 1 },
+            { "type": "gain_skill_exp", "category": "survival", "skill_id": "gathering", "amount": 5 }
+        ]
+    },
+    "gather_herbs": {
+        "label": "采集药草",
+        "repeatable": true,
+        "turn_cost": 3,
+        "cmd": [
+            { "type": "log", "val": "你蹲下身，辨认着草叶与根茎，小心挖起几株带苦味的草根。" },
+            { "type": "add_to_inventory", "item_id": "bitter_herb", "count": 1 },
+            { "type": "gain_skill_exp", "category": "survival", "skill_id": "gathering", "amount": 6 }
+        ]
+    },
+    "fish_manual": {
+        "label": "手动钓鱼",
+        "repeatable": true,
+        "turn_cost": 3,
+        "effect": "manual_fishing",
+        "difficulty": 2,
+        "fish_item_id": "river_fish"
+    },
+    "fish_auto": {
+        "label": "自动钓鱼",
+        "repeatable": true,
+        "turn_cost": 6,
+        "cmd": [
+            { "type": "log", "val": "你挂上饵，把竿架好，有一搭没一搭地等。" },
+            { "type": "catch_fish", "mode": "auto", "difficulty": 2, "fish_item_id": "river_fish", "cycles": 4 },
+            { "type": "mod_stat", "key": "fatigue", "val": 1 }
+        ]
+    },
+    "harvest_crops": {
+        "label": "收割作物",
+        "repeatable": true,
+        "turn_cost": 3,
+        "cmd": [
+            { "type": "log", "val": "你弯腰辨认熟成的穗子与块根，小心收割。" },
+            { "type": "harvest_crop", "difficulty": 2, "crop_item_id": "wheat_ear" },
+            { "type": "mod_stat", "key": "fatigue", "val": 1 }
+        ]
+    },
+    "hunt_manual": {
+        "label": "手动狩猎",
+        "repeatable": true,
+        "turn_cost": 4,
+        "cmd": [
+            { "type": "log", "val": "你辨踪潜行，寻找合适的时机下手。" },
+            { "type": "hunt_game", "mode": "manual", "difficulty": 2, "cycles": 1 },
+            { "type": "mod_stat", "key": "fatigue", "val": 2 }
+        ]
+    },
+    "hunt_auto": {
+        "label": "自动狩猎",
+        "repeatable": true,
+        "turn_cost": 8,
+        "cmd": [
+            { "type": "log", "val": "你按经验布设陷阱或守株待兔。" },
+            { "type": "hunt_game", "mode": "auto", "difficulty": 2, "cycles": 2 },
+            { "type": "mod_stat", "key": "fatigue", "val": 3 }
+        ]
+    },
+    "craft_fishing_rod": {
+        "label": "制作鱼竿",
+        "repeatable": true,
+        "turn_cost": 5,
+        "cmd": [
+            { "type": "craft", "recipe_id": "fishing_rod" }
+        ]
     }
 }

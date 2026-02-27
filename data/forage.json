@@ -1,0 +1,112 @@
+{
+  "wild_berry": {
+    "sn_unknown": "红红的小果子",
+    "fn_unknown": "一串红色的小果子，看起来挺诱人，也不知道能不能吃。",
+    "sn_basic": "野果",
+    "fn_basic": "味道还算尚可，能稍微填一填肚子，也解一点渴。",
+    "sn_advanced": "甘甜野果",
+    "fn_advanced": "味道甘甜，能略微恢复饱食与心情，但不能当正餐，吃多了也会腻。",
+    "reveal_basic_at": 3,
+    "reveal_advanced_at": 12,
+    "tags": ["forage","food","fruit","safe"]
+  },
+  "sour_berry": {
+    "sn_unknown": "酸酸的小果子",
+    "fn_unknown": "一串颜色有点发暗的小果子，闻起来酸酸的。",
+    "sn_basic": "酸野果",
+    "fn_basic": "入口偏酸，解渴比填肚子更有用。",
+    "sn_advanced": "清酸野果",
+    "fn_advanced": "酸味较重，能略微提神并补充少量水分，但空腹多吃容易胃里不舒服。",
+    "reveal_basic_at": 5,
+    "reveal_advanced_at": 15,
+    "tags": ["forage","food","fruit","sour"]
+  },
+  "bitter_herb": {
+    "sn_unknown": "苦苦的野草",
+    "fn_unknown": "一把味道发苦的杂草，不小心咬了一口，舌头发麻。",
+    "sn_basic": "苦草根",
+    "fn_basic": "略有苦味，生吃难以下咽，或许可以当药引。",
+    "sn_advanced": "退热苦草",
+    "fn_advanced": "煎煮后可稍微缓解发热不适，但味苦难入口，长期服用也未必全无副作用。",
+    "reveal_basic_at": 6,
+    "reveal_advanced_at": 18,
+    "tags": ["forage","herb","medicine","bitter"]
+  },
+  "cooling_herb": {
+    "sn_unknown": "凉凉的草叶",
+    "fn_unknown": "一撮摸上去略显冰凉的草叶，闻起来有股清凉气味。",
+    "sn_basic": "清凉草",
+    "fn_basic": "捣碎敷在皮肤上有些清凉感，或许能缓解暑热。",
+    "sn_advanced": "清凉药草",
+    "fn_advanced": "适量外敷可稍微缓解暑热不适，但在寒冷环境下滥用反而会让体温更难保持。",
+    "reveal_basic_at": 8,
+    "reveal_advanced_at": 20,
+    "tags": ["forage","herb","cooling","situational"]
+  },
+  "warming_root": {
+    "sn_unknown": "辣辣的根块",
+    "fn_unknown": "一截略带辛辣气味的根块，握在手里似乎有股微微的热感。",
+    "sn_basic": "暖身根",
+    "fn_basic": "煮汤后喝下，似乎能让身体暖一点。",
+    "sn_advanced": "驱寒根",
+    "fn_advanced": "适量服用可在寒冷环境中略微提升御寒能力，但在炎热环境服用会让人更难受。",
+    "reveal_basic_at": 8,
+    "reveal_advanced_at": 22,
+    "tags": ["forage","herb","warming","situational"]
+  },
+  "stimulant_leaf": {
+    "sn_unknown": "提神的叶片",
+    "fn_unknown": "一撮带着淡淡苦味的叶片，咀嚼后有点提神的感觉。",
+    "sn_basic": "苦叶",
+    "fn_basic": "嚼上一点似乎能缓解些许困意。",
+    "sn_advanced": "提神叶",
+    "fn_advanced": "少量服用可短时间提振精神，但过量会让心跳加快、事后更疲惫。",
+    "reveal_basic_at": 10,
+    "reveal_advanced_at": 24,
+    "tags": ["forage","herb","stimulant","give_and_take"]
+  },
+  "sleep_flower": {
+    "sn_unknown": "香香的小花",
+    "fn_unknown": "几朵香味有些奇怪的小花，闻久了头有点晕。",
+    "sn_basic": "安神花",
+    "fn_basic": "少量煎煮似乎有助入睡，但剂量难以把握。",
+    "sn_advanced": "沉睡花",
+    "fn_advanced": "适量使用可以帮助入眠，但过量会让人醒来后头昏无力，长期滥用可能带来隐患。",
+    "reveal_basic_at": 12,
+    "reveal_advanced_at": 26,
+    "tags": ["forage","herb","sedative","risky"]
+  },
+  "toxic_mushroom": {
+    "sn_unknown": "怪颜色的蘑菇",
+    "fn_unknown": "一朵颜色诡异的蘑菇，看着就有点不太对劲。",
+    "sn_basic": "可疑蘑菇",
+    "fn_basic": "据说蘑菇有好有坏，这种最好小心为妙。",
+    "sn_advanced": "毒蘑菇",
+    "fn_advanced": "含有明显毒性，处理不当会引发严重不适，但在某些药方或陷阱中也有其用武之地。",
+    "reveal_basic_at": 5,
+    "reveal_advanced_at": 20,
+    "tags": ["forage","herb","poisonous","trap_material"]
+  },
+  "mild_mushroom": {
+    "sn_unknown": "普通蘑菇",
+    "fn_unknown": "一朵看起来很普通的蘑菇，既不鲜艳也不难闻。",
+    "sn_basic": "野蘑菇",
+    "fn_basic": "简单处理后可以食用，味道一般，但勉强能充饥。",
+    "sn_advanced": "温和蘑菇",
+    "fn_advanced": "营养一般，但相对安全，适合作为长途路上的应急干粮基础。",
+    "reveal_basic_at": 6,
+    "reveal_advanced_at": 18,
+    "tags": ["forage","food","mushroom","safe"]
+  },
+  "wild_nut": {
+    "sn_unknown": "硬硬的果仁",
+    "fn_unknown": "一小把硬壳果仁，敲开有点费劲。",
+    "sn_basic": "野坚果",
+    "fn_basic": "富含油脂，吃几颗就挺顶饱，但有点噎人。",
+    "sn_advanced": "高油野坚果",
+    "fn_advanced": "便于携带且耐存放，能在长路上提供不错的能量，但吃多了会让口干舌燥。",
+    "reveal_basic_at": 4,
+    "reveal_advanced_at": 16,
+    "tags": ["forage","food","nut","drying"]
+  }
+}
