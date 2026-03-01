@@ -163,10 +163,25 @@ const Engine = {
             if (st.upgrading_progress >= 100) {
                 prog.level = level + 1;
                 st.combat_skill_progress = progress;
-                st.upgrading_skill_id = null;
                 st.upgrading_progress = 0;
-                st.last_upgrading_skill_id = null;
-                if (Engine.log) Engine.log(`${skillId} 提升至 ${prog.level} 级。`);
+                const levelMaxNow = Math.max(prog.level, parseInt(prog.level_max, 10) || 1000);
+                const reachedCap = prog.level >= levelMaxNow;
+                if (reachedCap) {
+                    st.upgrading_skill_id = null;
+                    st.last_upgrading_skill_id = null;
+                }
+                if (Engine.log) {
+                    const name = (typeof UI !== 'undefined' && UI.skillName) ? UI.skillName(skillId) : skillId;
+                    const phrases = [
+                        name + ' 更精进一层。',
+                        name + ' 又有所悟，进境一分。',
+                        name + ' 功力渐长。',
+                        name + ' 再进一步。',
+                        name + ' 略有所得，造诣更深。',
+                        name + ' 心有所得，境界微进。'
+                    ];
+                    Engine.log(phrases[Math.floor(Math.random() * phrases.length)]);
+                }
             } else if (progressToAdd < 5) {
                 st.last_upgrading_skill_id = skillId;
                 st.upgrading_skill_id = null;
