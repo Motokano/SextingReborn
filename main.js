@@ -79,16 +79,63 @@ const Engine = {
 
     startMeditateTick() {
         if (Engine._meditateInterval) return;
+        const MEDITATE_PHRASES = [
+            '你闭目调息，气息渐稳。',
+            '吐纳周天，心神渐定。',
+            '丹田微热，真气缓缓流转。',
+            '一呼一吸之间，杂念渐消。',
+            '你静坐不动，内息绵绵若存。',
+            '气沉丹田，周身松静。',
+            '神意内守，呼吸绵长。',
+            '调息片刻，精神稍振。'
+        ];
+        const NEILI_UP_PHRASES = [
+            '丹田拓宽一线，内力上限略有精进。',
+            '你感到内力修为又进一分，上限微增。',
+            '气海略扩，可纳更多真气。',
+            '内力修为精进，上限提升。',
+            '吐纳日久，丹田容量渐长。',
+            '真气充盈，境界微进，内力上限加一。',
+            '内力修为更上一层。',
+            '气海生变，可蓄内力又多一分。'
+        ];
+        const CANT_EXHALE_PHRASES = [
+            '精力不足，内力也已耗尽，无法吐气纳精。',
+            '内力空空，难以化精，只得作罢。',
+            '真气已竭，无法再化精力。',
+            '内力不足，难以吐气纳精。',
+            '精力与内力皆不足，无法继续。',
+            '真气枯竭，吐气纳精只得暂停。',
+            '内力见底，无法化精。',
+            '难以化精，只得歇息。'
+        ];
+        const CANT_LIMB_PHRASES = [
+            '内力不足，但全身已无多余血气可化劲。',
+            '肢体血气已无可损，无法再化内力。',
+            '身无余血可化，只得暂停。',
+            '全身无多余血气，难以血气化劲。',
+            '肢体已损至极，无法再化劲。',
+            '血气不足，无法继续化劲。',
+            '身无余力可化内力，只得作罢。',
+            '无可损之血气，血气化劲暂停。'
+        ];
         Engine._meditateInterval = setInterval(() => {
             const st = Engine.state;
             if (!st) return;
+            let neiliMaxGained = false;
             if (st.meditating && st.neili_max != null) {
+                const prevMax = st.neili_max;
                 st.neili_lower = (st.neili_lower || 0) + 1;
                 let max = st.neili_max;
                 while (max > 0 && st.neili_lower >= 2 * max) {
                     st.neili_lower -= 2 * max;
                     st.neili_max = max + 1;
                     max = st.neili_max;
+                    neiliMaxGained = true;
+                }
+                if (Engine.log) {
+                    if (neiliMaxGained) Engine.log(NEILI_UP_PHRASES[Math.floor(Math.random() * NEILI_UP_PHRASES.length)]);
+                    else Engine.log(MEDITATE_PHRASES[Math.floor(Math.random() * MEDITATE_PHRASES.length)]);
                 }
             }
             if (st.in_combat) return;
@@ -102,6 +149,8 @@ const Engine = {
                     const ratio = Math.max(1, parseInt(def.neili_to_energy_ratio, 10) || 10);
                     if ((st.neili || 0) >= ratio) {
                         if (Engine.runHandlers.exhale_absorb) Engine.runHandlers.exhale_absorb({});
+                    } else if (Engine.log) {
+                        Engine.log(CANT_EXHALE_PHRASES[Math.floor(Math.random() * CANT_EXHALE_PHRASES.length)]);
                     }
                 }
             }
@@ -113,7 +162,11 @@ const Engine = {
                 if (neili <= threshold) {
                     const limbs = st.limbs || {};
                     const has = Object.keys(limbs).some(k => limbs[k] != null && Number(limbs[k]) > 1);
-                    if (has && Engine.runHandlers.limb_to_neili) Engine.runHandlers.limb_to_neili({});
+                    if (has && Engine.runHandlers.limb_to_neili) {
+                        Engine.runHandlers.limb_to_neili({});
+                    } else if (Engine.log) {
+                        Engine.log(CANT_LIMB_PHRASES[Math.floor(Math.random() * CANT_LIMB_PHRASES.length)]);
+                    }
                 }
             }
         }, 5000);

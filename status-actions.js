@@ -98,14 +98,16 @@ const StatusActions = {
         const ratio = Math.max(1, parseInt(def.neili_to_energy_ratio, 10) || 10);
         const neili = st.neili != null ? st.neili : 0;
         if (neili < ratio) {
-            Engine.log("内力不足，无法吐气纳精。");
+            const phrases = ['内力不足，无法吐气纳精。', '内力空空，难以化精，只得作罢。', '真气已竭，无法再化精力。', '内力不足，难以吐气纳精。', '真气枯竭，吐气纳精只得暂停。', '内力见底，无法化精。', '难以化精，只得歇息。', '精力与内力皆不足，无法继续。'];
+            Engine.log(phrases[Math.floor(Math.random() * phrases.length)]);
             return;
         }
         const energyMax = st.energy_max != null ? st.energy_max : 100;
         const energy = Math.min(energyMax, (st.energy != null ? st.energy : 100) + 1);
         st.neili = neili - ratio;
         st.energy = energy;
-        Engine.log(`你吐气纳精，内力化作精力。`);
+        const phrases = ['你吐气纳精，内力化作精力。', '一口浊气吐出，内力转为精神。', '真气化精，倦意稍减。', '你引内力上行，化入识海，顿觉清明。', '吐气纳精，神采略复。', '内力徐徐化入精神。', '纳精一息，耳目稍明。', '真气化精，疲意渐消。'];
+        Engine.log(phrases[Math.floor(Math.random() * phrases.length)]);
         StatusActions.addInternalProficiency(1);
     },
 
@@ -119,14 +121,16 @@ const StatusActions = {
         const limbs = st.limbs || {};
         const candidates = Object.keys(limbs).filter(k => (limbs[k] != null && Number(limbs[k]) > 1));
         if (candidates.length === 0) {
-            Engine.log("全身没有多余的血量，无法继续。");
+            const phrases = ['全身没有多余的血量，无法继续。', '内力不足，但全身已无多余血气可化劲。', '肢体血气已无可损，无法再化内力。', '身无余血可化，只得暂停。', '全身无多余血气，难以血气化劲。', '肢体已损至极，无法再化劲。', '身无余力可化内力，只得作罢。', '无可损之血气，血气化劲暂停。'];
+            Engine.log(phrases[Math.floor(Math.random() * phrases.length)]);
             return;
         }
         const limbKey = candidates[Math.floor(Math.random() * candidates.length)];
         st.limbs[limbKey] = Number(limbs[limbKey]) - 1;
         const neiliMax = st.neili_max != null ? st.neili_max : 0;
         st.neili = Math.min(neiliMax, (st.neili != null ? st.neili : 0) + 10);
-        Engine.log(`你血气化劲，略损肢体，内力有所恢复。`);
+        const phrases = ['你血气化劲，略损肢体，内力有所恢复。', '以血换气，肢体微损，内力渐复。', '血气下行入丹田，内力稍长。', '略损肢体血气，化作一缕内力。', '你引血气化劲，丹田微暖。', '肢体略损，内力渐生。', '血气化劲，身有微损，内力稍复。', '以血养气，内力略增。'];
+        Engine.log(phrases[Math.floor(Math.random() * phrases.length)]);
         StatusActions.addInternalProficiency(1);
     },
 

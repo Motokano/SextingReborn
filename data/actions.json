@@ -156,8 +156,10 @@
         "repeatable": false,
         "turn_cost": 2,
         "cmd": [
-            {"type": "log", "val": "你翻阅武学纲要，对刀、暗器、枪、掌、拳、腿、棍、指、身法、内功、招架的基本用法略知一二。"},
+            {"type": "log", "val": "你翻阅武学纲要，对剑、刀、暗器、枪、掌、拳、腿、棍、指、身法、内功、招架的基本用法略知一二。"},
             {"type": "grant_combat_awareness"},
+            {"type": "learn_combat_skill", "slot": "剑法", "skill_id": "basic_sword", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "set_move_progress", "move_id": "basic_sword_thrust", "level": 1, "proficiency": 0},
             {"type": "learn_combat_skill", "slot": "刀法", "skill_id": "basic_blade", "level": 1, "level_max": 1000, "proficiency": 0},
             {"type": "learn_combat_skill", "slot": "暗器", "skill_id": "basic_throwing", "level": 1, "level_max": 1000, "proficiency": 0},
             {"type": "learn_combat_skill", "slot": "枪法", "skill_id": "basic_spear", "level": 1, "level_max": 1000, "proficiency": 0},
