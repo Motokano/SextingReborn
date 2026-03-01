@@ -30,6 +30,22 @@
             { "type": "toggle_meditate" }
         ]
     },
+    "exhale_absorb": {
+        "label": "吐气纳精",
+        "repeatable": true,
+        "turn_cost": 0,
+        "cmd": [
+            { "type": "exhale_absorb" }
+        ]
+    },
+    "limb_to_neili": {
+        "label": "血气化劲",
+        "repeatable": true,
+        "turn_cost": 0,
+        "cmd": [
+            { "type": "limb_to_neili" }
+        ]
+    },
     "old_man_wisdom": {
         "label": "恭敬请教",
         "repeatable": false,

@@ -4,9 +4,13 @@
 const MenuController = {
     update() {
         if (typeof UI === 'undefined') return;
-        const selfActions = Engine.curId === 'home'
+        let selfActions = Engine.curId === 'home'
             ? [...(Engine.db.config.sys_actions || []), 'open_build_menu']
             : (Engine.db.config.sys_actions || []);
+        const hasInternal = Engine.state.combat_skill_slots && Engine.state.combat_skill_slots['内功'] != null;
+        if (!hasInternal) selfActions = selfActions.filter(id => id !== 'meditate' && id !== 'exhale_absorb' && id !== 'limb_to_neili');
+        const hasAnyLifeSkill = (Object.keys(Engine.state.survival_skills || {}).length + Object.keys(Engine.state.production_skills || {}).length + Object.keys(Engine.state.support_skills || {}).length) > 0;
+        if (!hasAnyLifeSkill) selfActions = selfActions.filter(id => id !== 'open_build_menu');
         UI.renderMenu('self-options', selfActions, "个人指令");
         const c = Engine.cur.grid[Engine.pIdx];
         const refObj = c.object_id ? Engine.db.objects[c.object_id] : null;

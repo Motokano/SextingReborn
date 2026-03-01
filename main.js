@@ -46,16 +46,20 @@ const Engine = {
             if (Engine.state.day_index == null) Engine.state.day_index = 1;
             if (Engine.state.todayAlmanac == null) Engine.state.todayAlmanac = null;
             if (Engine.state.has_time_building == null) Engine.state.has_time_building = false;
-            if (Engine.state.potential == null) Engine.state.potential = 0;
+            if (Engine.state.potential == null) Engine.state.potential = 5000000;
             if (Engine.state.battle_exp == null) Engine.state.battle_exp = 0;
             if (Engine.state.move_progress == null) Engine.state.move_progress = {};
             if (Engine.state.neili_lower == null) Engine.state.neili_lower = 0;
             if (Engine.state.guard_shield == null) Engine.state.guard_shield = {};
             if (Engine.state.meditating == null) Engine.state.meditating = false;
+            if (Engine.state.auto_exhale_energy_threshold == null) Engine.state.auto_exhale_energy_threshold = null;
+            if (Engine.state.auto_limb_to_neili_threshold == null) Engine.state.auto_limb_to_neili_threshold = null;
             if (Engine.state.in_combat == null) Engine.state.in_combat = false;
             if (Engine.state.combat_enemies == null) Engine.state.combat_enemies = [];
             if (Engine.state.combat_queued_command == null) Engine.state.combat_queued_command = null;
             if (Engine.state.combat_escape_pending == null) Engine.state.combat_escape_pending = false;
+            if (Engine.state.upgrading_skill_id == null) Engine.state.upgrading_skill_id = null;
+            if (Engine.state.upgrading_progress == null) Engine.state.upgrading_progress = 0;
             if (Engine.state.home_farmland == null) Engine.state.home_farmland = [70, 71, 72, 73];
             if (Engine.state.home_crops == null) Engine.state.home_crops = {};
             if (Engine.state.inventory_quality == null) Engine.state.inventory_quality = {};
@@ -69,6 +73,7 @@ const Engine = {
             Engine.ensureTodayAlmanac();
             Movement.setupKeyboardControls();
             Engine.startMeditateTick();
+            Engine.startUpgradeTick();
         } catch (e) { console.error(e); }
     },
 
@@ -76,15 +81,98 @@ const Engine = {
         if (Engine._meditateInterval) return;
         Engine._meditateInterval = setInterval(() => {
             const st = Engine.state;
-            if (!st || !st.meditating || st.neili_max == null) return;
-            st.neili_lower = (st.neili_lower || 0) + 1;
-            let max = st.neili_max;
-            while (max > 0 && st.neili_lower >= 2 * max) {
-                st.neili_lower -= 2 * max;
-                st.neili_max = max + 1;
-                max = st.neili_max;
+            if (!st) return;
+            if (st.meditating && st.neili_max != null) {
+                st.neili_lower = (st.neili_lower || 0) + 1;
+                let max = st.neili_max;
+                while (max > 0 && st.neili_lower >= 2 * max) {
+                    st.neili_lower -= 2 * max;
+                    st.neili_max = max + 1;
+                    max = st.neili_max;
+                }
             }
-        }, 8000);
+            if (st.in_combat) return;
+            if (!st.combat_skill_slots || st.combat_skill_slots['内功'] == null) return;
+            const exhaleTh = st.auto_exhale_energy_threshold;
+            if (exhaleTh != null && exhaleTh > 0) {
+                const energy = st.energy != null ? st.energy : 100;
+                if (energy <= exhaleTh) {
+                    const arts = (Engine.db && Engine.db.internal_arts) ? Engine.db.internal_arts : {};
+                    const def = arts[st.combat_skill_slots['内功']] || {};
+                    const ratio = Math.max(1, parseInt(def.neili_to_energy_ratio, 10) || 10);
+                    if ((st.neili || 0) >= ratio) {
+                        if (Engine.runHandlers.exhale_absorb) Engine.runHandlers.exhale_absorb({});
+                    }
+                }
+            }
+            const limbTh = st.auto_limb_to_neili_threshold;
+            if (limbTh != null && limbTh > 0) {
+                const neili = st.neili != null ? st.neili : 0;
+                const neiliMax = st.neili_max != null ? st.neili_max : 1;
+                const threshold = (limbTh <= 100) ? neiliMax * limbTh / 100 : limbTh;
+                if (neili <= threshold) {
+                    const limbs = st.limbs || {};
+                    const has = Object.keys(limbs).some(k => limbs[k] != null && Number(limbs[k]) > 1);
+                    if (has && Engine.runHandlers.limb_to_neili) Engine.runHandlers.limb_to_neili({});
+                }
+            }
+        }, 5000);
+    },
+
+    startUpgradeTick() {
+        if (Engine._upgradeInterval) return;
+        Engine._upgradeInterval = setInterval(() => {
+            const st = Engine.state;
+            if (!st || !st.upgrading_skill_id) return;
+            if (st.in_combat) return;
+            const skillId = st.upgrading_skill_id;
+            const progress = st.combat_skill_progress || {};
+            const prog = progress[skillId];
+            if (!prog) {
+                st.upgrading_skill_id = null;
+                st.upgrading_progress = 0;
+                return;
+            }
+            const level = Math.max(1, parseInt(prog.level, 10) || 1);
+            const levelMax = Math.max(level, parseInt(prog.level_max, 10) || 1000);
+            if (level >= levelMax) {
+                st.upgrading_skill_id = null;
+                st.upgrading_progress = 0;
+                return;
+            }
+            const cost = 10 * level;
+            const potentialPerEnergy = Engine.getPotentialPerEnergy ? Engine.getPotentialPerEnergy(st) : 500;
+            const energyCost = Math.max(1, Math.ceil(cost / potentialPerEnergy));
+            const costPerTick = cost * 0.05;
+            const energyPerTick = energyCost * 0.05;
+            const potential = st.potential != null ? st.potential : 0;
+            const energy = st.energy != null ? st.energy : 100;
+            const progressFromPotential = costPerTick > 0 ? (potential / costPerTick) * 5 : 5;
+            const progressFromEnergy = energyPerTick > 0 ? (energy / energyPerTick) * 5 : 5;
+            const progressToAdd = Math.min(5, progressFromPotential, progressFromEnergy);
+            if (progressToAdd <= 0) {
+                st.upgrading_skill_id = null;
+                st.upgrading_progress = 0;
+                return;
+            }
+            const actualPotentialSpend = (progressToAdd / 5) * costPerTick;
+            const actualEnergySpend = (progressToAdd / 5) * energyPerTick;
+            st.potential = Math.max(0, potential - actualPotentialSpend);
+            st.energy = Math.max(0, energy - actualEnergySpend);
+            st.upgrading_progress = (st.upgrading_progress || 0) + progressToAdd;
+            if (st.upgrading_progress >= 100) {
+                prog.level = level + 1;
+                st.combat_skill_progress = progress;
+                st.upgrading_skill_id = null;
+                st.upgrading_progress = 0;
+                st.last_upgrading_skill_id = null;
+                if (Engine.log) Engine.log(`${skillId} 提升至 ${prog.level} 级。`);
+            } else if (progressToAdd < 5) {
+                st.last_upgrading_skill_id = skillId;
+                st.upgrading_skill_id = null;
+            }
+            if (typeof Engine !== 'undefined' && Engine.render) Engine.render();
+        }, 1000);
     },
 
     run(cmds) {
@@ -201,6 +289,15 @@ const Engine = {
             });
         }
         return res.length > 0 ? res.join(" ") : sArr.find(s => s.condition === "default").text;
+    },
+
+    /** 单位精力可消耗的潜能（呼吸、代谢影响）：基础 500，呼吸/恢复每高于 10 则加成 1%，用于修炼消耗精力计算 */
+    getPotentialPerEnergy(state) {
+        const st = state || Engine.state;
+        const breath = (st.breath_innate != null ? st.breath_innate : 10) + (st.breath_acq != null ? st.breath_acq : 0);
+        const rec = (st.rec_innate != null ? st.rec_innate : 10) + (st.rec_acq != null ? st.rec_acq : 0);
+        const factor = 1 + (breath - 10) * 0.01 + (rec - 10) * 0.01;
+        return Math.max(100, Math.min(1000, Math.floor(500 * factor)));
     },
 
     getLimbDegree(cur, max) {

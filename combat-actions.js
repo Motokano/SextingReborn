@@ -136,7 +136,7 @@ const CombatRunHandlers = {
     },
     mod_potential(c) {
         const v = Engine.state.potential + (Number(c.val) || 0);
-        Engine.state.potential = Math.max(0, v);
+        Engine.state.potential = Math.max(0, Math.min(5000000, v));
     },
     mod_battle_exp(c) {
         const v = Engine.state.battle_exp + (Number(c.val) || 0);
@@ -151,6 +151,30 @@ const CombatRunHandlers = {
         const cap = typeof CombatActions !== 'undefined' ? CombatActions.getMoveLevelCap(Engine.state.battle_exp) : 1000;
         progress[moveId] = { level: Math.min(level, cap), level_max: cap, proficiency };
         Engine.state.move_progress = progress;
+    },
+    /** 开始修炼：学习为过程，每秒提升当前等级进度 5% 并消耗对应潜能与精力。仅启动修炼，实际结算由 main 的 startUpgradeTick 每秒执行。 */
+    start_upgrade_combat_skill(c) {
+        const skillId = c.skill_id;
+        if (!skillId) return;
+        const st = Engine.state;
+        const progress = st.combat_skill_progress || {};
+        const prog = progress[skillId];
+        if (!prog) return;
+        const level = Math.max(1, parseInt(prog.level, 10) || 1);
+        const levelMax = Math.max(level, parseInt(prog.level_max, 10) || 1000);
+        if (level >= levelMax) return;
+        if (st.upgrading_skill_id) return;
+        const cost = 10 * level;
+        const potentialPerEnergy = (typeof Engine !== 'undefined' && Engine.getPotentialPerEnergy) ? Engine.getPotentialPerEnergy(st) : 500;
+        const energyCost = Math.max(1, Math.ceil(cost / potentialPerEnergy));
+        const costPerTick = cost * 0.05;
+        const energyPerTick = energyCost * 0.05;
+        const potential = Math.min(5000000, st.potential || 0);
+        const energy = Math.min(st.energy_max || 100, st.energy != null ? st.energy : 100);
+        if (potential < costPerTick || energy < energyPerTick) return;
+        st.upgrading_skill_id = skillId;
+        st.upgrading_progress = (st.last_upgrading_skill_id === skillId && st.upgrading_progress != null) ? st.upgrading_progress : 0;
+        st.last_upgrading_skill_id = null;
     },
     open_guard(c) {
         const st = Engine.state;

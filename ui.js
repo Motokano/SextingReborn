@@ -76,7 +76,7 @@ const UI = {
         }
         section.style.display = '';
         container.innerHTML = '';
-        actionsContainer.innerHTML = '<p class="menu-hint">选择一位角色以查看其信息与可做的事。</p>';
+        actionsContainer.innerHTML = '<p class="menu-hint">选人后显示动作。</p>';
         npcIds.forEach(id => {
             const def = Engine.db.npcs[id];
             if (!def) return;
@@ -243,6 +243,12 @@ const UI = {
         if (combatContainer && hasCombat) {
             UI.renderCombatSlots(combatContainer, state);
         }
+        const assistSection = document.getElementById('combat-assist-section');
+        if (assistSection && hasCombat && state.combat_skill_slots && state.combat_skill_slots['内功'] != null) {
+            UI.renderCombatAssist(state);
+        } else if (assistSection) {
+            assistSection.innerHTML = '';
+        }
         if (combatActiveContainer) {
             combatActiveContainer.style.display = 'none';
         }
@@ -280,6 +286,12 @@ const UI = {
         if (!container) return;
         const slots = state.combat_skill_slots || {};
         const progress = state.combat_skill_progress || {};
+        const potential = Math.min(5000000, state.potential || 0);
+        const potentialEl = document.getElementById('combat-potential-display');
+        if (potentialEl) {
+            potentialEl.textContent = potential >= 2500000 ? '充足' : potential >= 500000 ? '尚可' : potential > 0 ? '不足' : '耗尽';
+        }
+
         const slotOrder = ['剑法', '刀法', '暗器', '枪法', '掌法', '拳法', '腿法', '棍法', '指法', '身法', '内功', '招架'];
         const unlockedSlots = new Set();
         Object.entries(UI.COMBAT_SKILL_SLOT || {}).forEach(([skillId, slotName]) => {
@@ -290,10 +302,18 @@ const UI = {
         slotOrder.forEach(slotName => {
             if (!unlockedSlots.has(slotName)) return;
             const skillId = slots[slotName];
+            const row = document.createElement('div');
+            row.className = 'combat-slot-row';
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.gap = '6px';
+            row.style.marginBottom = '4px';
+
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'combat-slot-btn' + (skillId ? '' : ' combat-slot-empty');
             btn.setAttribute('data-slot', slotName);
+            btn.style.flex = '1';
             if (skillId) {
                 const prog = progress[skillId];
                 const level = prog && prog.level != null ? prog.level : 1;
@@ -305,9 +325,112 @@ const UI = {
                 btn.innerHTML = `<span class="slot-name">${slotName}</span><span class="slot-empty">空</span>`;
             }
             btn.onclick = () => UI.showCombatSlotModal(slotName);
-            container.appendChild(btn);
+            row.appendChild(btn);
+
+            if (skillId) {
+                const prog = progress[skillId];
+                const level = prog && prog.level != null ? prog.level : 1;
+                const levelMax = prog && prog.level_max != null ? prog.level_max : 1000;
+                const cost = 10 * level;
+                const potentialPerEnergy = (typeof Engine !== 'undefined' && Engine.getPotentialPerEnergy) ? Engine.getPotentialPerEnergy(state) : 500;
+                const energyCost = Math.max(1, Math.ceil(cost / potentialPerEnergy));
+                const costPerTick = cost * 0.05;
+                const energyPerTick = energyCost * 0.05;
+                const energy = Math.min(state.energy_max || 100, state.energy != null ? state.energy : 100);
+                const isUpgradingThis = state.upgrading_skill_id === skillId;
+                const canStart = level < levelMax && potential >= costPerTick && energy >= energyPerTick && !state.upgrading_skill_id;
+                const upBtn = document.createElement('button');
+                upBtn.type = 'button';
+                upBtn.className = 'action-brick';
+                upBtn.textContent = isUpgradingThis ? ('修炼中 ' + (state.upgrading_progress || 0) + '%') : '升级';
+                upBtn.title = '消耗潜能与精力';
+                upBtn.disabled = !canStart && !isUpgradingThis;
+                upBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (!canStart) return;
+                    Engine.run([{ type: 'start_upgrade_combat_skill', skill_id: skillId }]);
+                    Engine.render();
+                };
+                row.appendChild(upBtn);
+            }
+            container.appendChild(row);
         });
     },
+
+    /** 内功辅助：精力/内力阈值，与打坐同间隔（5 秒）自动执行吐气纳精、血气化劲。选项为描述，不显示具体数值。 */
+    renderCombatAssist(state) {
+        const section = document.getElementById('combat-assist-section');
+        if (!section) return;
+        section.innerHTML = '';
+        const subTitle = document.createElement('div');
+        subTitle.className = 'sub-title';
+        subTitle.textContent = '内功辅助';
+        section.appendChild(subTitle);
+        const row1 = document.createElement('div');
+        row1.style.display = 'flex';
+        row1.style.alignItems = 'center';
+        row1.style.gap = '6px';
+        row1.style.marginTop = '4px';
+        row1.style.flexWrap = 'wrap';
+        const label1 = document.createElement('label');
+        label1.textContent = '精力';
+        const select1 = document.createElement('select');
+        select1.style.minWidth = '100px';
+        const opts1 = [
+            { v: '', t: '关' },
+            { v: 75, t: '偏高时自动吐气纳精' },
+            { v: 50, t: '偏低时自动吐气纳精' },
+            { v: 25, t: '不足时自动吐气纳精' }
+        ];
+        opts1.forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o.v;
+            opt.textContent = o.t;
+            if (state.auto_exhale_energy_threshold != null && state.auto_exhale_energy_threshold === o.v) opt.selected = true;
+            select1.appendChild(opt);
+        });
+        if (state.auto_exhale_energy_threshold == null) select1.selectedIndex = 0;
+        label1.appendChild(select1);
+        row1.appendChild(label1);
+        section.appendChild(row1);
+        select1.onchange = () => {
+            const v = select1.value;
+            Engine.state.auto_exhale_energy_threshold = (v !== '') ? parseInt(v, 10) : null;
+        };
+
+        const row2 = document.createElement('div');
+        row2.style.display = 'flex';
+        row2.style.alignItems = 'center';
+        row2.style.gap = '6px';
+        row2.style.marginTop = '4px';
+        row2.style.flexWrap = 'wrap';
+        const label2 = document.createElement('label');
+        label2.textContent = '内力';
+        const select2 = document.createElement('select');
+        select2.style.minWidth = '100px';
+        const opts2 = [
+            { v: '', t: '关' },
+            { v: 75, t: '偏高时自动血气化劲' },
+            { v: 50, t: '偏低时自动血气化劲' },
+            { v: 25, t: '不足时自动血气化劲' }
+        ];
+        opts2.forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o.v;
+            opt.textContent = o.t;
+            if (state.auto_limb_to_neili_threshold != null && state.auto_limb_to_neili_threshold === o.v) opt.selected = true;
+            select2.appendChild(opt);
+        });
+        if (state.auto_limb_to_neili_threshold == null) select2.selectedIndex = 0;
+        label2.appendChild(select2);
+        row2.appendChild(label2);
+        section.appendChild(row2);
+        select2.onchange = () => {
+            const v = select2.value;
+            Engine.state.auto_limb_to_neili_threshold = (v !== '') ? parseInt(v, 10) : null;
+        };
+    },
+
     showCombatSlotModal(slotName) {
         const state = Engine.state;
         const slots = state.combat_skill_slots || {};

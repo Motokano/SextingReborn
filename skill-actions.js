@@ -36,10 +36,8 @@ const SkillActions = {
         const skillId = c.skill_id;
         const skills = Engine.state.survival_skills || {};
         if (skillId) {
-            const level = Math.max(1, parseInt(c.level, 10) || 1);
-            const levelMax = Math.max(level, parseInt(c.level_max, 10) || 100);
-            const proficiency = Math.max(0, parseFloat(c.proficiency) || 0);
-            skills[skillId] = { level, level_max: levelMax, proficiency };
+            const levelMax = Math.max(1, parseInt(c.level_max, 10) || 100);
+            skills[skillId] = { level: 1, level_max: levelMax, use_count: 0 };
             Engine.state.survival_skills = skills;
         }
     },
@@ -48,10 +46,8 @@ const SkillActions = {
         const skillId = c.skill_id;
         const skills = Engine.state.production_skills || {};
         if (skillId) {
-            const level = Math.max(1, parseInt(c.level, 10) || 1);
-            const levelMax = Math.max(level, parseInt(c.level_max, 10) || 100);
-            const proficiency = Math.max(0, parseFloat(c.proficiency) || 0);
-            skills[skillId] = { level, level_max: levelMax, proficiency };
+            const levelMax = Math.max(1, parseInt(c.level_max, 10) || 100);
+            skills[skillId] = { level: 1, level_max: levelMax, use_count: 0 };
             Engine.state.production_skills = skills;
         }
     },
@@ -60,14 +56,13 @@ const SkillActions = {
         const skillId = c.skill_id;
         const skills = Engine.state.support_skills || {};
         if (skillId) {
-            const level = Math.max(1, parseInt(c.level, 10) || 1);
-            const levelMax = Math.max(level, parseInt(c.level_max, 10) || 100);
-            const proficiency = Math.max(0, parseFloat(c.proficiency) || 0);
-            skills[skillId] = { level, level_max: levelMax, proficiency };
+            const levelMax = Math.max(1, parseInt(c.level_max, 10) || 100);
+            skills[skillId] = { level: 1, level_max: levelMax, use_count: 0 };
             Engine.state.support_skills = skills;
         }
     },
 
+    /** 生活技能仅能通过使用升级：增加 use_count，等级由曲线计算（五万次满级） */
     gain_skill_exp(c) {
         const category = c.category;
         const skillId = c.skill_id;
@@ -83,13 +78,10 @@ const SkillActions = {
         const prog = skills[skillId];
         if (!prog) return;
 
-        prog.proficiency = (prog.proficiency || 0) + amount;
-        const maxLv = prog.level_max || 100;
-        while (prog.proficiency >= 100 && prog.level < maxLv) {
-            prog.proficiency -= 100;
-            prog.level += 1;
-            Engine.log("你似乎对这项技艺多了一分理解。");
-        }
+        const useCount = (prog.use_count != null ? Number(prog.use_count) : 0) + amount;
+        prog.use_count = Math.min(50000, useCount);
+        const levelMax = prog.level_max != null ? parseInt(prog.level_max, 10) : 100;
+        prog.level = Math.max(1, Math.min(levelMax, Math.floor(levelMax * Math.pow(prog.use_count / 50000, 0.5))));
         skills[skillId] = prog;
     }
 };
