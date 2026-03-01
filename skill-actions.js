@@ -29,6 +29,9 @@ const SkillActions = {
             progress[skillId] = { level, level_max: levelMax, proficiency };
             Engine.state.combat_skill_slots = slots;
             Engine.state.combat_skill_progress = progress;
+            if (slotKey === '内功' && (Engine.state.neili_max == null || Engine.state.neili_max === 0)) {
+                Engine.state.neili_max = 1;
+            }
         }
     },
 

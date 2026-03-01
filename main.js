@@ -124,7 +124,10 @@ const Engine = {
             if (!st) return;
             let neiliMaxGained = false;
             if (st.meditating && st.neili_max != null) {
-                const prevMax = st.neili_max;
+                if (st.neili_max > 0 && Engine.getMeditateNeiliRecovery) {
+                    const recovery = Engine.getMeditateNeiliRecovery(st);
+                    st.neili = Math.min(st.neili_max, (st.neili || 0) + recovery);
+                }
                 st.neili_lower = (st.neili_lower || 0) + 1;
                 let max = st.neili_max;
                 while (max > 0 && st.neili_lower >= 2 * max) {
@@ -366,6 +369,16 @@ const Engine = {
         const rec = (st.rec_innate != null ? st.rec_innate : 10) + (st.rec_acq != null ? st.rec_acq : 0);
         const factor = 1 + (breath - 10) * 0.01 + (rec - 10) * 0.01;
         return Math.max(100, Math.min(1000, Math.floor(500 * factor)));
+    },
+
+    /** 打坐每 tick 恢复内力：基础 10，呼吸乘区与代谢（恢复）乘区分别计算 */
+    getMeditateNeiliRecovery(state) {
+        const st = state || Engine.state;
+        const breath = (st.breath_innate != null ? st.breath_innate : 10) + (st.breath_acq != null ? st.breath_acq : 0);
+        const rec = (st.rec_innate != null ? st.rec_innate : 10) + (st.rec_acq != null ? st.rec_acq : 0);
+        const breathMult = 1 + (breath - 10) * 0.01;
+        const recMult = 1 + (rec - 10) * 0.01;
+        return Math.floor(10 * Math.max(0, breathMult) * Math.max(0, recMult));
     },
 
     getLimbDegree(cur, max) {
