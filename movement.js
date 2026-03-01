@@ -10,6 +10,7 @@ const Movement = {
     setupKeyboardControls() {
         document.addEventListener('keydown', (e) => {
             if (document.querySelector('.modal-overlay:not(.hidden)')) return;
+            if (Engine.state && Engine.state.upgrading_skill_id) return;
             let targetIndex = -1;
             const pIdx = Engine.pIdx;
             const COLS = Engine.cur.cols || 8;
@@ -152,6 +153,7 @@ const Movement = {
         const c = Engine.cur.grid[i];
         const d = Movement.dist(Engine.pIdx, i);
         if (d === 1) {
+            if (Engine.state && Engine.state.upgrading_skill_id) return;
             const ref = c.object_id ? Engine.db.objects[c.object_id] : null;
             if (c.blocking || (ref && ref.blocking)) return;
             let legMult = 1;

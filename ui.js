@@ -340,11 +340,17 @@ const UI = {
                 const upBtn = document.createElement('button');
                 upBtn.type = 'button';
                 upBtn.className = 'action-brick';
-                upBtn.textContent = isUpgradingThis ? ('修炼中 ' + (state.upgrading_progress || 0) + '%') : '升级';
-                upBtn.title = '消耗潜能与精力';
+                upBtn.textContent = isUpgradingThis ? '停止' : '升级';
+                upBtn.title = isUpgradingThis ? ('修炼中 ' + (state.upgrading_progress || 0) + '%，点击停止') : '消耗潜能与精力';
                 upBtn.disabled = !canStart && !isUpgradingThis;
                 upBtn.onclick = (e) => {
                     e.stopPropagation();
+                    if (isUpgradingThis) {
+                        state.upgrading_skill_id = null;
+                        state.upgrading_progress = 0;
+                        Engine.render();
+                        return;
+                    }
                     if (!canStart) return;
                     Engine.run([{ type: 'start_upgrade_combat_skill', skill_id: skillId }]);
                     Engine.render();
