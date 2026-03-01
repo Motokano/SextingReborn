@@ -1,9 +1,9 @@
 ---
-description: 残机物语项目结构与扩展方式
+description: 潮碧物语项目结构与扩展方式
 alwaysApply: true
 ---
 
-# 残机物语 (Sexting) 项目规则
+# 潮碧物语 (Sexting) 项目规则
 
 - **技术栈**：原生 HTML/CSS/JS，无构建；`main.js` 仅作解释器与入口，具体逻辑在 `*-utils.js`、`*-actions.js`、`effects.js`、`movement.js`、`menu-controller.js`、`item-controller.js`、`action-dispatcher.js`；界面在 `ui.js`，内容在 `data/*.json`。
 - **扩展内容**：优先改 JSON；新 run 指令在对应 `*-actions.js` 实现并注册到 `Engine.runHandlers`（见 `.cursor/rules/game-engine.mdc`）；新动作效果在 `action-dispatcher.js` 的 `ActionDispatcher.perform()` 里加分枝。

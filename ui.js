@@ -157,7 +157,7 @@ const UI = {
     renderMenu(containerId, actions, fullName) {
         const container = document.getElementById(containerId);
         if (!container) return;
-        
+
         container.innerHTML = `<p class="menu-hint">${fullName || ""}</p>`;
         if (!actions || actions.length === 0) return;
 
@@ -165,8 +165,8 @@ const UI = {
         brickContainer.className = 'action-brick-container';
 
         actions.forEach(actionOrId => {
-            const isId = typeof actionOrId === 'string';
-            const act = isId ? Engine.db.actions[actionOrId] : actionOrId;
+            const actionId = typeof actionOrId === 'string' ? actionOrId : null;
+            const act = actionId && Engine.db.actions ? Engine.db.actions[actionId] : null;
 
             if (!act || !act.label) return;
 
@@ -174,13 +174,11 @@ const UI = {
             btn.className = "action-brick";
             btn.innerText = act.label;
 
-            if (isId && act.repeatable === false && Engine.flags[actionOrId]) {
+            if (act.repeatable === false && Engine.flags[actionId]) {
                 btn.classList.add('disabled');
                 btn.disabled = true;
             } else {
-                btn.onclick = () => {
-                    Engine.performAction(actionOrId);
-                };
+                btn.onclick = () => Engine.performAction(actionId);
             }
             brickContainer.appendChild(btn);
         });
