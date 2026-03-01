@@ -3,7 +3,8 @@
  */
 const Movement = {
     dist(a, b) {
-        return Math.abs(Math.floor(a / 8) - Math.floor(b / 8)) + Math.abs(a % 8 - b % 8);
+        const cols = (Engine.cur && Engine.cur.cols) || 8;
+        return Math.abs(Math.floor(a / cols) - Math.floor(b / cols)) + Math.abs(a % cols - b % cols);
     },
 
     setupKeyboardControls() {
@@ -38,6 +39,11 @@ const Movement = {
         if (!Engine.db.scenes[id]) return;
         Engine.curId = id;
         Engine.cur = JSON.parse(JSON.stringify(Engine.db.scenes[id]));
+        if (id === 'home' && Engine.state.home_farmland && Engine.state.home_farmland.length > 0) {
+            Engine.state.home_farmland.forEach(idx => {
+                if (Engine.cur.grid[idx]) Engine.cur.grid[idx].farmland = true;
+            });
+        }
         if (entry !== null) Engine.pIdx = entry;
         Engine.render();
         Engine.log(`<b>[环境]</b> 抵达：${Engine.cur.name}`);

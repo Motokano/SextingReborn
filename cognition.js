@@ -16,8 +16,11 @@ const Cognition = {
                 return;
             }
             const lv = mining.level || 1;
-            const oreId = (ref && ref.ore_item_id) || 'iron_ore';
-            const name = (typeof UI !== 'undefined' && UI.getItemDisplayName) ? UI.getItemDisplayName(oreId, s) : "矿脉";
+            const objectId = cell.object_id;
+            const resolved = Engine.resolveOreSource && Engine.resolveOreSource(Engine.curId, objectId);
+            const isVein = resolved && resolved.ore_vein && Object.keys(resolved.ore_vein).length > 0;
+            const oreId = (ref && ref.ore_item_id) || (resolved && resolved.ore_item_id) || 'iron_ore';
+            const name = isVein ? '杂矿脉' : ((typeof UI !== 'undefined' && UI.getItemDisplayName) ? UI.getItemDisplayName(oreId, s) : "矿脉");
 
             if (lv < 5) Engine.log("你总觉得这面岩壁的颜色和纹理有一点点不对劲，但还说不上来。");
             else if (lv < 15) Engine.log("你隐约觉得这面岩壁底下藏着什么，比周围更坚硬、更沉闷。");
@@ -54,7 +57,7 @@ const Cognition = {
                 return;
             }
             const lv = logging.level || 1;
-            const woodId = (ref && ref.wood_item_id) || 'rough_log';
+            const woodId = (ref && ref.wood_item_id) || 'pine_log';
             const name = (typeof UI !== 'undefined' && UI.getItemDisplayName) ? UI.getItemDisplayName(woodId, s) : "木料";
 
             if (lv < 5) Engine.log("你隐约觉得这棵树的形状和树皮纹理有点不太一样，但还说不上来。");
@@ -73,7 +76,7 @@ const Cognition = {
                 return;
             }
             const lv = fishing.level || 1;
-            const fishId = (ref && ref.fish_item_id) || 'river_fish';
+            const fishId = (ref && ref.fish_item_id) || 'dull_bass';
             const name = (typeof UI !== 'undefined' && UI.getItemDisplayName) ? UI.getItemDisplayName(fishId, s) : "鱼";
 
             if (lv < 5) Engine.log("你隐约觉得这段水面下似乎有东西在动，但说不准。");

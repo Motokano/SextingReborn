@@ -9,46 +9,102 @@ const InventoryActions = {
         if (!item) return;
 
         const inv = Engine.state.inventory;
+        const invQuality = Engine.state.inventory_quality || {};
         const sizeLimit = Engine.state.inventory_size || 12;
         const hasBackpack = Engine.state.has_backpack === true;
+        const quality = InventoryUtils.clampQuality(c.quality != null ? c.quality : (item.quality != null ? item.quality : 1));
+        const count = c.count || 1;
+        const unitWeight = item.weight || 0;
+        const overflowToGround = c.overflow_to_ground === true;
+
+        // 计算最多能拿多少（重量、格子、堆叠）
+        let maxByWeight = count;
+        if (unitWeight > 0 && Engine.state.max_weight != null) {
+            const spare = Engine.state.max_weight - (Engine.state.current_weight || 0);
+            maxByWeight = Math.max(0, Math.floor(spare / unitWeight));
+        }
+        let canAdd = Math.min(count, maxByWeight);
+        if (canAdd <= 0 && !overflowToGround) {
+            Engine.log("太重了，拿不动。");
+            return;
+        }
 
         if (hasBackpack) {
-            const count = c.count || 1;
-            const weight = (item.weight || 0) * count;
-            if (Engine.state.current_weight + weight > Engine.state.max_weight) {
-                Engine.log("太重了，拿不动。");
-                return;
-            }
             const stackLimit = item.stack_limit || 1;
-            const currentCount = inv[baseId] || 0;
-            if (currentCount >= stackLimit) {
-                Engine.log(`${item.sn}在你的背包里已经堆叠满了。`);
-                return;
+            const existingSlot = InventoryUtils.findSlotByBaseIdAndQuality(inv, invQuality, baseId, quality);
+            let stackSpace = 0;
+            if (existingSlot) {
+                const currentCount = inv[existingSlot] || 0;
+                stackSpace = Math.max(0, stackLimit - currentCount);
             }
-            if (Object.keys(inv).length >= sizeLimit && !inv[baseId]) {
-                Engine.log("背包格子已满。");
-                return;
-            }
-            inv[baseId] = currentCount + count;
-            Engine.state.current_weight += weight;
-            Engine.log(`你得到了 ${item.sn} x${count}。`);
+            const newSlots = Math.max(0, sizeLimit - Object.keys(inv).length);
+            const canAddBySpace = Math.min(count, stackSpace + newSlots * stackLimit);
+            canAdd = Math.min(canAdd, canAddBySpace);
         } else {
-            const toAdd = c.count || 1;
-            const weight = (item.weight || 0) * toAdd;
-            if (Engine.state.current_weight + weight > Engine.state.max_weight) {
-                Engine.log("太重了，拿不动。");
-                return;
-            }
-            for (let i = 0; i < toAdd; i++) {
-                if (Object.keys(inv).length >= sizeLimit) {
-                    Engine.log("身上拿不下了。");
-                    break;
+            const freeSlots = Math.max(0, sizeLimit - Object.keys(inv).length);
+            canAdd = Math.min(canAdd, freeSlots);
+        }
+
+        if (canAdd <= 0 && !overflowToGround) {
+            Engine.log(hasBackpack ? "背包格子已满。" : "身上拿不下了。");
+            return;
+        }
+        if (canAdd <= 0 && overflowToGround) { /* 全部丢到地上，下面处理 */ }
+
+        // 往背包里加 canAdd 个
+        if (canAdd > 0) {
+            if (hasBackpack) {
+                const stackLimit = item.stack_limit || 1;
+                const existingSlot = InventoryUtils.findSlotByBaseIdAndQuality(inv, invQuality, baseId, quality);
+                let left = canAdd;
+                if (existingSlot && left > 0) {
+                    const currentCount = inv[existingSlot] || 0;
+                    const add = Math.min(left, Math.max(0, stackLimit - currentCount));
+                    if (add > 0) {
+                        inv[existingSlot] = currentCount + add;
+                        Engine.state.current_weight += unitWeight * add;
+                        left -= add;
+                    }
                 }
-                const slotKey = InventoryUtils.getNextSlotKey(inv, baseId);
-                inv[slotKey] = 1;
-                Engine.state.current_weight += (item.weight || 0);
+                while (left > 0 && Object.keys(inv).length < sizeLimit) {
+                    const slotKey = InventoryUtils.getNextSlotKey(inv, baseId);
+                    const toAdd = Math.min(left, stackLimit);
+                    inv[slotKey] = toAdd;
+                    invQuality[slotKey] = quality;
+                    Engine.state.inventory_quality = invQuality;
+                    Engine.state.current_weight += unitWeight * toAdd;
+                    left -= toAdd;
+                }
+            } else {
+                for (let i = 0; i < canAdd && Object.keys(inv).length < sizeLimit; i++) {
+                    const slotKey = InventoryUtils.getNextSlotKey(inv, baseId);
+                    inv[slotKey] = 1;
+                    invQuality[slotKey] = quality;
+                    Engine.state.current_weight += unitWeight;
+                }
+                Engine.state.inventory_quality = invQuality;
             }
-            Engine.log(`你得到了 ${item.sn}${toAdd > 1 ? ' x' + toAdd : ''}。`);
+            Engine.log(`你得到了 ${item.sn}${canAdd > 1 ? ' x' + canAdd : ''}。`);
+        }
+
+        const overflow = count - canAdd;
+        if (overflow <= 0) return;
+        if (!overflowToGround) {
+            if (overflow > 0 && canAdd === 0) Engine.log("太重了，拿不动。");
+            return;
+        }
+        // 拿不下的丢到当前格地面
+        const gridCell = Engine.cur && Engine.cur.grid && Engine.pIdx != null && Engine.cur.grid[Engine.pIdx];
+        if (!gridCell || gridCell.blocking) return;
+        const ref = gridCell.object_id ? (Engine.db.objects && Engine.db.objects[gridCell.object_id]) : null;
+        if (ref && ref.blocking) return;
+        const ground = gridCell.groundInventory || (gridCell.groundInventory = {});
+        const totalOnGround = Object.values(ground).reduce((a, n) => a + n, 0);
+        const groundLimit = (typeof Engine.GROUND_SLOTS === 'number' ? Engine.GROUND_SLOTS : 8);
+        const toGround = Math.min(overflow, Math.max(0, groundLimit - totalOnGround));
+        if (toGround > 0) {
+            ground[baseId] = (ground[baseId] || 0) + toGround;
+            Engine.log("拿不下的掉在了地上。");
         }
     },
 
@@ -61,8 +117,10 @@ const InventoryActions = {
         const item = (Engine.db.objects && Engine.db.objects[baseId]) || (Engine.db.items && Engine.db.items[baseId]);
         const actual = Math.min(toRemove, currentCount);
         currentCount -= actual;
-        if (currentCount <= 0) delete inv[c.item_id];
-        else inv[c.item_id] = currentCount;
+        if (currentCount <= 0) {
+            delete inv[c.item_id];
+            if (Engine.state.inventory_quality) delete Engine.state.inventory_quality[c.item_id];
+        } else inv[c.item_id] = currentCount;
         if (item && item.weight) Engine.state.current_weight = Math.max(0, Engine.state.current_weight - item.weight * actual);
     },
 

@@ -1,0 +1,52 @@
+{
+  "cooking": {
+    "id": "cooking",
+    "sn": "烹饪",
+    "category": "production",
+    "type": "crafting",
+    "description": "制作食物与饮品，提升饱食与恢复效果。"
+  },
+  "medicine": {
+    "id": "medicine",
+    "sn": "制药",
+    "category": "production",
+    "type": "crafting",
+    "description": "炼制药品与丹药，疗伤、解毒、增益。"
+  },
+  "leatherworking": {
+    "id": "leatherworking",
+    "sn": "制皮",
+    "category": "production",
+    "type": "crafting",
+    "description": "鞣制皮革、制作皮甲与皮具。"
+  },
+  "smithing": {
+    "id": "smithing",
+    "sn": "锻造",
+    "category": "production",
+    "type": "crafting",
+    "description": "冶炼金属、打造兵器与防具。"
+  },
+  "carpentry": {
+    "id": "carpentry",
+    "sn": "木工",
+    "category": "production",
+    "type": "crafting",
+    "description": "加工木材，制作工具、家具与木制装备。"
+  },
+  "tailoring": {
+    "id": "tailoring",
+    "sn": "缝纫",
+    "category": "production",
+    "type": "crafting",
+    "description": "纺织与缝制布甲、衣物与背包。"
+  },
+  "enchanting": {
+    "id": "enchanting",
+    "sn": "附魔",
+    "category": "production",
+    "type": "crafting",
+    "placeholder": true,
+    "description": "为装备施加附魔效果。（占位，待实装）"
+  }
+}

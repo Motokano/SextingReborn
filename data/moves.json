@@ -1,0 +1,14 @@
+{
+  "basic_sword_thrust": {
+    "sn": "基础刺",
+    "slot": "剑法",
+    "damage_type": "piercing",
+    "power_coef": 1,
+    "hit_bonus": 0,
+    "crit_bonus": 0,
+    "weapon_tags": ["剑", "锐利"],
+    "limb_weights": { "head": 5, "chest": 15, "stomach": 15, "l_arm": 20, "r_arm": 20, "l_leg": 12, "r_leg": 13 },
+    "learn_req": {},
+    "cooldown_rounds": 0
+  }
+}

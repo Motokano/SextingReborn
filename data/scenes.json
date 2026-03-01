@@ -1,14 +1,26 @@
 {
   "home": {
-    "name": "家", "cols": 8, "desc": "简陋的避风港。",
+    "name": "家", "cols": 10, "desc": "简陋的避风港。",
+    "ore_vein": {
+      "iron_ore": 50,
+      "black_iron_ore": 18,
+      "yellow_copper_ore": 12,
+      "tin_shiny_ore": 8,
+      "lime_stone_ore": 5,
+      "heavy_lead_ore": 3,
+      "manganese_ore": 2,
+      "mixed_bronze_ore": 2
+    },
     "grid": [
-      {"type":"null"},{"type":"null"},{"type":"null"},{"sn":"出门","acts":[{"label":"去树林","cmd":[{"type":"move","target":"forest","entry":59}]}]},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
-      {"type":"null"},{"type":"null"},{"type":"null"},{"object_id":"time_pole"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
-      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
-      {"type":"null"},{"object_id":"logging_manual"},{"object_id":"breathing_manual"},{"object_id":"sword_manual"},{"object_id":"iron_vein"},{"object_id":"mining_manual"},{"object_id":"probe_manual"},{"object_id":"gathering_manual"},{"object_id":"fishing_manual"},
-      {"object_id":"farming_manual"},{"object_id":"hunting_manual"},{"object_id":"almanac_manual"},{"npc_id":"old_man"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
-      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"sn":"出门","acts":[{"label":"去树林","cmd":[{"type":"move","target":"forest","entry":59}]}]},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"object_id":"time_pole"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"object_id":"logging_manual"},{"object_id":"breathing_manual"},{"object_id":"sword_manual"},{"object_id":"iron_vein"},{"object_id":"mining_manual"},{"object_id":"probe_manual"},{"object_id":"gathering_manual"},{"object_id":"fishing_manual"},{"type":"null"},{"type":"null"},
+      {"object_id":"farming_manual"},{"object_id":"hunting_manual"},{"object_id":"almanac_manual"},{"npc_id":"old_man"},{"object_id":"common_tongue_manual"},{"object_id":"basic_compendium"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
       {"object_id":"berry_bush"},{"object_id":"crop_patch"},{"object_id":"herb_patch"},{"object_id":"workbench"},{"object_id":"storage_box","inventory":{
+        "blueprint_time_pole":1,
+        "blueprint_smelter":1,
         "iron_ore":20,
         "black_iron_ore":20,
         "yellow_copper_ore":20,
@@ -20,18 +32,62 @@
         "tungsten_ore":10,
         "white_quartz_ore":20,
         "mixed_bronze_ore":20,
-        "phosphor_iron_ore":20
-      }},{"type":"null","groundInventory":{"bandage":2}},{"object_id":"bed"}
+        "phosphor_iron_ore":20,
+        "wheat_ear":1,
+        "wheat_seed":1,
+        "wild_berry_seed":1,
+        "tomato":1,
+        "tomato_seed":1,
+        "potato":1,
+        "potato_seed":1,
+        "carrot":1,
+        "carrot_seed":1,
+        "onion":1,
+        "onion_seed":1,
+        "garlic":1,
+        "garlic_seed":1,
+        "cabbage":1,
+        "cabbage_seed":1,
+        "spinach":1,
+        "spinach_seed":1,
+        "green_bean":1,
+        "green_bean_seed":1,
+        "chili_pepper":1,
+        "chili_pepper_seed":1,
+        "corn":1,
+        "corn_seed":1,
+        "rice":1,
+        "rice_seed":1,
+        "soybean":1,
+        "soybean_seed":1,
+        "cucumber":1,
+        "cucumber_seed":1,
+        "eggplant":1,
+        "eggplant_seed":1,
+        "pumpkin":1,
+        "pumpkin_seed":1,
+        "radish":1,
+        "radish_seed":1,
+        "lettuce":1,
+        "lettuce_seed":1,
+        "celery":1,
+        "celery_seed":1,
+        "ginger":1,
+        "ginger_seed":1
+      }},{"type":"null","groundInventory":{"bandage":2}},{"object_id":"bed"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"}
     ]
   },
   "forest": {
     "name": "幽静树林", "cols": 8, "desc": "树影婆娑。",
     "grid": [
-      {"type":"tree","sn":"树"},{"type":"tree","sn":"树"},{"type":"tree","sn":"树"},{"sn":"北路","acts":[{"label":"前进","cmd":[{"type":"move","target":"lake","entry":59}]}]},{"type":"tree","sn":"树"},{"type":"tree","sn":"树"},{"type":"tree","sn":"树"},{"type":"tree","sn":"树"},
-      {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"object_id":"logging_tree"},
+      {"object_id":"pine_tree"},{"object_id":"birch_tree"},{"object_id":"oak_tree"},{"sn":"北路","acts":[{"label":"前进","cmd":[{"type":"move","target":"lake","entry":59}]}]},{"object_id":"ash_tree"},{"object_id":"cedar_tree"},{"object_id":"balsa_tree"},{"object_id":"ironwood_tree"},
+      {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"object_id":"pine_tree"},
       {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},
       {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},
-      {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"object_id":"game_trail"},{"object_id":"campfire"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},
+      {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"object_id":"game_trail"},{"object_id":"campfire"},{"object_id":"wild_wolf"},{"type":"null"},{"type":"tree","sn":"树"},
       {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},
       {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},
       {"type":"tree","sn":"树"},{"type":"tree","sn":"树"},{"type":"tree","sn":"树"},{"sn":"南路","acts":[{"label":"回家","cmd":[{"type":"move","target":"home","entry":3}]}]},{"type":"tree","sn":"树"},{"type":"tree","sn":"树"},{"type":"tree","sn":"树"},{"type":"tree","sn":"树"}
@@ -48,6 +104,14 @@
       {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
       {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
       {"object_id":"fishing_spot"},{"type":"null"},{"type":"null"},{"type":"null"},{"sn":"南回","acts":[{"label":"往南","cmd":[{"type":"move","target":"forest","entry":3}]}]},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"}
+    ]
+  },
+  "underworld": {
+    "name": "阴曹地府", "cols": 4, "desc": "昏暗中隐约见黄泉路、忘川水。",
+    "grid": [
+      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"npc_id":"underworld_keeper"},{"type":"null"},{"type":"null"},
+      {"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"}
     ]
   }
 }

@@ -1,5 +1,9 @@
 const UI = {
-    COMBAT_SKILL_SLOT: { basic_sword: '剑法' },
+    COMBAT_SKILL_SLOT: {
+        basic_sword: '剑法', basic_blade: '刀法', basic_throwing: '暗器', basic_spear: '枪法',
+        basic_palm: '掌法', basic_fist: '拳法', basic_leg: '腿法', basic_staff: '棍法',
+        basic_finger: '指法', basic_movement: '身法', basic_internal: '内功', basic_parry: '招架'
+    },
 
     getOreMeta(itemId) {
         const mats = Engine.db.materials || {};
@@ -12,27 +16,40 @@ const UI = {
     },
 
     getItemDisplayName(itemId, state) {
-        const obj = (Engine.db.objects && Engine.db.objects[itemId]) || (Engine.db.items && Engine.db.items[itemId]);
-        let meta = UI.getOreMeta(itemId) || UI.getForageMeta(itemId);
-        if (!meta) return obj ? obj.sn : itemId;
-        const miningLv = (state && state.production_skills && state.production_skills.mining && state.production_skills.mining.level) || 0;
-        const loggingLv = (state && state.production_skills && state.production_skills.logging && state.production_skills.logging.level) || 0;
-        const gatheringLv = (state && state.survival_skills && state.survival_skills.gathering && state.survival_skills.gathering.level) || 0;
-        const fishingLv = (state && state.survival_skills && state.survival_skills.fishing && state.survival_skills.fishing.level) || 0;
-        const farmingLv = (state && state.production_skills && state.production_skills.farming && state.production_skills.farming.level) || 0;
-        const huntingLv = (state && state.survival_skills && state.survival_skills.hunting && state.survival_skills.hunting.level) || 0;
-        const basicAt = meta.reveal_basic_at || 999;
-        const advAt = meta.reveal_advanced_at || 999;
-        const tags = meta.tags || [];
-        let lv = miningLv;
-        if (tags.includes('forage')) lv = gatheringLv;
-        else if (tags.includes('wood')) lv = loggingLv;
-        else if (tags.includes('fish')) lv = fishingLv;
-        else if (tags.includes('crop')) lv = farmingLv;
-        else if (tags.includes('game')) lv = huntingLv;
-        if (lv >= advAt && meta.sn_advanced) return meta.sn_advanced;
-        if (lv >= basicAt && meta.sn_basic) return meta.sn_basic;
-        return meta.sn_unknown || (obj ? obj.sn : itemId);
+        const baseId = (typeof InventoryUtils !== 'undefined' && InventoryUtils.getBaseItemId) ? InventoryUtils.getBaseItemId(itemId) : itemId;
+        const obj = (Engine.db.objects && Engine.db.objects[baseId]) || (Engine.db.items && Engine.db.items[baseId]);
+        let meta = UI.getOreMeta(baseId) || UI.getForageMeta(baseId);
+        let name;
+        if (!meta) {
+            name = obj ? obj.sn : baseId;
+        } else {
+            const miningLv = (state && state.production_skills && state.production_skills.mining && state.production_skills.mining.level) || 0;
+            const loggingLv = (state && state.production_skills && state.production_skills.logging && state.production_skills.logging.level) || 0;
+            const gatheringLv = (state && state.survival_skills && state.survival_skills.gathering && state.survival_skills.gathering.level) || 0;
+            const fishingLv = (state && state.survival_skills && state.survival_skills.fishing && state.survival_skills.fishing.level) || 0;
+            const farmingLv = (state && state.production_skills && state.production_skills.farming && state.production_skills.farming.level) || 0;
+            const huntingLv = (state && state.survival_skills && state.survival_skills.hunting && state.survival_skills.hunting.level) || 0;
+            const basicAt = meta.reveal_basic_at || 999;
+            const advAt = meta.reveal_advanced_at || 999;
+            const tags = meta.tags || [];
+            let lv = miningLv;
+            if (tags.includes('forage')) lv = gatheringLv;
+            else if (tags.includes('wood')) lv = loggingLv;
+            else if (tags.includes('fish')) lv = fishingLv;
+            else if (tags.includes('crop')) lv = farmingLv;
+            else if (tags.includes('game')) lv = huntingLv;
+            if (lv >= advAt && meta.sn_advanced) name = meta.sn_advanced;
+            else if (lv >= basicAt && meta.sn_basic) name = meta.sn_basic;
+            else name = meta.sn_unknown || (obj ? obj.sn : baseId);
+        }
+        if (obj && obj.tags && obj.tags.includes('seed')) {
+            const farmingLv = (state && state.production_skills && state.production_skills.farming && state.production_skills.farming.level) || 0;
+            if (farmingLv < 1) name = '未知种子';
+        }
+        const rawQ = (state && state.inventory_quality && state.inventory_quality[itemId] != null) ? state.inventory_quality[itemId] : (obj && obj.quality != null ? obj.quality : 1);
+        const quality = (typeof InventoryUtils !== 'undefined' && InventoryUtils.clampQuality) ? InventoryUtils.clampQuality(rawQ) : Math.max(1, Math.min(6, Math.floor(Number(rawQ)) || 1));
+        if (quality > 1) name = name + ' (品质' + quality + ')';
+        return name;
     },
 
     getObjectDisplayName(ref, state) {
@@ -76,8 +93,13 @@ const UI = {
     },
 
     getItemDescription(itemId, state) {
-        const obj = (Engine.db.objects && Engine.db.objects[itemId]) || (Engine.db.items && Engine.db.items[itemId]);
-        let meta = UI.getOreMeta(itemId) || UI.getForageMeta(itemId);
+        const baseId = (typeof InventoryUtils !== 'undefined' && InventoryUtils.getBaseItemId) ? InventoryUtils.getBaseItemId(itemId) : itemId;
+        const obj = (Engine.db.objects && Engine.db.objects[baseId]) || (Engine.db.items && Engine.db.items[baseId]);
+        if (obj && obj.tags && obj.tags.includes('seed')) {
+            const flv = (state && state.production_skills && state.production_skills.farming && state.production_skills.farming.level) || 0;
+            if (flv < 1) return "一些不起眼的小颗粒，看不出是什么。";
+        }
+        let meta = UI.getOreMeta(baseId) || UI.getForageMeta(baseId);
         if (!meta) return (obj && obj.fn) ? obj.fn : '';
         const miningLv = (state && state.production_skills && state.production_skills.mining && state.production_skills.mining.level) || 0;
         const loggingLv = (state && state.production_skills && state.production_skills.logging && state.production_skills.logging.level) || 0;
@@ -195,29 +217,11 @@ const UI = {
         return "难以支撑";
     },
     renderStats(state) {
-        const el = document.getElementById('stat-monitor');
-        const titleEl = document.getElementById('self-view-title');
-        if (!el) return;
-        const full = state.fullness != null ? state.fullness : 100;
-        const hyd = state.hydration != null ? state.hydration : 100;
-        const energy = state.energy != null ? state.energy : 100;
-        const energyMax = state.energy_max != null ? state.energy_max : 100;
-        const fatigue = state.fatigue != null ? state.fatigue : 0;
-
-        if (titleEl) titleEl.textContent = '当前状态';
-        const survivalBlock = `
-            <div style="line-height:1.8; color:var(--text);">
-                <div>饱食：${UI.degreeFullness(full)}</div>
-                <div>饮水：${UI.degreeHydration(hyd)}</div>
-                <div>精力：${UI.degreeEnergy(energy, energyMax)}</div>
-                <div>疲劳：${UI.degreeFatigue(fatigue)}</div>
-            </div>
-            <p class="panel-hint">留意饱食与休息。</p>
-        `;
-        el.innerHTML = survivalBlock;
-
         const skillContainer = document.getElementById('skill-categories-container');
         const skillSection = document.getElementById('skill-section');
+        const stateSection = document.getElementById('state-section');
+        if (stateSection) stateSection.style.display = 'none';
+
         const hasSurvival = Object.keys(state.survival_skills || {}).length > 0;
         const hasProduction = Object.keys(state.production_skills || {}).length > 0;
         const hasSupport = Object.keys(state.support_skills || {}).length > 0;
@@ -233,18 +237,29 @@ const UI = {
 
         const combatSection = document.getElementById('combat-section');
         const combatContainer = document.getElementById('combat-slots-container');
+        const combatActiveContainer = document.getElementById('combat-active-container');
         const hasCombat = Engine.hasCombatAwareness(state);
         if (combatSection) combatSection.style.display = hasCombat ? '' : 'none';
         if (combatContainer && hasCombat) {
             UI.renderCombatSlots(combatContainer, state);
         }
+        if (combatActiveContainer) {
+            combatActiveContainer.style.display = 'none';
+        }
     },
 
     survivalSkillName(id) { const n = { breathing: '呼吸' }; return n[id] || id; },
-    productionSkillName(id) { const n = { mining: '挖矿' }; return n[id] || id; },
-    supportSkillName(id) { const n = { probe: '探查', almanac: '看黄历' }; return n[id] || id; },
+    productionSkillName(id) {
+        const n = { mining: '挖矿', logging: '伐木', farming: '种植', cooking: '烹饪', medicine: '制药', leatherworking: '制皮', smithing: '锻造', carpentry: '木工', tailoring: '缝纫', enchanting: '附魔' };
+        return n[id] || (Engine.db.crafting_skills && Engine.db.crafting_skills[id] && Engine.db.crafting_skills[id].sn) || id;
+    },
+    supportSkillName(id) { const n = { probe: '探查', almanac: '看黄历', common_tongue: '通用语' }; return n[id] || id; },
     skillName(skillId) {
-        const names = { basic_sword: '基本剑法' };
+        const names = {
+            basic_sword: '基本剑法', basic_blade: '基本刀法', basic_throwing: '基本暗器', basic_spear: '基本枪法',
+            basic_palm: '基本掌法', basic_fist: '基本拳法', basic_leg: '基本腿法', basic_staff: '基本棍法',
+            basic_finger: '基本指法', basic_movement: '基本身法', basic_internal: '基本内功', basic_parry: '基本招架'
+        };
         return names[skillId] || skillId;
     },
     renderCategorySkillBar(skillsObj, nameFn) {
@@ -282,7 +297,7 @@ const UI = {
             if (skillId) {
                 const prog = progress[skillId];
                 const level = prog && prog.level != null ? prog.level : 1;
-                const levelMax = prog && prog.level_max != null ? prog.level_max : 500;
+                const levelMax = prog && prog.level_max != null ? prog.level_max : 1000;
                 const name = UI.skillName(skillId);
                 const degree = UI.skillDegree(level, levelMax, prog && prog.proficiency);
                 btn.innerHTML = `<span class="slot-name">${slotName}</span><span class="slot-skill">${name} ${degree}</span>`;
@@ -321,6 +336,83 @@ const UI = {
             Engine.render();
         }, 'combat-skill');
     },
+
+    updateCombatPanel() {
+        const state = Engine.state;
+        const enemies = (state.combat_enemies || []).filter(e => !CombatActions.isTargetDead(e.state));
+        const queued = state.combat_queued_command;
+
+        const actionsRowEl = document.getElementById('combat-cmd-row');
+        if (actionsRowEl && state.in_combat) {
+            actionsRowEl.innerHTML = '';
+            const btnItem = document.createElement('button');
+            btnItem.type = 'button';
+            btnItem.className = 'action-brick';
+            btnItem.textContent = queued && queued.type === 'item' ? '道具 (已选)' : '道具';
+            btnItem.onclick = () => {
+                const inv = state.inventory || {};
+                const objects = Engine.db.objects || {};
+                const options = [];
+                Object.keys(inv).forEach(itemId => {
+                    const baseId = (typeof InventoryUtils !== 'undefined' && InventoryUtils.getBaseItemId) ? InventoryUtils.getBaseItemId(itemId) : itemId;
+                    const obj = objects[baseId];
+                    if (obj && (obj.effect_id === 'heal_limb' || obj.effect === 'heal_limb')) {
+                        const name = UI.getItemDisplayName ? UI.getItemDisplayName(itemId, state) : (obj.sn || itemId);
+                        const heal = (obj.effect_params && obj.effect_params.heal) || (obj.heal_amount) || 20;
+                        options.push({ key: itemId, text: name + ' (+' + heal + ')', heal_amount: heal });
+                    }
+                });
+                if (options.length === 0) {
+                    Engine.log('背包内无可用的治疗道具。');
+                    return;
+                }
+                UI.showChoiceModal('使用道具', options, (key) => {
+                    const opt = options.find(o => o.key === key);
+                    CombatEngine.queueCommand({ type: 'item', item_id: key, effect: 'heal_limb', heal_amount: opt && opt.heal_amount ? opt.heal_amount : 20 });
+                    if (typeof UI !== 'undefined' && UI.updateCombatPanel) UI.updateCombatPanel();
+                });
+            };
+            actionsRowEl.appendChild(btnItem);
+            const btnFlee = document.createElement('button');
+            btnFlee.type = 'button';
+            btnFlee.className = 'action-brick';
+            btnFlee.textContent = queued && queued.type === 'flee' ? '逃跑 (已选)' : '逃跑';
+            btnFlee.onclick = () => {
+                CombatEngine.queueCommand({ type: 'flee' });
+                if (typeof UI !== 'undefined' && UI.updateCombatPanel) UI.updateCombatPanel();
+            };
+            actionsRowEl.appendChild(btnFlee);
+        }
+
+        const enemyListEl = document.getElementById('combat-enemy-list');
+        if (enemyListEl && !state.in_combat) {
+            enemyListEl.innerHTML = '<p class="menu-hint">无</p>';
+        }
+    },
+
+    showCombatModal() {
+        const modal = document.getElementById('combat-modal');
+        const logEl = document.getElementById('combat-log-content');
+        if (!modal || !logEl) return;
+        logEl.innerHTML = '';
+        modal.classList.remove('hidden');
+        UI.updateCombatPanel();
+    },
+
+    closeCombatModal() {
+        const modal = document.getElementById('combat-modal');
+        if (modal) modal.classList.add('hidden');
+    },
+
+    appendCombatLog(html) {
+        const wrap = document.getElementById('combat-log-content');
+        if (!wrap) return;
+        const el = document.createElement('div');
+        el.className = 'log';
+        el.innerHTML = html;
+        wrap.appendChild(el);
+        wrap.scrollTop = wrap.scrollHeight;
+    },
     skillDegree(level, levelMax, proficiency) {
         if (level == null || levelMax == null) return '—';
         const pct = levelMax > 0 ? (level / levelMax) * 100 : 0;
@@ -340,7 +432,7 @@ const UI = {
             if (skillId) {
                 const prog = progress[skillId];
                 const level = prog && prog.level != null ? prog.level : 1;
-                const levelMax = prog && prog.level_max != null ? prog.level_max : 500;
+                const levelMax = prog && prog.level_max != null ? prog.level_max : 1000;
                 const name = UI.skillName(skillId);
                 const degree = UI.skillDegree(level, levelMax, prog && prog.proficiency);
                 lines.push(`<div class="combat-slot" style="line-height:1.6;">${slotName}：${name} ${degree}</div>`);
@@ -413,16 +505,44 @@ const UI = {
             const item = (Engine.db.objects && Engine.db.objects[baseId]) || (Engine.db.items && Engine.db.items[baseId]);
             if (!item) return;
 
+            const wrap = document.createElement('div');
+            wrap.className = 'inventory-row';
+            wrap.style.display = 'flex';
+            wrap.style.alignItems = 'stretch';
+            wrap.style.gap = '4px';
+            wrap.style.marginBottom = '4px';
+
             const btn = document.createElement('button');
             btn.className = "action-brick";
+            btn.style.flex = '1';
             const name = UI.getItemDisplayName(baseId, state);
+            const locked = (state.inventory_locked || {})[itemId];
             let countBadge = count > 1 ? `<span style="font-size:10px;color:#888;position:absolute;right:4px;bottom:2px;">x${count}</span>` : '';
+            if (locked) countBadge = '<span style="position:absolute;top:2px;right:4px;font-size:10px;" title="已锁定">🔒</span>' + countBadge;
             btn.innerHTML = `${name}${countBadge}`;
             btn.style.position = 'relative';
             btn.onclick = () => Engine.showItemActions(itemId);
             btn.onmouseenter = () => UI.showItemTooltip(baseId, btn);
             btn.onmouseleave = () => UI.hideItemTooltip();
-            container.appendChild(btn);
+
+            const lockBtn = document.createElement('button');
+            lockBtn.type = 'button';
+            lockBtn.className = 'item-lock-btn';
+            lockBtn.title = locked ? '点击解锁' : '点击锁定（锁定后不可作为生产原料）';
+            lockBtn.textContent = locked ? '🔒' : '◇';
+            lockBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (!Engine.state.inventory_locked) Engine.state.inventory_locked = {};
+                if (Engine.state.inventory_locked[itemId]) {
+                    delete Engine.state.inventory_locked[itemId];
+                } else {
+                    Engine.state.inventory_locked[itemId] = true;
+                }
+                UI.renderInventory(Engine.state);
+            };
+            wrap.appendChild(btn);
+            wrap.appendChild(lockBtn);
+            container.appendChild(wrap);
         });
     },
 
@@ -472,6 +592,9 @@ const UI = {
     },
 
     showManualMiningModal(ctx) {
+        const prog = Engine.getSkillProgress && Engine.getSkillProgress('production', 'mining');
+        const lv = (prog && prog.level) ? prog.level : 1;
+        const skillBonus = Math.min(2, Math.floor(lv / 25));
         const steps = [
             [
                 { id: 'crack', text: '顺着裂缝下锤', score: 2, log: '你顺着已有的裂缝下锤，石屑四溅。' },
@@ -496,10 +619,9 @@ const UI = {
                 else if (totalScore <= -1) diffAdj = baseDiff + 1;
                 const turnCost = ctx.turnCost || 3;
                 Engine.advanceTime(turnCost * 10);
-                Engine.run([
-                    { type: 'mine_ore', mode: 'manual', difficulty: diffAdj, ore_item_id: ctx.oreItemId || 'iron_ore', cycles: 1 },
-                    { type: 'mod_stat', key: 'fatigue', val: 2 }
-                ]);
+                const cmd = { type: 'mine_ore', mode: 'manual', difficulty: diffAdj, cycles: 1 };
+                if (ctx.ore_vein && Object.keys(ctx.ore_vein).length > 0) cmd.ore_vein = ctx.ore_vein; else cmd.ore_item_id = ctx.ore_item_id || 'iron_ore';
+                Engine.run([cmd, { type: 'mod_stat', key: 'fatigue', val: 2 }]);
                 Engine.render();
                 return;
             }
@@ -515,7 +637,7 @@ const UI = {
             UI.showChoiceModal(title, options, (key) => {
                 const chosen = opts.find(o => o.id === key);
                 if (chosen) {
-                    totalScore += chosen.score;
+                    totalScore += chosen.score + (chosen.score > 0 ? skillBonus : 0);
                     if (chosen.log) Engine.log(chosen.log);
                 }
                 step += 1;
@@ -526,6 +648,9 @@ const UI = {
     },
 
     showManualLoggingModal(ctx) {
+        const prog = Engine.getSkillProgress && Engine.getSkillProgress('production', 'logging');
+        const lv = (prog && prog.level) ? prog.level : 1;
+        const skillBonus = Math.min(2, Math.floor(lv / 25));
         const steps = [
             [
                 { id: 'root', text: '靠近树根下斧', score: 2, log: '你把斧口尽量贴近树根，争取让受力更稳定。' },
@@ -551,7 +676,7 @@ const UI = {
                 const turnCost = ctx.turnCost || 3;
                 Engine.advanceTime(turnCost * 10);
                 Engine.run([
-                    { type: 'chop_wood', mode: 'manual', difficulty: diffAdj, wood_item_id: ctx.woodItemId || 'rough_log', cycles: 1 },
+                    { type: 'chop_wood', mode: 'manual', difficulty: diffAdj, wood_item_id: ctx.woodItemId || 'pine_log', cycles: 1 },
                     { type: 'mod_stat', key: 'fatigue', val: 3 }
                 ]);
                 Engine.render();
@@ -569,7 +694,64 @@ const UI = {
             UI.showChoiceModal(title, options, (key) => {
                 const chosen = opts.find(o => o.id === key);
                 if (chosen) {
-                    totalScore += chosen.score;
+                    totalScore += chosen.score + (chosen.score > 0 ? skillBonus : 0);
+                    if (chosen.log) Engine.log(chosen.log);
+                }
+                step += 1;
+                runStep();
+            }, 'manual');
+        };
+        runStep();
+    },
+
+    showManualHuntingModal(ctx) {
+        const prog = Engine.getSkillProgress && Engine.getSkillProgress('survival', 'hunting');
+        const lv = (prog && prog.level) ? prog.level : 1;
+        const skillBonus = Math.min(2, Math.floor(lv / 25));
+        const steps = [
+            [
+                { id: 'track', text: '顺着足迹与粪便辨踪', score: 2, log: '你蹲下身辨认地上的痕迹，大致摸清了猎物的去向。' },
+                { id: 'wander', text: '随便走走碰运气', score: 0, log: '你在林子里转了一圈，没发现什么明显的踪迹。' }
+            ],
+            [
+                { id: 'stalk', text: '压低身子悄悄接近', score: 2, log: '你放轻脚步，借着灌木一点点靠近。' },
+                { id: 'rush', text: '看准方向直接冲过去', score: -1, log: '你猛地一冲，惊得草动树摇，猎物早跑了。' }
+            ],
+            [
+                { id: 'steady', text: '稳住呼吸再出手', score: 2, log: '你屏住气，等它放松警惕的瞬间下手。' },
+                { id: 'early', text: '忍不住抢先动手', score: -1, log: '你出手太早，猎物一惊，蹿得没影。' }
+            ]
+        ];
+        let step = 0;
+        let totalScore = 0;
+        const runStep = () => {
+            if (step >= steps.length) {
+                const baseDiff = ctx.difficulty || 2;
+                let diffAdj = baseDiff;
+                if (totalScore >= 4) diffAdj = Math.max(1, baseDiff - 1);
+                else if (totalScore <= -1) diffAdj = baseDiff + 1;
+                const turnCost = ctx.turnCost || 4;
+                Engine.advanceTime(turnCost * 10);
+                Engine.run([
+                    { type: 'hunt_game', mode: 'manual', difficulty: diffAdj, cycles: 1 },
+                    { type: 'mod_stat', key: 'fatigue', val: 2 }
+                ]);
+                Engine.render();
+                return;
+            }
+            const opts = steps[step];
+            const options = opts.map(o => ({ key: o.id, text: o.text }));
+            const title = '手动狩猎';
+            const subtitle = step === 0 ? '先辨明猎物的踪迹。' : step === 1 ? '选择接近的方式。' : '把握下手的时机。';
+            const subtitleEl = document.getElementById('choice-modal-subtitle');
+            if (subtitleEl) {
+                subtitleEl.textContent = subtitle;
+                subtitleEl.style.display = '';
+            }
+            UI.showChoiceModal(title, options, (key) => {
+                const chosen = opts.find(o => o.id === key);
+                if (chosen) {
+                    totalScore += chosen.score + (chosen.score > 0 ? skillBonus : 0);
                     if (chosen.log) Engine.log(chosen.log);
                 }
                 step += 1;
@@ -610,7 +792,7 @@ const UI = {
             const turnCost = ctx.turnCost || 3;
             Engine.advanceTime(turnCost * 10);
             Engine.run([
-                { type: 'catch_fish', mode: 'manual', difficulty: ctx.difficulty || 2, fish_item_id: ctx.fishItemId || 'river_fish', cycles: 1, manual_result },
+                { type: 'catch_fish', mode: 'manual', difficulty: ctx.difficulty || 2, fish_item_id: ctx.fishItemId || 'dull_bass', cycles: 1, manual_result },
                 { type: 'mod_stat', key: 'fatigue', val: 1 }
             ]);
             Engine.render();
@@ -683,14 +865,16 @@ const UI = {
         let extraClass = '';
         if (layout === 'combat-skill') extraClass = ' choice-options--list';
         else if (layout === 'manual') extraClass = ' choice-options--manual';
+        else if (layout === 'list') extraClass = ' choice-options--list';
         optionsContainer.className = 'action-brick-container choice-options' + extraClass;
-        modal.classList.remove('choice-modal--combat', 'choice-modal--manual');
+        modal.classList.remove('choice-modal--combat', 'choice-modal--manual', 'choice-modal--list');
         if (layout === 'combat-skill') modal.classList.add('choice-modal--combat');
-        if (layout === 'manual') modal.classList.add('choice-modal--manual');
+        else if (layout === 'manual') modal.classList.add('choice-modal--manual');
+        else if (layout === 'list') modal.classList.add('choice-modal--list');
 
         const cleanup = () => {
             modal.classList.add('hidden');
-            modal.classList.remove('choice-modal--combat', 'choice-modal--manual');
+            modal.classList.remove('choice-modal--combat', 'choice-modal--manual', 'choice-modal--list');
             cancelBtn.removeEventListener('click', cancelListener);
             document.removeEventListener('keydown', esckeyListener);
         };
@@ -704,7 +888,7 @@ const UI = {
             if (e.key === "Escape") cancelListener();
         };
 
-        const isList = layout === 'combat-skill' || layout === 'manual';
+        const isList = layout === 'combat-skill' || layout === 'manual' || layout === 'list';
         options.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = isList ? 'choice-option-btn' : 'action-brick';
@@ -721,6 +905,54 @@ const UI = {
         modal.classList.remove('hidden');
     },
 
+    showBuildModal() {
+        const modal = document.getElementById('build-modal');
+        const optionsContainer = document.getElementById('build-options');
+        const cancelBtn = document.getElementById('build-cancel-btn');
+        if (!modal || !optionsContainer || !cancelBtn) return;
+
+        const buildings = Engine.db.buildings || {};
+        const unlocked = Engine.state.unlocked_buildings || {};
+        const list = Object.entries(buildings).filter(([id, def]) => unlocked[id] && (def.materials && Object.keys(def.materials).length > 0));
+        if (list.length === 0) {
+            Engine.log("你还没有解锁任何建筑蓝图。");
+            return;
+        }
+
+        optionsContainer.innerHTML = '';
+        list.forEach(([buildingId, def]) => {
+            const materials = def.materials || {};
+            let canBuild = true;
+            for (const [matId, need] of Object.entries(materials)) {
+                const have = typeof Engine.countAvailableMaterial === 'function' ? Engine.countAvailableMaterial(matId) : 0;
+                if (have < need) { canBuild = false; break; }
+            }
+            const matText = Object.entries(materials).map(([mid, n]) => {
+                const name = (Engine.db.objects && Engine.db.objects[mid] && Engine.db.objects[mid].sn) || mid;
+                return name + '×' + n;
+            }).join('、');
+            const btn = document.createElement('button');
+            btn.className = 'choice-option-btn' + (canBuild ? '' : ' disabled');
+            btn.innerText = (def.sn || buildingId) + (matText ? '（' + matText + '）' : '');
+            if (canBuild) {
+                btn.onclick = () => {
+                    modal.classList.add('hidden');
+                    Engine.run([{ type: 'build_building', building_id: buildingId }]);
+                    Engine.render();
+                };
+            } else {
+                btn.disabled = true;
+            }
+            optionsContainer.appendChild(btn);
+        });
+
+        cancelBtn.onclick = () => {
+            modal.classList.add('hidden');
+            Engine.log("你取消了建造。");
+        };
+        modal.classList.remove('hidden');
+    },
+
     showStorageModal(containerObject) {
         const modal = document.getElementById('storage-modal');
         const closeBtn = document.getElementById('storage-close-btn');
@@ -729,6 +961,9 @@ const UI = {
         if(!modal || !closeBtn || !containerContent || !playerContent) return;
 
         const getBaseItemId = (key) => (key && /_\d+$/.test(key)) ? key.replace(/_\d+$/, '') : key;
+        const containerId = containerObject.id || ('grid_' + (Engine.cur && Engine.pIdx != null ? Engine.pIdx : 0));
+        if (!Engine.state.container_locked) Engine.state.container_locked = {};
+        if (!Engine.state.container_locked[containerId]) Engine.state.container_locked[containerId] = {};
 
         const renderColumn = (element, inventory, type) => {
             element.innerHTML = '';
@@ -749,9 +984,14 @@ const UI = {
 
                 const li = document.createElement('li');
                 li.className = 'storage-list-row';
+                li.style.display = 'flex';
+                li.style.alignItems = 'stretch';
+                li.style.gap = '4px';
+
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'storage-list-btn';
+                btn.style.flex = '1';
                 const name = UI.getItemDisplayName(baseId, Engine.state);
                 btn.textContent = count > 1 ? `${name} ×${count}` : name;
                 btn.onclick = () => {
@@ -763,7 +1003,31 @@ const UI = {
                 };
                 btn.onmouseenter = () => UI.showItemTooltip(baseId, btn);
                 btn.onmouseleave = () => UI.hideItemTooltip();
+
+                const lockBtn = document.createElement('button');
+                lockBtn.type = 'button';
+                lockBtn.className = 'item-lock-btn';
+                const locked = type === 'player'
+                    ? (Engine.state.inventory_locked || {})[key]
+                    : (Engine.state.container_locked[containerId] || {})[key];
+                lockBtn.title = locked ? '点击解锁' : '点击锁定（不可作为生产原料）';
+                lockBtn.textContent = locked ? '🔒' : '◇';
+                lockBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (type === 'player') {
+                        if (!Engine.state.inventory_locked) Engine.state.inventory_locked = {};
+                        if (Engine.state.inventory_locked[key]) delete Engine.state.inventory_locked[key];
+                        else Engine.state.inventory_locked[key] = true;
+                    } else {
+                        if (!Engine.state.container_locked[containerId]) Engine.state.container_locked[containerId] = {};
+                        if (Engine.state.container_locked[containerId][key]) delete Engine.state.container_locked[containerId][key];
+                        else Engine.state.container_locked[containerId][key] = true;
+                    }
+                    refresh();
+                };
+
                 li.appendChild(btn);
+                li.appendChild(lockBtn);
                 element.appendChild(li);
             });
         };
@@ -793,9 +1057,32 @@ const UI = {
         modal.classList.remove('hidden');
     },
 
+    updateDayNightCanvas(time) {
+        const canvas = document.getElementById('status-bar-canvas');
+        const bar = document.getElementById('status-bar');
+        if (!canvas || !bar || !time) return;
+        const w = bar.offsetWidth;
+        const h = bar.offsetHeight;
+        if (w <= 0 || h <= 0) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.scale(dpr, dpr);
+        const hourF = (time.hour || 0) + (time.minute != null ? time.minute / 60 : 0);
+        // 中午(12时)最亮、半夜(0/24时)最暗；黎明/傍晚平滑过渡
+        const alpha = 0.5 * 0.5 * (1 - Math.cos(((hourF - 12) * Math.PI) / 12));
+        ctx.fillStyle = `rgba(0,0,0,${Math.max(0, Math.min(1, alpha))})`;
+        ctx.fillRect(0, 0, w, h);
+    },
+
     updateStatus(time, sceneName) {
         const tEl = document.getElementById('time-display');
         const lEl = document.getElementById('loc-display');
+        if (typeof time === 'object' && time !== null) UI.updateDayNightCanvas(time);
         if (tEl) {
             const dayIndex = (Engine.state && Engine.state.day_index) || 1;
             let timePart = '';
@@ -875,6 +1162,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initResizer(document.getElementById('info-panel-resizer'), document.getElementById('info-panel'), 'horizontal');
     initResizer(document.getElementById('log-panel-resizer'), document.getElementById('log-panel'), 'vertical');
+
+    // Modal resize: all .modal-content can be stretched by dragging the bottom-right handle
+    const initModalResizers = () => {
+        const overlays = document.querySelectorAll('.modal-overlay');
+        overlays.forEach(overlay => {
+            const content = overlay.querySelector('.modal-content');
+            if (!content || content.querySelector('.modal-resize-handle')) return;
+            const handle = document.createElement('div');
+            handle.className = 'modal-resize-handle';
+            handle.setAttribute('title', '拖拽调整大小');
+            content.appendChild(handle);
+            handle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startW = content.offsetWidth;
+                const startH = content.offsetHeight;
+                const minW = 280;
+                const minH = 120;
+                const maxW = Math.max(600, window.innerWidth - 40);
+                const maxH = Math.max(400, window.innerHeight - 40);
+                const doDrag = (e) => {
+                    const dw = e.clientX - startX;
+                    const dh = e.clientY - startY;
+                    let w = Math.min(maxW, Math.max(minW, startW + dw));
+                    let h = Math.min(maxH, Math.max(minH, startH + dh));
+                    content.style.width = w + 'px';
+                    content.style.height = h + 'px';
+                    content.style.maxWidth = w + 'px';
+                };
+                const stopDrag = () => {
+                    window.removeEventListener('mousemove', doDrag, false);
+                    window.removeEventListener('mouseup', stopDrag, false);
+                };
+                window.addEventListener('mousemove', doDrag, false);
+                window.addEventListener('mouseup', stopDrag, false);
+            });
+        });
+    };
+    initModalResizers();
 
     // Popout for interactive panels (moves content node)
     const initContentMovePopout = (btnId, panelId, contentId) => {

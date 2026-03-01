@@ -23,7 +23,7 @@ const SkillActions = {
         const progress = Engine.state.combat_skill_progress || {};
         if (slotKey && Object.prototype.hasOwnProperty.call(slots, slotKey) && skillId) {
             const level = Math.max(1, parseInt(c.level, 10) || 1);
-            const levelMax = Math.max(level, parseInt(c.level_max, 10) || 500);
+            const levelMax = Math.max(level, parseInt(c.level_max, 10) || 1000);
             const proficiency = Math.max(0, parseFloat(c.proficiency) || 0);
             slots[slotKey] = skillId;
             progress[skillId] = { level, level_max: levelMax, proficiency };

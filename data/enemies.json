@@ -1,0 +1,36 @@
+{
+  "wolf": {
+    "id": "wolf",
+    "sn": "野狼",
+    "limbs": { "head": 25, "chest": 60, "stomach": 40, "l_arm": 35, "r_arm": 35, "l_leg": 40, "r_leg": 40 },
+    "maxLimbs": { "head": 25, "chest": 60, "stomach": 40, "l_arm": 35, "r_arm": 35, "l_leg": 40, "r_leg": 40 },
+    "reflex_innate": 12,
+    "reflex_acq": 0,
+    "sinew_innate": 8,
+    "flex_innate": 10,
+    "combat_skill_progress": { "basic_parry": { "level": 5 }, "basic_movement": { "level": 8 } },
+    "move_id": "basic_sword_thrust",
+    "damage_type": "slashing",
+    "power_base": 8,
+    "drops": { "raw_meat": 1 },
+    "potential_gain": 50,
+    "battle_exp_gain": 120
+  },
+  "bandit": {
+    "id": "bandit",
+    "sn": "山贼",
+    "limbs": { "head": 30, "chest": 70, "stomach": 45, "l_arm": 50, "r_arm": 50, "l_leg": 50, "r_leg": 50 },
+    "maxLimbs": { "head": 30, "chest": 70, "stomach": 45, "l_arm": 50, "r_arm": 50, "l_leg": 50, "r_leg": 50 },
+    "reflex_innate": 10,
+    "reflex_acq": 5,
+    "sinew_innate": 12,
+    "flex_innate": 8,
+    "combat_skill_progress": { "basic_parry": { "level": 15 }, "basic_movement": { "level": 10 } },
+    "move_id": "basic_sword_thrust",
+    "damage_type": "slashing",
+    "power_base": 12,
+    "drops": {},
+    "potential_gain": 80,
+    "battle_exp_gain": 200
+  }
+}

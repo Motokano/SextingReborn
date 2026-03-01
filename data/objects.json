@@ -7,6 +7,11 @@
     "sn": "篝火", "fn": "明亮的火堆", "type": "fire",
     "onStep": [{"type": "call_action", "id": "fire_burn"}]
   },
+  "wild_wolf": {
+    "sn": "野狼", "fn": "一头瘦削的野狼，目露凶光。",
+    "enemy_ids": ["wolf"],
+    "onStep": [{"type": "start_combat", "enemy_ids_from": "object"}]
+  },
   "water": { "sn": "湖面", "fn": "深水区", "type": "water", "blocking": true },
   "stone": {
     "sn": "石块", "fn": "一块普通的灰色石块，有点重。",
@@ -67,10 +72,20 @@
     "fn": "关于观察与探查的笔记。",
     "action_ids": ["read_probe_manual"]
   },
+  "common_tongue_manual": {
+    "sn": "通用语入门",
+    "fn": "一本教人发音与常用词的薄册，边角被翻得起毛。",
+    "action_ids": ["read_common_tongue_manual"]
+  },
   "almanac_manual": {
     "sn": "旧黄历",
     "fn": "一本破旧的黄历，上面密密麻麻写着某种“宜忌”。",
     "action_ids": ["read_almanac_manual"]
+  },
+  "basic_compendium": {
+    "sn": "武学纲要",
+    "fn": "一本辑录刀、暗器、枪、掌、拳、腿、棍、指、身法、内功、招架入门要诀的册子。",
+    "action_ids": ["read_basic_compendium"]
   },
   "gathering_manual": {
     "sn": "采集手册",
@@ -108,6 +123,22 @@
     "fn": "一根随手削出的木杆，斜插在地上，上面刻着歪七扭八的刻痕，大概能看个时辰。",
     "tags": ["building", "time"],
     "action_ids": ["setup_time_pole"]
+  },
+  "blueprint_time_pole": {
+    "sn": "报时杆蓝图",
+    "fn": "一张简陋的图纸，画着如何立一根木杆来估摸日影。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1,
+    "action_ids": ["use_blueprint_time_pole"]
+  },
+  "blueprint_storage": {
+    "sn": "仓库蓝图",
+    "fn": "一张图纸，说明如何搭建简易储物箱。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1,
+    "action_ids": ["use_blueprint_storage"]
   },
   "fishing_rod": {
     "sn": "鱼竿",
@@ -200,26 +231,54 @@
     "tags": ["material","ore","metal","hard","weapon_grade","brittle","impure"],
     "stack_limit": 20
   },
-  "rough_log": {
-    "sn": "粗木柴",
-    "fn": "一截粗糙的木头，可以当柴火，也能勉强支撑些简单结构。",
-    "weight": 2.0,
-    "tags": ["material","wood","fuel","low_grade"],
+  "pine_log": {
+    "sn": "松木原木",
+    "fn": "富含松脂，质地较软，极易燃烧，具天然防水性。",
+    "weight": 1.6,
+    "tags": ["material", "wood", "fuel", "flammable", "waterproof", "soft"],
     "stack_limit": 20
   },
-  "straight_log": {
-    "sn": "直木料",
-    "fn": "比较笔直的木料，适合做梁柱或长柄，不过搬起来有点吃力。",
-    "weight": 2.5,
-    "tags": ["material","wood","construction_grade","heavy"],
+  "birch_log": {
+    "sn": "白桦木原木",
+    "fn": "树皮呈纸片状易剥落且防水，木质轻软，纹理均匀。",
+    "weight": 1.4,
+    "tags": ["material", "wood", "light", "soft", "uniform_grain", "waterproof"],
+    "stack_limit": 20
+  },
+  "oak_log": {
+    "sn": "橡木原木",
+    "fn": "硬度极高，耐腐蚀，富含单宁酸，常用于造船与酿酒桶。",
+    "weight": 2.2,
+    "tags": ["material", "wood", "hard", "corrosion_resistant", "construction_grade"],
     "stack_limit": 15
   },
-  "resin_wood": {
-    "sn": "脂木",
-    "fn": "带树脂味的木头，很容易点燃，火旺但烟也大。",
-    "weight": 1.8,
-    "tags": ["material","wood","fuel","smoky"],
+  "ash_log": {
+    "sn": "白蜡木原木",
+    "fn": "抗震性与弹性极佳，是球棒、斧柄与长矛杆的首选。",
+    "weight": 2.0,
+    "tags": ["material", "wood", "elastic", "shock_resistant", "tool_handle"],
+    "stack_limit": 15
+  },
+  "cedar_log": {
+    "sn": "雪松木原木",
+    "fn": "散发强烈香气，含天然油脂，防虫、防潮、防腐。",
+    "weight": 1.5,
+    "tags": ["material", "wood", "aromatic", "rot_resistant", "oily"],
     "stack_limit": 20
+  },
+  "balsa_log": {
+    "sn": "轻木原木",
+    "fn": "密度极低、最轻的实用木材，极其轻巧且浮力惊人。",
+    "weight": 0.5,
+    "tags": ["material", "wood", "very_light", "buoyant"],
+    "stack_limit": 25
+  },
+  "ironwood_log": {
+    "sn": "铁木原木",
+    "fn": "密度极大入水即沉，坚硬如铁，常带自润滑天然油脂。",
+    "weight": 3.0,
+    "tags": ["material", "wood", "very_heavy", "very_hard", "sinkable"],
+    "stack_limit": 10
   },
   "wild_berry": {
     "sn": "野果",
@@ -309,50 +368,703 @@
     "sn": "岩壁",
     "fn": "一面普通的岩壁，看上去和周围没什么不同。",
     "tags": ["node", "mining"],
-    "ore_item_id": "iron_ore",
     "action_ids": ["mine_manual", "mine_auto"]
   },
-  "logging_tree": {
-    "sn": "树干",
-    "fn": "一棵看上去普普通通的树干，和旁边的树没什么区别。",
-    "tags": ["node","logging"],
-    "wood_item_id": "rough_log",
-    "action_ids": ["chop_manual","chop_auto"]
+  "pine_tree": {
+    "sn": "松树",
+    "fn": "树皮粗糙、富含松脂的针叶树，砍伐可得松木原木。",
+    "tags": ["node", "logging", "tree"],
+    "wood_item_id": "pine_log",
+    "action_ids": ["chop_manual", "chop_auto"]
   },
-  "river_fish": {
-    "sn": "河鱼",
-    "fn": "从水里捞上来的鱼，烤或煮能填肚子。",
+  "birch_tree": {
+    "sn": "白桦树",
+    "fn": "树皮纸片状易剥的白桦，砍伐可得白桦木原木。",
+    "tags": ["node", "logging", "tree"],
+    "wood_item_id": "birch_log",
+    "action_ids": ["chop_manual", "chop_auto"]
+  },
+  "oak_tree": {
+    "sn": "橡树",
+    "fn": "木质坚硬耐腐的阔叶树，砍伐可得橡木原木。",
+    "tags": ["node", "logging", "tree"],
+    "wood_item_id": "oak_log",
+    "action_ids": ["chop_manual", "chop_auto"]
+  },
+  "ash_tree": {
+    "sn": "白蜡树",
+    "fn": "木质富有弹性的乔木，砍伐可得白蜡木原木。",
+    "tags": ["node", "logging", "tree"],
+    "wood_item_id": "ash_log",
+    "action_ids": ["chop_manual", "chop_auto"]
+  },
+  "cedar_tree": {
+    "sn": "雪松",
+    "fn": "散发香气的针叶树，砍伐可得雪松木原木。",
+    "tags": ["node", "logging", "tree"],
+    "wood_item_id": "cedar_log",
+    "action_ids": ["chop_manual", "chop_auto"]
+  },
+  "balsa_tree": {
+    "sn": "轻木树",
+    "fn": "木质极轻的乔木，砍伐可得轻木原木。",
+    "tags": ["node", "logging", "tree"],
+    "wood_item_id": "balsa_log",
+    "action_ids": ["chop_manual", "chop_auto"]
+  },
+  "ironwood_tree": {
+    "sn": "铁木树",
+    "fn": "木质坚沉如铁的硬木，砍伐可得铁木原木。",
+    "tags": ["node", "logging", "tree"],
+    "wood_item_id": "ironwood_log",
+    "action_ids": ["chop_manual", "chop_auto"]
+  },
+  "mud_loach": {
+    "sn": "泥布丁鳅",
+    "fn": "体表黏滑、刺多，处理后可食。",
+    "weight": 0.3,
+    "tags": ["material", "fish", "food"],
+    "stack_limit": 15
+  },
+  "weed_minnow": {
+    "sn": "杂草小鱼",
+    "fn": "体型极小，常作钓饵。",
+    "weight": 0.05,
+    "tags": ["material", "fish", "food", "bait"],
+    "stack_limit": 30
+  },
+  "blind_cavefish": {
+    "sn": "盲眼洞穴鱼",
+    "fn": "无眼，栖于暗处水坑，可食。",
+    "weight": 0.2,
+    "tags": ["material", "fish", "food"],
+    "stack_limit": 20
+  },
+  "brittle_carp": {
+    "sn": "脆骨鲫",
+    "fn": "骨多肉少，宜熬汤。",
+    "weight": 0.4,
+    "tags": ["material", "fish", "food"],
+    "stack_limit": 15
+  },
+  "green_frogfish": {
+    "sn": "绿水蛙鱼",
+    "fn": "形似蛙、带土腥，可食。",
     "weight": 0.5,
-    "tags": ["material","fish","food"],
+    "tags": ["material", "fish", "food"],
     "stack_limit": 10
   },
-  "pond_carp": {
-    "sn": "塘鲤",
-    "fn": "肉多刺少的鱼，适合熬汤。",
+  "dull_bass": {
+    "sn": "呆呆鲈",
+    "fn": "易上钩，适合练手。",
+    "weight": 0.6,
+    "tags": ["material", "fish", "food"],
+    "stack_limit": 10
+  },
+  "copper_trout": {
+    "sn": "铜鳞鳟",
+    "fn": "鳞硬如铜，可食亦可取鳞用。",
+    "weight": 0.7,
+    "tags": ["material", "fish", "food", "craft"],
+    "stack_limit": 10
+  },
+  "arrow_chub": {
+    "sn": "箭尾鲦",
+    "fn": "游速快，上钩后挣扎剧烈。",
+    "weight": 0.35,
+    "tags": ["material", "fish", "food"],
+    "stack_limit": 12
+  },
+  "fat_wood_carp": {
+    "sn": "肥木鲤",
+    "fn": "体肥多脂，可炼油亦可食。",
+    "weight": 0.9,
+    "tags": ["material", "fish", "food", "oil_source"],
+    "stack_limit": 10
+  },
+  "iron_spine_catfish": {
+    "sn": "铁刺黄颡",
+    "fn": "背鳍硬刺有毒，取刺可作针或刃料。",
+    "weight": 0.5,
+    "tags": ["material", "fish", "food", "craft"],
+    "stack_limit": 10
+  },
+  "whisker_catfish": {
+    "sn": "细须鲶鱼",
+    "fn": "藏身泥底，长须灵敏，肉嫩。",
     "weight": 0.8,
-    "tags": ["material","fish","food"],
+    "tags": ["material", "fish", "food"],
     "stack_limit": 10
   },
+  "silver_saury": {
+    "sn": "银光秋刀",
+    "fn": "夜行，喜月光，常成群。",
+    "weight": 0.4,
+    "tags": ["material", "fish", "food"],
+    "stack_limit": 15
+  },
+  "armored_sturgeon": {
+    "sn": "铠甲鲟鱼",
+    "fn": "身披骨板，可食可取材制甲。",
+    "weight": 1.2,
+    "tags": ["material", "fish", "food", "craft"],
+    "stack_limit": 5
+  },
+  "glow_salmon": {
+    "sn": "幽光鲑",
+    "fn": "体内有发光腺体，可作光源。",
+    "weight": 0.8,
+    "tags": ["material", "fish", "food", "craft"],
+    "stack_limit": 10
+  },
+  "razor_piranha": {
+    "sn": "剃刀食人鱼",
+    "fn": "齿极利，头骨可当锯用。",
+    "weight": 0.4,
+    "tags": ["material", "fish", "food", "craft"],
+    "stack_limit": 12
+  },
+  "poison_puffer": {
+    "sn": "毒囊鲀",
+    "fn": "内脏含毒，去毒囊后可食或取毒用。",
+    "weight": 0.35,
+    "tags": ["material", "fish", "food", "craft", "toxic"],
+    "stack_limit": 10
+  },
+  "spark_eel": {
+    "sn": "闪电鳗",
+    "fn": "受惊会放电，体可作特殊材料。",
+    "weight": 0.5,
+    "tags": ["material", "fish", "food", "craft"],
+    "stack_limit": 10
+  },
+  "rock_grouper": {
+    "sn": "岩隐斑鱼",
+    "fn": "拟态岩石，上钩后易钻缝，难拉。",
+    "weight": 0.9,
+    "tags": ["material", "fish", "food"],
+    "stack_limit": 8
+  },
+  "sapphire_tuna": {
+    "sn": "蓝宝石金枪",
+    "fn": "大型掠食鱼，肉紧实贵重。",
+    "weight": 1.5,
+    "tags": ["material", "fish", "food", "rare"],
+    "stack_limit": 5
+  },
+  "phantom_ray": {
+    "sn": "幻影鳐",
+    "fn": "半透明，需特殊方法才能看见与钓获。",
+    "weight": 0.6,
+    "tags": ["material", "fish", "food", "craft", "rare"],
+    "stack_limit": 8
+  },
+  "steel_jaw_shark": {
+    "sn": "钢颌鲨",
+    "fn": "颌力极强，需坚固钓具方能钓起。",
+    "weight": 1.2,
+    "tags": ["material", "fish", "food", "craft", "rare"],
+    "stack_limit": 5
+  },
+  "magma_char": {
+    "sn": "炽热岩浆鱼",
+    "fn": "栖于高温水域，需特殊钓具。",
+    "weight": 0.5,
+    "tags": ["material", "fish", "food", "rare"],
+    "stack_limit": 8
+  },
+  "ice_abyss_cod": {
+    "sn": "冰渊鳕",
+    "fn": "栖于极寒深水，鱼鳔为贵重材料。",
+    "weight": 0.8,
+    "tags": ["material", "fish", "food", "craft", "rare"],
+    "stack_limit": 8
+  },
+  "corrupt_swampfish": {
+    "sn": "腐化泥沼鱼",
+    "fn": "带瘴气，经炼制可得药用成分。",
+    "weight": 0.4,
+    "tags": ["material", "fish", "food", "craft", "toxic"],
+    "stack_limit": 10
+  },
+  "storm_narwhal": {
+    "sn": "风暴角鲸",
+    "fn": "头生长角，多现于雷雨时的高山水域。",
+    "weight": 2.0,
+    "tags": ["material", "fish", "food", "craft", "rare"],
+    "stack_limit": 3
+  },
+  "starlight_nightfish": {
+    "sn": "星光夜空鱼",
+    "fn": "鳞片能映星象，可作导向或仪具。",
+    "weight": 0.5,
+    "tags": ["material", "fish", "food", "craft", "rare"],
+    "stack_limit": 8
+  },
+  "dragon_blood_koi": {
+    "sn": "龙血锦鲤",
+    "fn": "性情凶猛，身可入锻炉作附魔材。",
+    "weight": 0.9,
+    "tags": ["material", "fish", "food", "craft", "rare"],
+    "stack_limit": 5
+  },
+  "void_gulper": {
+    "sn": "虚空吞噬者",
+    "fn": "出没于异常水域，腹中偶有古物。",
+    "weight": 0.6,
+    "tags": ["material", "fish", "food", "rare"],
+    "stack_limit": 5
+  },
+  "crystal_leviathan": {
+    "sn": "晶岩利维坦幼体",
+    "fn": "体型巨大，需机械辅助方能起钓。",
+    "weight": 3.0,
+    "tags": ["material", "fish", "food", "craft", "rare"],
+    "stack_limit": 1
+  },
+  "epoch_arowana": {
+    "sn": "岁月金龙鱼",
+    "fn": "极为罕见，传说与时光有关。",
+    "weight": 0.7,
+    "tags": ["material", "fish", "food", "rare"],
+    "stack_limit": 5
+  },
+  "mud_loach_fillet": { "sn": "泥布丁鳅鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.15, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 7 } },
+  "weed_minnow_fillet": { "sn": "杂草小鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.03, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 4 } },
+  "blind_cavefish_fillet": { "sn": "盲眼洞穴鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.12, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 7 } },
+  "brittle_carp_fillet": { "sn": "脆骨鲫鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.18, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 7 } },
+  "green_frogfish_fillet": { "sn": "绿水蛙鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.25, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 10 } },
+  "dull_bass_fillet": { "sn": "呆呆鲈鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.28, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 10 } },
+  "copper_trout_fillet": { "sn": "铜鳞鳟鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.32, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 12 } },
+  "arrow_chub_fillet": { "sn": "箭尾鲦鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.15, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 7 } },
+  "fat_wood_carp_fillet": { "sn": "肥木鲤鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.4, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 15 } },
+  "iron_spine_catfish_fillet": { "sn": "铁刺黄颡鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.22, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 10 } },
+  "whisker_catfish_fillet": { "sn": "细须鲶鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.38, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 12 } },
+  "silver_saury_fillet": { "sn": "银光秋刀鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.18, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 10 } },
+  "armored_sturgeon_fillet": { "sn": "铠甲鲟鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.55, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 15 } },
+  "glow_salmon_fillet": { "sn": "幽光鲑鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.38, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 12 } },
+  "razor_piranha_fillet": { "sn": "剃刀食人鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.18, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 10 } },
+  "poison_puffer_fillet": { "sn": "毒囊鲀鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.15, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 7 } },
+  "spark_eel_fillet": { "sn": "闪电鳗鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.22, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 10 } },
+  "rock_grouper_fillet": { "sn": "岩隐斑鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.4, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 12 } },
+  "sapphire_tuna_fillet": { "sn": "蓝宝石金枪鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.7, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 22 } },
+  "phantom_ray_fillet": { "sn": "幻影鳐鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.28, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 15 } },
+  "steel_jaw_shark_fillet": { "sn": "钢颌鲨鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.55, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 18 } },
+  "magma_char_fillet": { "sn": "炽热岩浆鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.22, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 15 } },
+  "ice_abyss_cod_fillet": { "sn": "冰渊鳕鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.38, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 15 } },
+  "corrupt_swampfish_fillet": { "sn": "腐化泥沼鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.18, "tags": ["material", "fish", "food", "processed"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 10 } },
+  "storm_narwhal_fillet": { "sn": "风暴角鲸鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.9, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 20 } },
+  "starlight_nightfish_fillet": { "sn": "星光夜空鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.22, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 15 } },
+  "dragon_blood_koi_fillet": { "sn": "龙血锦鲤鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.4, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 18 } },
+  "void_gulper_fillet": { "sn": "虚空吞噬者鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.28, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 15 } },
+  "crystal_leviathan_fillet": { "sn": "晶岩利维坦幼体鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 1.2, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 10, "effect_id": "restore_fullness", "effect_params": { "fullness": 28 } },
+  "epoch_arowana_fillet": { "sn": "岁月金龙鱼鱼片", "fn": "片好的净肉，食用可恢复饱食。", "weight": 0.32, "tags": ["material", "fish", "food", "processed", "rare"], "stack_limit": 30, "effect_id": "restore_fullness", "effect_params": { "fullness": 18 } },
+  "sticky_mucus": { "sn": "强效生物黏液", "fn": "加工泥布丁鳅时取得的黏液，可作粘合剂或药材。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 20 },
+  "micro_scale_dust": { "sn": "微光鳞粉", "fn": "加工杂草小鱼时刮下的细鳞。", "weight": 0.01, "tags": ["material", "fish", "processed", "bait"], "stack_limit": 30 },
+  "sonar_bladder": { "sn": "盲鱼声呐鳔", "fn": "加工盲眼洞穴鱼时取下的感水器官。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 20 },
+  "brittle_bone_needle": { "sn": "脆骨细针", "fn": "加工脆骨鲫时剔出的透明脆骨。", "weight": 0.03, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 20 },
+  "amphibian_tendon": { "sn": "两栖强健腿筋", "fn": "加工绿水蛙鱼时取下的腿筋。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 15 },
+  "dull_brain_crystal": { "sn": "迟钝脑核", "fn": "加工呆呆鲈时取下的脑核。", "weight": 0.02, "tags": ["material", "fish", "processed"], "stack_limit": 20 },
+  "copper_fish_scale": { "sn": "铜化鱼鳞", "fn": "加工铜鳞鳟时剥下的坚硬鳞片。", "weight": 0.05, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 15 },
+  "arrow_fin": { "sn": "破风尾鳍", "fn": "加工箭尾鲦时取下的尾鳍。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 20 },
+  "crude_fish_oil": { "sn": "粗制肥鱼油", "fn": "加工肥木鲤时炼出的鱼油。", "weight": 0.08, "tags": ["material", "fish", "processed", "oil_source"], "stack_limit": 15 },
+  "iron_spine_dart": { "sn": "铁棘毒刺", "fn": "加工铁刺黄颡时取下的毒刺。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft", "toxic"], "stack_limit": 15 },
+  "sensitive_whisker": { "sn": "灵敏触须", "fn": "加工细须鲶鱼时取下的长须。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 15 },
+  "moonlight_scale": { "sn": "月光银鳞", "fn": "加工银光秋刀时取下的发光鳞。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 20 },
+  "sturgeon_bone_plate": { "sn": "坚硬骨板", "fn": "加工铠甲鲟鱼时撬下的骨板。", "weight": 0.1, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 10 },
+  "luminescent_gland": { "sn": "荧光腺体", "fn": "加工幽光鲑时取下的发光腺体。", "weight": 0.03, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 15 },
+  "razor_tooth_blade": { "sn": "剃刀利齿片", "fn": "加工剃刀食人鱼时取下的利齿。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 20 },
+  "deadly_toxin_gland": { "sn": "神经毒囊", "fn": "加工毒囊鲀时小心取下的毒腺。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft", "toxic"], "stack_limit": 15 },
+  "bio_electric_organ": { "sn": "生物发电核", "fn": "加工闪电鳗时取下的蓄电器官。", "weight": 0.03, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 15 },
+  "camo_fish_skin": { "sn": "岩石拟态皮", "fn": "加工岩隐斑鱼时剥下的拟态皮膜。", "weight": 0.05, "tags": ["material", "fish", "processed", "craft"], "stack_limit": 15 },
+  "water_infused_core": { "sn": "水元素水滴核", "fn": "加工蓝宝石金枪时取得的水元素核。", "weight": 0.15, "tags": ["material", "fish", "processed", "oil_source", "rare"], "stack_limit": 10 },
+  "phantom_membrane": { "sn": "幻影半透膜", "fn": "加工幻影鳐时取下的透明膜。", "weight": 0.03, "tags": ["material", "fish", "processed", "craft", "rare"], "stack_limit": 15 },
+  "hydraulic_jaw_bone": { "sn": "液压钢颌骨", "fn": "加工钢颌鲨时取下的颌骨。", "weight": 0.05, "tags": ["material", "fish", "processed", "craft", "rare"], "stack_limit": 10 },
+  "magma_fire_scale": { "sn": "熔火隔热鳞", "fn": "加工炽热岩浆鱼时取下的隔热鳞。", "weight": 0.03, "tags": ["material", "fish", "processed", "craft", "rare"], "stack_limit": 15 },
+  "abyss_space_bladder": { "sn": "深渊空间鳔", "fn": "加工冰渊鳕时取下的厚鱼鳔。", "weight": 0.08, "tags": ["material", "fish", "processed", "craft", "rare"], "stack_limit": 10 },
+  "anti_toxin_liver": { "sn": "净水过滤肝脏", "fn": "加工腐化泥沼鱼时取得的过滤肝脏。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft", "toxic"], "stack_limit": 15 },
+  "storm_lightning_horn": { "sn": "风暴引雷角", "fn": "加工风暴角鲸时取下的角。", "weight": 0.2, "tags": ["material", "fish", "processed", "craft", "rare"], "stack_limit": 5 },
+  "starlight_compass": { "sn": "星辰指引鳞", "fn": "加工星光夜空鱼时取下的星纹鳞。", "weight": 0.02, "tags": ["material", "fish", "processed", "craft", "rare"], "stack_limit": 15 },
+  "boiling_dragon_blood": { "sn": "沸腾龙血滴", "fn": "加工龙血锦鲤时取下的龙血。", "weight": 0.03, "tags": ["material", "fish", "processed", "craft", "rare"], "stack_limit": 10 },
+  "void_digestion_acid": { "sn": "虚空消解酸", "fn": "加工虚空吞噬者时取得的胃酸。", "weight": 0.05, "tags": ["material", "fish", "processed", "rare"], "stack_limit": 10 },
+  "leviathan_crystal_heart": { "sn": "利维坦动力晶核", "fn": "加工晶岩利维坦幼体时取下的晶核。", "weight": 0.2, "tags": ["material", "fish", "processed", "craft", "rare"], "stack_limit": 5 },
+  "scale_of_time": { "sn": "时间回溯鳞片", "fn": "加工岁月金龙鱼时取下的时鳞。", "weight": 0.03, "tags": ["material", "fish", "processed", "rare"], "stack_limit": 10 },
   "wheat_ear": {
     "sn": "麦穗",
     "fn": "脱粒后可磨面或煮粥。",
     "weight": 0.2,
     "tags": ["material","crop","food"],
-    "stack_limit": 30
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "wheat_seed": {
+    "sn": "麦种",
+    "fn": "可播种的麦粒，留种用。",
+    "weight": 0.05,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "wheat_ear"
+  },
+  "wild_berry_seed": {
+    "sn": "野果籽",
+    "fn": "从野果里留下的籽粒，可播种。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "wild_berry"
+  },
+  "tomato": {
+    "sn": "番茄",
+    "fn": "熟透可生吃或做菜。",
+    "weight": 0.15,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "tomato_seed": {
+    "sn": "番茄籽",
+    "fn": "可播种的番茄种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "tomato"
+  },
+  "potato": {
+    "sn": "土豆",
+    "fn": "块茎，耐放，煮烤皆宜。",
+    "weight": 0.2,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "potato_seed": {
+    "sn": "土豆种",
+    "fn": "可播种的土豆块或籽。",
+    "weight": 0.05,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "potato"
+  },
+  "carrot": {
+    "sn": "胡萝卜",
+    "fn": "根茎，生熟都可吃。",
+    "weight": 0.12,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "carrot_seed": {
+    "sn": "胡萝卜籽",
+    "fn": "可播种的胡萝卜种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "carrot"
+  },
+  "onion": {
+    "sn": "洋葱",
+    "fn": "辛香，做菜提味。",
+    "weight": 0.15,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "onion_seed": {
+    "sn": "洋葱籽",
+    "fn": "可播种的洋葱种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "onion"
+  },
+  "garlic": {
+    "sn": "大蒜",
+    "fn": "瓣状，调味去腥。",
+    "weight": 0.08,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "garlic_seed": {
+    "sn": "蒜种",
+    "fn": "可播种的蒜瓣。",
+    "weight": 0.03,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "garlic"
+  },
+  "cabbage": {
+    "sn": "卷心菜",
+    "fn": "叶球，煮炒做汤都可。",
+    "weight": 0.4,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "cabbage_seed": {
+    "sn": "卷心菜籽",
+    "fn": "可播种的卷心菜种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "cabbage"
+  },
+  "spinach": {
+    "sn": "菠菜",
+    "fn": "绿叶菜，快炒或煮汤。",
+    "weight": 0.1,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "spinach_seed": {
+    "sn": "菠菜籽",
+    "fn": "可播种的菠菜种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "spinach"
+  },
+  "green_bean": {
+    "sn": "四季豆",
+    "fn": "豆荚，需煮熟食用。",
+    "weight": 0.08,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "green_bean_seed": {
+    "sn": "四季豆籽",
+    "fn": "可播种的豆种。",
+    "weight": 0.03,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "green_bean"
+  },
+  "chili_pepper": {
+    "sn": "辣椒",
+    "fn": "辛辣，调味提味。",
+    "weight": 0.05,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "chili_pepper_seed": {
+    "sn": "辣椒籽",
+    "fn": "可播种的辣椒种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "chili_pepper"
+  },
+  "corn": {
+    "sn": "玉米",
+    "fn": "煮或烤都香。",
+    "weight": 0.25,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "corn_seed": {
+    "sn": "玉米种",
+    "fn": "可播种的玉米粒。",
+    "weight": 0.03,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "corn"
+  },
+  "rice": {
+    "sn": "稻谷",
+    "fn": "脱壳后可煮饭煮粥。",
+    "weight": 0.2,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "rice_seed": {
+    "sn": "稻种",
+    "fn": "可播种的稻谷。",
+    "weight": 0.05,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "rice"
+  },
+  "soybean": {
+    "sn": "大豆",
+    "fn": "可煮豆、磨豆浆或发豆芽。",
+    "weight": 0.15,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "soybean_seed": {
+    "sn": "豆种",
+    "fn": "可播种的大豆。",
+    "weight": 0.05,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "soybean"
+  },
+  "cucumber": {
+    "sn": "黄瓜",
+    "fn": "可生吃或凉拌。",
+    "weight": 0.15,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "cucumber_seed": {
+    "sn": "黄瓜籽",
+    "fn": "可播种的黄瓜种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "cucumber"
+  },
+  "eggplant": {
+    "sn": "茄子",
+    "fn": "烧煮做菜都合适。",
+    "weight": 0.2,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "eggplant_seed": {
+    "sn": "茄子籽",
+    "fn": "可播种的茄子种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "eggplant"
+  },
+  "pumpkin": {
+    "sn": "南瓜",
+    "fn": "可煮粥、做馅或烤。",
+    "weight": 0.5,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "pumpkin_seed": {
+    "sn": "南瓜籽",
+    "fn": "可播种的南瓜籽。",
+    "weight": 0.03,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "pumpkin"
+  },
+  "radish": {
+    "sn": "萝卜",
+    "fn": "根茎，生吃或煮汤。",
+    "weight": 0.2,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "radish_seed": {
+    "sn": "萝卜籽",
+    "fn": "可播种的萝卜种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "radish"
+  },
+  "lettuce": {
+    "sn": "生菜",
+    "fn": "绿叶，生食或夹饼。",
+    "weight": 0.15,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "lettuce_seed": {
+    "sn": "生菜籽",
+    "fn": "可播种的生菜种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "lettuce"
+  },
+  "celery": {
+    "sn": "芹菜",
+    "fn": "茎叶，炒或做馅。",
+    "weight": 0.2,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "celery_seed": {
+    "sn": "芹菜籽",
+    "fn": "可播种的芹菜种子。",
+    "weight": 0.02,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "celery"
+  },
+  "ginger": {
+    "sn": "姜",
+    "fn": "根茎，去腥驱寒。",
+    "weight": 0.1,
+    "tags": ["material","crop","food"],
+    "stack_limit": 10,
+    "quality": 1
+  },
+  "ginger_seed": {
+    "sn": "姜种",
+    "fn": "可播种的姜块。",
+    "weight": 0.03,
+    "tags": ["material","seed","crop"],
+    "stack_limit": 20,
+    "quality": 1,
+    "crop_id": "ginger"
   },
   "root_vegetable": {
     "sn": "块根",
     "fn": "煮熟能填肚子，耐放。",
     "weight": 0.3,
     "tags": ["material","crop","food"],
-    "stack_limit": 20
+    "stack_limit": 10
   },
   "raw_meat": {
-    "sn": "生肉",
+    "sn": "兽肉",
     "fn": "需烤熟或煮透后食用。",
     "weight": 0.6,
-    "tags": ["material","game","food"],
+    "tags": ["material","game","food","meat"],
     "stack_limit": 15
+  },
+  "bird_meat": {
+    "sn": "禽肉",
+    "fn": "禽类身上的肉，烤或煮后能填肚子。",
+    "weight": 0.35,
+    "tags": ["material","game","food","meat"],
+    "stack_limit": 20
+  },
+  "rabbit_meat": {
+    "sn": "兔肉",
+    "fn": "兔子的肉，嫩而少油，煮烤皆可。",
+    "weight": 0.4,
+    "tags": ["material","game","food","meat"],
+    "stack_limit": 20
   },
   "hide": {
     "sn": "兽皮",
@@ -365,14 +1077,28 @@
     "sn": "兽骨",
     "fn": "可熬汤或磨成骨器。",
     "weight": 0.3,
-    "tags": ["material","game","craft"],
+    "tags": ["material","game","craft","bone"],
     "stack_limit": 20
+  },
+  "bird_bone": {
+    "sn": "禽骨",
+    "fn": "禽类的骨头，轻而脆，熬汤或做小件。",
+    "weight": 0.1,
+    "tags": ["material","game","craft","bone"],
+    "stack_limit": 30
+  },
+  "small_bone": {
+    "sn": "细骨",
+    "fn": "小兽或兔子的细骨，可熬汤。",
+    "weight": 0.15,
+    "tags": ["material","game","craft","bone"],
+    "stack_limit": 25
   },
   "fishing_spot": {
     "sn": "水边",
     "fn": "一段平静的水面，看上去和别处没什么两样。",
     "tags": ["node","fishing"],
-    "fish_item_id": "river_fish",
+    "fish_item_id": "dull_bass",
     "action_ids": ["fish_manual","fish_auto"]
   },
   "crop_patch": {
@@ -387,5 +1113,289 @@
     "fn": "树林里的一小片空地，地上有些杂乱的痕迹。",
     "tags": ["node","hunting"],
     "action_ids": ["hunt_manual","hunt_auto"]
+  },
+  "fish_rack_1": {
+    "sn": "乱竿晒鱼架",
+    "fn": "几根歪树枝胡乱搭的架子，能晾几条鱼。",
+    "tags": ["building", "life_skill"],
+    "action_ids": ["rough_process"]
+  },
+  "fish_rack_2": {
+    "sn": "草绳挂鱼架",
+    "fn": "拿草绳捆过的架子，挂鱼稳当些。",
+    "tags": ["building", "life_skill"],
+    "action_ids": ["rough_process"]
+  },
+  "fish_rack_3": {
+    "sn": "漏风鱼棚",
+    "fn": "东拼西凑搭出来的小棚子，晾鱼够用了。",
+    "tags": ["building", "life_skill"],
+    "action_ids": ["rough_process"]
+  },
+  "smelter_1": {
+    "sn": "简易熔炉",
+    "fn": "石头垒的炉膛，能烧矿石炼成锭。",
+    "tags": ["building", "craft", "smelter"],
+    "action_ids": ["rough_process"]
+  },
+  "smelter_2": {
+    "sn": "垒石炉膛",
+    "fn": "石头垒得更高，炉火更旺，炼矿更顺手。",
+    "tags": ["building", "craft", "smelter"],
+    "action_ids": ["rough_process"]
+  },
+  "smelter_3": {
+    "sn": "稳当锻炉",
+    "fn": "砌得稳当的炉子，火候好控，出锭更稳。",
+    "tags": ["building", "craft", "smelter"],
+    "action_ids": ["rough_process"]
+  },
+  "gather_rack_1": {
+    "sn": "乱枝晾晒架",
+    "fn": "树枝乱搭的架子，能晾野果和草根。",
+    "tags": ["building", "life_skill"],
+    "action_ids": []
+  },
+  "gather_rack_2": {
+    "sn": "破筐摞晾架",
+    "fn": "破筐摞起来凑的，能多晾些东西。",
+    "tags": ["building", "life_skill"],
+    "action_ids": []
+  },
+  "gather_rack_3": {
+    "sn": "遮阳晾棚",
+    "fn": "能遮点阳的简易棚，果子草药都能晾。",
+    "tags": ["building", "life_skill"],
+    "action_ids": []
+  },
+  "hunt_rack_1": {
+    "sn": "乱木猎物台",
+    "fn": "几根乱木搭的台子，能搁兽肉、剥皮剔骨。",
+    "tags": ["building", "life_skill"],
+    "action_ids": []
+  },
+  "hunt_rack_2": {
+    "sn": "挂杠皮肉架",
+    "fn": "加了横杠，挂肉挂皮稳当些。",
+    "tags": ["building", "life_skill"],
+    "action_ids": []
+  },
+  "hunt_rack_3": {
+    "sn": "稳当宰肉案",
+    "fn": "凑合能用的宰肉案，下刀顺手多了。",
+    "tags": ["building", "life_skill"],
+    "action_ids": []
+  },
+  "log_bench_1": {
+    "sn": "垫石削木台",
+    "fn": "石头垫的台子，能把原木削成规整木料。",
+    "tags": ["building", "life_skill"],
+    "action_ids": ["rough_process"]
+  },
+  "log_bench_2": {
+    "sn": "捆木削台",
+    "fn": "捆牢之后台面平了些，出料齐一点。",
+    "tags": ["building", "life_skill"],
+    "action_ids": ["rough_process"]
+  },
+  "log_bench_3": {
+    "sn": "稳当削木案",
+    "fn": "凑合能用的削木案，省力又出活。",
+    "tags": ["building", "life_skill"],
+    "action_ids": ["rough_process"]
+  },
+  "dried_berry": {
+    "sn": "果干",
+    "fn": "晾干的野果，便于保存。",
+    "weight": 0.05,
+    "tags": ["material", "food", "processed"],
+    "stack_limit": 30
+  },
+  "dried_herb": {
+    "sn": "干草药",
+    "fn": "晾干的苦草根，药性更易保存。",
+    "weight": 0.03,
+    "tags": ["material", "herb", "medicine", "processed"],
+    "stack_limit": 30
+  },
+  "sorted_ore": {
+    "sn": "粗选矿石",
+    "fn": "敲掉杂石后的矿石，更易冶炼。",
+    "weight": 1.5,
+    "tags": ["material", "ore", "processed"],
+    "stack_limit": 20
+  },
+  "trimmed_log": {
+    "sn": "规整木料",
+    "fn": "削去树皮与毛刺的木料，适合做用具。",
+    "weight": 1.6,
+    "tags": ["material", "wood", "processed"],
+    "stack_limit": 15
+  },
+  "cured_meat": {
+    "sn": "肉干",
+    "fn": "腌晒过的肉，耐存放。",
+    "weight": 0.4,
+    "tags": ["material", "food", "processed"],
+    "stack_limit": 20
+  },
+  "leather_strip": {
+    "sn": "皮条",
+    "fn": "粗加工过的皮条，可进一步鞣制。",
+    "weight": 0.3,
+    "tags": ["material", "processed", "craft"],
+    "stack_limit": 20
+  },
+  "iron_ingot": {
+    "sn": "铁锭",
+    "fn": "异世界最常见的金属锭，敲打去除杂质后成型。各村落铁匠铺的硬通货。",
+    "weight": 1.2,
+    "tags": ["material", "metal", "ingot", "processed", "weapon_grade", "armor_grade"],
+    "stack_limit": 20
+  },
+  "dark_iron_ingot": {
+    "sn": "黑铁锭",
+    "fn": "含有更多碳元素的铁矿高温提炼而成，泛着幽光，极其坚硬。",
+    "weight": 1.4,
+    "tags": ["material", "metal", "ingot", "processed", "weapon_grade", "armor_grade", "tough"],
+    "stack_limit": 15
+  },
+  "copper_ingot": {
+    "sn": "铜锭",
+    "fn": "熔点较低、质地较软的金属。土著常用来铸造低阶钱币或制作便宜的防具配件。",
+    "weight": 1.0,
+    "tags": ["material", "metal", "ingot", "processed", "conductive", "soft"],
+    "stack_limit": 25
+  },
+  "tin_ingot": {
+    "sn": "锡锭",
+    "fn": "银白色金属，稍热即熔，通常不单独制武器，多用于与其他金属混合。",
+    "weight": 0.8,
+    "tags": ["material", "metal", "ingot", "processed", "alloy_additive", "soft"],
+    "stack_limit": 25
+  },
+  "lead_ingot": {
+    "sn": "铅锭",
+    "fn": "沉重且带微弱毒性。盗贼喜欢用它做暗器配重，法师则用它阻挡魔法探测。",
+    "weight": 1.8,
+    "tags": ["material", "metal", "ingot", "processed", "very_heavy", "toxic", "weight_core"],
+    "stack_limit": 15
+  },
+  "rough_bronze": {
+    "sn": "粗制青铜块",
+    "fn": "天然混合矿直接熔炼得到的青铜，比纯铜更坚硬，是新手的绝佳过渡材料。",
+    "weight": 1.1,
+    "tags": ["material", "metal", "alloy", "processed", "weapon_grade", "tool_grade"],
+    "stack_limit": 20
+  },
+  "blueprint_fish_rack": {
+    "sn": "乱竿晒鱼架蓝图",
+    "fn": "一张皱巴巴的图，画着怎么拿树枝搭晒鱼架。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1,
+    "action_ids": ["use_blueprint_fish_rack"]
+  },
+  "blueprint_gather_rack": {
+    "sn": "乱枝晾晒架蓝图",
+    "fn": "一张皱巴巴的图，画着怎么用树枝搭晾晒架。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1,
+    "action_ids": ["use_blueprint_gather_rack"]
+  },
+  "blueprint_hunt_rack": {
+    "sn": "乱木猎物台蓝图",
+    "fn": "一张皱巴巴的图，画着怎么搭处理猎物的台子。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1,
+    "action_ids": ["use_blueprint_hunt_rack"]
+  },
+  "blueprint_log_bench": {
+    "sn": "垫石削木台蓝图",
+    "fn": "一张皱巴巴的图，画着怎么垫石头当削木台。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1,
+    "action_ids": ["use_blueprint_log_bench"]
+  },
+  "blueprint_smelter": {
+    "sn": "简易熔炉蓝图",
+    "fn": "一张皱巴巴的图，画着怎么垒石头当熔炉炼矿。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1,
+    "action_ids": ["use_blueprint_smelter"]
+  },
+  "blueprint_smelter_t2": {
+    "sn": "垒石炉膛蓝图",
+    "fn": "升级熔炉时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_smelter_t3": {
+    "sn": "稳当锻炉蓝图",
+    "fn": "升级熔炉时使用，需配合建材与铁锭。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_fish_rack_t2": {
+    "sn": "草绳挂鱼架蓝图",
+    "fn": "升级晒鱼架时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_fish_rack_t3": {
+    "sn": "漏风鱼棚蓝图",
+    "fn": "升级晒鱼架时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_gather_rack_t2": {
+    "sn": "破筐摞晾架蓝图",
+    "fn": "升级晾晒架时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_gather_rack_t3": {
+    "sn": "遮阳晾棚蓝图",
+    "fn": "升级晾晒架时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_hunt_rack_t2": {
+    "sn": "挂杠皮肉架蓝图",
+    "fn": "升级猎物台时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_hunt_rack_t3": {
+    "sn": "稳当宰肉案蓝图",
+    "fn": "升级猎物台时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_log_bench_t2": {
+    "sn": "捆木削台蓝图",
+    "fn": "升级削木台时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
+  },
+  "blueprint_log_bench_t3": {
+    "sn": "稳当削木案蓝图",
+    "fn": "升级削木台时使用，需配合建材。",
+    "weight": 0.1,
+    "tags": ["blueprint"],
+    "stack_limit": 1
   }
 }

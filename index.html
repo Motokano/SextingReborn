@@ -9,8 +9,11 @@
 <body>
     <div id="game-app">
         <header id="status-bar">
-            <div id="time-display">--月--日 --:--</div>
-            <div id="loc-display">系统初始化...</div>
+            <canvas id="status-bar-canvas" aria-hidden="true"></canvas>
+            <div id="status-bar-content">
+                <div id="time-display">--月--日 --:--</div>
+                <div id="loc-display">系统初始化...</div>
+            </div>
         </header>
 
         <main id="stage">
@@ -67,6 +70,11 @@
                         <div id="combat-content" class="collapsible">
                             <p class="combat-hint">仅装备的技能可在战斗中使用。</p>
                             <div id="combat-slots-container"></div>
+                            <div id="combat-active-container" style="display:none;">
+                                <div class="sub-title" style="margin-top:8px;">战斗中</div>
+                                <div id="combat-enemy-list" class="combat-enemy-list"></div>
+                                <div id="combat-actions-row" class="action-brick-container" style="margin-top:6px;"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="menu-section" id="items-section">
@@ -127,6 +135,19 @@
             </div>
         </div>
 
+        <div id="build-modal" class="modal-overlay hidden">
+            <div class="modal-content choice-modal-content choice-modal--list">
+                <div class="choice-modal-header">
+                    <h2 id="build-modal-title" class="choice-modal-title">建造</h2>
+                    <p id="build-modal-subtitle" class="choice-modal-subtitle">选择要建造的建筑（材料不足的将灰显）</p>
+                </div>
+                <div id="build-options" class="action-brick-container choice-options choice-options--list"></div>
+                <div class="choice-modal-footer">
+                    <button type="button" id="build-cancel-btn" class="choice-cancel-btn">取消</button>
+                </div>
+            </div>
+        </div>
+
         <div id="storage-modal" class="modal-overlay hidden">
             <div class="modal-content storage-modal-content">
                 <h2 class="storage-modal-title">仓库</h2>
@@ -145,6 +166,16 @@
                 </div>
             </div>
         </div>
+
+        <div id="combat-modal" class="modal-overlay hidden">
+            <div class="modal-content combat-modal-content">
+                <h2 class="combat-modal-title">战斗</h2>
+                <div id="combat-log-content" class="combat-log-body"></div>
+                <div class="combat-modal-footer">
+                    <div id="combat-cmd-row" class="action-brick-container"></div>
+                </div>
+            </div>
+        </div>
         <div id="item-tooltip" class="item-tooltip hidden"></div>
     </div>
     <script src="ui.js"></script>
@@ -159,6 +190,10 @@
     <script src="skill-actions.js"></script>
     <script src="buff-actions.js"></script>
     <script src="effects.js"></script>
+    <script src="combat-actions.js"></script>
+    <script src="combat.js"></script>
+    <script src="language-utils.js"></script>
+    <script src="language-actions.js"></script>
     <script src="movement.js"></script>
     <script src="menu-controller.js"></script>
     <script src="item-controller.js"></script>

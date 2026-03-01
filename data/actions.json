@@ -1,4 +1,18 @@
 {
+    "open_build_menu": {
+        "label": "建造",
+        "repeatable": true
+    },
+    "rough_process": {
+        "label": "粗制加工",
+        "repeatable": true,
+        "turn_cost": 2
+    },
+    "upgrade_building": {
+        "label": "升级",
+        "repeatable": true,
+        "turn_cost": 3
+    },
     "check_self": {
         "label": "检查身体",
         "repeatable": true,
@@ -8,12 +22,20 @@
             { "type": "check_body_text" }
         ]
     },
+    "meditate": {
+        "label": "打坐吐纳",
+        "repeatable": true,
+        "turn_cost": 0,
+        "cmd": [
+            { "type": "toggle_meditate" }
+        ]
+    },
     "old_man_wisdom": {
         "label": "恭敬请教",
         "repeatable": false,
         "turn_cost": 1,
         "cmd": [
-            { "type": "log", "val": "老者缓缓睁眼：‘保全肢体，方有生机。’" },
+            { "type": "say", "speaker": "old_man", "val": "保全肢体，方有生机。" },
             { "type": "mod_stat", "key": "hydration", "val": 20 }
         ]
     },
@@ -33,7 +55,27 @@
         "repeatable": false,
         "turn_cost": 1,
         "cmd": [
-            { "type": "log", "val": "你试图搭话，老者只是冷哼一声：‘哼！’，随后便不再理你。" }
+            { "type": "log", "val": "你试图搭话。" },
+            { "type": "say", "speaker": "old_man", "val": "哼。" },
+            { "type": "log", "val": "随后他便不再理你。" }
+        ]
+    },
+    "underworld_return": {
+        "label": "还阳",
+        "repeatable": false,
+        "turn_cost": 0,
+        "cmd": [
+            { "type": "log", "val": "判官翻簿一瞥，挥手道：阳寿未尽，回去吧。" },
+            { "type": "apply_resurrect_penalties" },
+            { "type": "move", "target": "home", "entry": 27 }
+        ]
+    },
+    "attack_wolf": {
+        "label": "攻击",
+        "repeatable": false,
+        "turn_cost": 1,
+        "cmd": [
+            { "type": "start_combat", "enemy_ids": ["wolf"] }
         ]
     },
     "fire_burn": {
@@ -89,7 +131,28 @@
         "cmd": [
             {"type": "log", "val": "你翻看剑谱，似有所悟，心中生出对招式的朦胧感知。"},
             {"type": "grant_combat_awareness"},
-            {"type": "learn_combat_skill", "slot": "剑法", "skill_id": "basic_sword", "level": 1, "level_max": 500, "proficiency": 0}
+            {"type": "learn_combat_skill", "slot": "剑法", "skill_id": "basic_sword", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "set_move_progress", "move_id": "basic_sword_thrust", "level": 1, "proficiency": 0}
+        ]
+    },
+    "read_basic_compendium": {
+        "label": "阅读",
+        "repeatable": false,
+        "turn_cost": 2,
+        "cmd": [
+            {"type": "log", "val": "你翻阅武学纲要，对刀、暗器、枪、掌、拳、腿、棍、指、身法、内功、招架的基本用法略知一二。"},
+            {"type": "grant_combat_awareness"},
+            {"type": "learn_combat_skill", "slot": "刀法", "skill_id": "basic_blade", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "暗器", "skill_id": "basic_throwing", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "枪法", "skill_id": "basic_spear", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "掌法", "skill_id": "basic_palm", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "拳法", "skill_id": "basic_fist", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "腿法", "skill_id": "basic_leg", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "棍法", "skill_id": "basic_staff", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "指法", "skill_id": "basic_finger", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "身法", "skill_id": "basic_movement", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "内功", "skill_id": "basic_internal", "level": 1, "level_max": 1000, "proficiency": 0},
+            {"type": "learn_combat_skill", "slot": "招架", "skill_id": "basic_parry", "level": 1, "level_max": 1000, "proficiency": 0}
         ]
     },
     "read_breathing_manual": {
@@ -119,6 +182,15 @@
             {"type": "learn_support_skill", "skill_id": "probe", "level": 1, "level_max": 100, "proficiency": 0}
         ]
     },
+    "read_common_tongue_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你照着书页上的发音与手势，笨拙地模仿了许久，总算记住了一些常用词。"},
+          {"type": "learn_support_skill", "skill_id": "common_tongue", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
     "read_almanac_manual": {
       "label": "阅读",
       "repeatable": false,
@@ -137,6 +209,48 @@
           {"type": "set_has_time_building", "val": true}
       ]
     },
+    "use_blueprint_time_pole": {
+      "label": "使用",
+      "repeatable": false,
+      "unlock_building": true,
+      "building_id": "time_pole"
+    },
+    "use_blueprint_storage": {
+      "label": "使用",
+      "repeatable": false,
+      "unlock_building": true,
+      "building_id": "storage_box"
+    },
+    "use_blueprint_fish_rack": {
+      "label": "使用",
+      "repeatable": false,
+      "unlock_building": true,
+      "building_id": "fish_rack_1"
+    },
+    "use_blueprint_gather_rack": {
+      "label": "使用",
+      "repeatable": false,
+      "unlock_building": true,
+      "building_id": "gather_rack_1"
+    },
+    "use_blueprint_hunt_rack": {
+      "label": "使用",
+      "repeatable": false,
+      "unlock_building": true,
+      "building_id": "hunt_rack_1"
+    },
+    "use_blueprint_log_bench": {
+      "label": "使用",
+      "repeatable": false,
+      "unlock_building": true,
+      "building_id": "log_bench_1"
+    },
+    "use_blueprint_smelter": {
+      "label": "使用",
+      "repeatable": false,
+      "unlock_building": true,
+      "building_id": "smelter_1"
+    },
     "read_gathering_manual": {
         "label": "阅读",
         "repeatable": false,
@@ -152,7 +266,7 @@
       "turn_cost": 2,
       "cmd": [
           {"type": "log", "val": "你读着伐木入门的示意图，开始在脑中比划下斧的角度。"},
-          {"type": "learn_production_skill", "skill_id": "logging", "level": 1, "level_max": 100, "proficiency": 0}
+          {"type": "learn_production_skill", "skill_id": "logging", "level": 1, "level_max": 1000, "proficiency": 0}
       ]
     },
     "read_fishing_manual": {
@@ -161,7 +275,7 @@
       "turn_cost": 2,
       "cmd": [
           {"type": "log", "val": "你翻看垂钓要略，开始留意水纹与下钩时机。"},
-          {"type": "learn_survival_skill", "skill_id": "fishing", "level": 1, "level_max": 100, "proficiency": 0}
+          {"type": "learn_survival_skill", "skill_id": "fishing", "level": 1, "level_max": 1000, "proficiency": 0}
       ]
     },
     "read_farming_manual": {
@@ -182,6 +296,69 @@
           {"type": "learn_survival_skill", "skill_id": "hunting", "level": 1, "level_max": 100, "proficiency": 0}
       ]
     },
+    "read_cooking_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你翻看烹饪入门，记下火候与调味要领。"},
+          {"type": "learn_production_skill", "skill_id": "cooking", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_medicine_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你研读制药要略，对药材与炼制有了初步认识。"},
+          {"type": "learn_production_skill", "skill_id": "medicine", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_leatherworking_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你记下制皮入门的鞣制与裁切之法。"},
+          {"type": "learn_production_skill", "skill_id": "leatherworking", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_smithing_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你领会锻造图谱里的锻打与淬火要领。"},
+          {"type": "learn_production_skill", "skill_id": "smithing", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_carpentry_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你翻看木工入门，开始琢磨刨削与榫卯。"},
+          {"type": "learn_production_skill", "skill_id": "carpentry", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_tailoring_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你记下缝纫要略中的裁剪与针法。"},
+          {"type": "learn_production_skill", "skill_id": "tailoring", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
+    "read_enchanting_manual": {
+      "label": "阅读",
+      "repeatable": false,
+      "turn_cost": 2,
+      "cmd": [
+          {"type": "log", "val": "你翻看附魔残卷，只觉玄奥难解，仅留下模糊印象。（占位）"},
+          {"type": "learn_production_skill", "skill_id": "enchanting", "level": 1, "level_max": 100, "proficiency": 0}
+      ]
+    },
     "mine_manual": {
         "label": "手动挖矿",
         "repeatable": true,
@@ -196,7 +373,7 @@
         "turn_cost": 6,
         "cmd": [
             { "type": "log", "val": "你开始按固定节奏挖掘，省心但收获有限。" },
-            { "type": "mine_ore", "mode": "auto", "difficulty": 2, "ore_item_id": "iron_ore", "cycles": 4 },
+            { "type": "mine_ore", "mode": "auto", "difficulty": 2, "cycles": 4 },
             { "type": "mod_stat", "key": "fatigue", "val": 1 }
         ]
     },
@@ -206,7 +383,7 @@
       "turn_cost": 3,
       "effect": "manual_logging",
       "difficulty": 2,
-      "wood_item_id": "rough_log"
+      "wood_item_id": "pine_log"
     },
     "chop_auto": {
       "label": "自动伐木",
@@ -214,7 +391,7 @@
       "turn_cost": 6,
       "cmd": [
           { "type": "log", "val": "你按着记下的节奏反复挥斧，让身体去记住动作。" },
-          { "type": "chop_wood", "mode": "auto", "difficulty": 2, "wood_item_id": "rough_log", "cycles": 4 },
+          { "type": "chop_wood", "mode": "auto", "difficulty": 2, "wood_item_id": "pine_log", "cycles": 4 },
           { "type": "mod_stat", "key": "fatigue", "val": 2 }
       ]
     },
@@ -224,8 +401,7 @@
         "turn_cost": 2,
         "cmd": [
             { "type": "log", "val": "你伸手拨开枝叶，小心挑拣看起来尚可的野果。" },
-            { "type": "add_to_inventory", "item_id": "wild_berry", "count": 1 },
-            { "type": "gain_skill_exp", "category": "survival", "skill_id": "gathering", "amount": 5 }
+            { "type": "gather_berries", "plant_id": "wild_berry", "seed_id": "wild_berry_seed" }
         ]
     },
     "gather_herbs": {
@@ -234,8 +410,7 @@
         "turn_cost": 3,
         "cmd": [
             { "type": "log", "val": "你蹲下身，辨认着草叶与根茎，小心挖起几株带苦味的草根。" },
-            { "type": "add_to_inventory", "item_id": "bitter_herb", "count": 1 },
-            { "type": "gain_skill_exp", "category": "survival", "skill_id": "gathering", "amount": 6 }
+            { "type": "gather_herbs" }
         ]
     },
     "fish_manual": {
@@ -244,7 +419,7 @@
         "turn_cost": 3,
         "effect": "manual_fishing",
         "difficulty": 2,
-        "fish_item_id": "river_fish"
+        "fish_item_id": "dull_bass"
     },
     "fish_auto": {
         "label": "自动钓鱼",
@@ -252,7 +427,7 @@
         "turn_cost": 6,
         "cmd": [
             { "type": "log", "val": "你挂上饵，把竿架好，有一搭没一搭地等。" },
-            { "type": "catch_fish", "mode": "auto", "difficulty": 2, "fish_item_id": "river_fish", "cycles": 4 },
+            { "type": "catch_fish", "mode": "auto", "difficulty": 2, "fish_item_id": "dull_bass", "cycles": 4 },
             { "type": "mod_stat", "key": "fatigue", "val": 1 }
         ]
     },
@@ -270,11 +445,8 @@
         "label": "手动狩猎",
         "repeatable": true,
         "turn_cost": 4,
-        "cmd": [
-            { "type": "log", "val": "你辨踪潜行，寻找合适的时机下手。" },
-            { "type": "hunt_game", "mode": "manual", "difficulty": 2, "cycles": 1 },
-            { "type": "mod_stat", "key": "fatigue", "val": 2 }
-        ]
+        "effect": "manual_hunting",
+        "difficulty": 2
     },
     "hunt_auto": {
         "label": "自动狩猎",
@@ -292,6 +464,54 @@
         "turn_cost": 5,
         "cmd": [
             { "type": "craft", "recipe_id": "fishing_rod" }
+        ]
+    },
+    "designate_farmland": {
+        "label": "开辟农田",
+        "repeatable": false,
+        "turn_cost": 2,
+        "cmd": [
+            { "type": "designate_farmland" }
+        ]
+    },
+    "sow_home_crop": {
+        "label": "播种",
+        "repeatable": true,
+        "turn_cost": 2,
+        "cmd": [
+            { "type": "sow_home_crop" }
+        ]
+    },
+    "harvest_home_crop": {
+        "label": "收获",
+        "repeatable": true,
+        "turn_cost": 2,
+        "cmd": [
+            { "type": "harvest_home_crop" }
+        ]
+    },
+    "select_seed_home_crop": {
+        "label": "选种",
+        "repeatable": true,
+        "turn_cost": 2,
+        "cmd": [
+            { "type": "select_seed_home_crop" }
+        ]
+    },
+    "refine_seed_home_crop": {
+        "label": "作物选优",
+        "repeatable": true,
+        "turn_cost": 3,
+        "cmd": [
+            { "type": "refine_seed_home_crop" }
+        ]
+    },
+    "remove_farmland": {
+        "label": "撤走农田",
+        "repeatable": true,
+        "turn_cost": 1,
+        "cmd": [
+            { "type": "remove_farmland" }
         ]
     }
 }
