@@ -556,8 +556,14 @@
         "turn_cost": 0,
         "effect": "npc_get_dungeon_code"
     },
+    "npc_enter_recovery_code": {
+        "label": "凭符文取回物品",
+        "repeatable": true,
+        "turn_cost": 0,
+        "effect": "npc_enter_recovery_code"
+    },
     "npc_retrieve_dungeon": {
-        "label": "取回地牢装备",
+        "label": "取回地牢物品",
         "repeatable": true,
         "turn_cost": 0,
         "effect": "npc_retrieve_dungeon"

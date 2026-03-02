@@ -2,6 +2,36 @@
  * 玩家动作分发：performAction(actionOrId, context)。处理 heal_limb、open_container、manual_*、bed_sleep 等特例，其余走 cmd。
  * 依赖 Engine, UI。
  */
+
+/* ── 取回符文加密工具 ─────────────────────────────────────────
+ * 符文 = AES-256-GCM 加密的装备快照。
+ * 任何拥有该符文的玩家都可凭此取回其中记载的装备，但每人只能使用一次。
+ */
+const _RECOVERY_KEY_HEX = 'd4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5';
+const _hexToBytes = hex => { const a = new Uint8Array(hex.length / 2); for (let i = 0; i < a.length; i++) a[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16); return a; };
+const _toHex = bytes => Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+async function _getRecoveryKey(usage) {
+    return crypto.subtle.importKey('raw', _hexToBytes(_RECOVERY_KEY_HEX), 'AES-GCM', false, [usage]);
+}
+async function _encryptSnapshot(snapshot, beltSnapshot) {
+    const key = await _getRecoveryKey('encrypt');
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = new TextEncoder().encode(JSON.stringify({ s: snapshot, b: beltSnapshot }));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
+    return _toHex(iv) + _toHex(new Uint8Array(ct));
+}
+async function _decryptSnapshot(code) {
+    const key = await _getRecoveryKey('decrypt');
+    const iv = _hexToBytes(code.slice(0, 24));
+    const ct = _hexToBytes(code.slice(24));
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+    return JSON.parse(new TextDecoder().decode(plain));
+}
+async function _sha256hex(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return _toHex(new Uint8Array(buf));
+}
+/* ─────────────────────────────────────────────────────────── */
 const ActionDispatcher = {
     perform(actionOrId, context = {}) {
         const action = (typeof actionOrId === 'string') ? Engine.db.actions[actionOrId] : actionOrId;
@@ -365,53 +395,75 @@ const ActionDispatcher = {
                 return;
             }
             if (backup.recovery_code) {
-                Engine.log(`记档先生从袖中取出一张已盖章的纸条递给你。纸条上写着：【${backup.recovery_code}】`);
+                Engine.log(`记档先生从袖中取出一张已盖章的纸条递给你。纸条上写着：\n${backup.recovery_code}`);
                 Engine.render();
                 return;
             }
             (async () => {
-                const seed = crypto.getRandomValues(new Uint8Array(32));
-                const hashBuf = await crypto.subtle.digest('SHA-256', seed);
-                const code = Array.from(new Uint8Array(hashBuf))
-                    .map(b => b.toString(16).padStart(2, '0')).join('');
+                const code = await _encryptSnapshot(backup.snapshot || {}, backup.belt_snapshot || []);
                 backup.recovery_code = code;
                 backup.code_used = false;
                 backup.retrievable = false;
                 st.equipment_backup = backup;
-                Engine.log(`记档先生在账簿上划了几笔，盖上朱印，撕下一张纸条递给你。「此符一次有效，凭它再入那处，寻得出路后回来找我。」纸条上写着：【${code}】`);
+                Engine.log(`记档先生在账簿上划了几笔，盖上朱印，撕下一张密纸递给你。「此符一次有效，凭它再入那处，寻得出路后回来找我。你也可以将此符转交他人同去。」\n\n${code}`);
                 Engine.render();
+            })();
+            return;
+        }
+
+        if (action.effect === 'npc_enter_recovery_code') {
+            const st = Engine.state;
+            const code = (window.prompt('将符文抄录于此：') || '').trim();
+            if (!code) return;
+            (async () => {
+                try {
+                    const codeHash = await _sha256hex(code);
+                    const usedCodes = st.used_recovery_codes || [];
+                    if (usedCodes.includes(codeHash)) {
+                        Engine.log("记档先生看了看账簿，摇摇头。「此符已有记录在案，不可重复凭用。」");
+                        Engine.render();
+                        return;
+                    }
+                    const { s: snapshot, b: beltSnapshot } = await _decryptSnapshot(code);
+                    usedCodes.push(codeHash);
+                    st.used_recovery_codes = usedCodes;
+                    st.pending_recovery = { snapshot, belt_snapshot: beltSnapshot, code_hash: codeHash, retrievable: false };
+                    Engine.log("记档先生验核符文，抬头点了点头。「此符有效。凭它入牢一次，寻得出路后再来取物。」");
+                    Engine.render();
+                } catch (_) {
+                    Engine.log("记档先生眯眼端详良久，最终摇了摇头。「此符残缺或有误，无法辨认。」");
+                    Engine.render();
+                }
             })();
             return;
         }
 
         if (action.effect === 'npc_retrieve_dungeon') {
             const st = Engine.state;
-            const backup = st.equipment_backup || {};
-            if (backup.recovery_code && !backup.code_used) {
-                Engine.log("记档先生摇摇头。「此符尚未经地牢验证，不可取物。」");
+            const pr = st.pending_recovery;
+            if (!pr || !pr.retrievable) {
+                Engine.log("条件尚未满足。需要在地牢中使用取回符文并找到出口撤出后，才能取回物品。");
                 Engine.render();
                 return;
             }
-            if (!backup.retrievable || backup.death_type !== 'dungeon') {
-                Engine.log("条件尚未满足。需要在地牢中使用取回代码并找到出口撤出后，才能取回装备。");
-                Engine.render();
-                return;
-            }
-            const snapshot = backup.snapshot || {};
+            const snapshot = pr.snapshot || {};
             const SLOT_NAMES = ["头饰", "护甲", "左手", "右手", "腰带", "左脚", "右脚", "左耳环", "右耳环", "项链", "左手戒指", "右手戒指"];
             if (!st.equipment_slots) st.equipment_slots = {};
             SLOT_NAMES.forEach(s => { st.equipment_slots[s] = snapshot[s] || null; });
-            st.belt_quick_contents = JSON.parse(JSON.stringify(backup.belt_snapshot || []));
-            backup.registered = false;
-            backup.snapshot = null;
-            backup.belt_snapshot = null;
-            backup.death_type = null;
-            backup.death_time = null;
-            backup.recovery_code = null;
-            backup.recovery_dungeon_id = null;
-            backup.code_used = false;
-            backup.retrievable = false;
-            st.equipment_backup = backup;
+            st.belt_quick_contents = JSON.parse(JSON.stringify(pr.belt_snapshot || []));
+            const backup = st.equipment_backup || {};
+            if (backup.death_type === 'dungeon') {
+                backup.snapshot = null;
+                backup.belt_snapshot = null;
+                backup.death_type = null;
+                backup.death_time = null;
+                backup.recovery_code = null;
+                backup.recovery_dungeon_id = null;
+                backup.code_used = false;
+                backup.retrievable = false;
+                st.equipment_backup = backup;
+            }
+            st.pending_recovery = null;
             Engine.log("记档先生核对符印，在账簿上勾销一行，从柜后取出一个包裹交到你手中。「物归原主。」");
             Engine.render();
             return;

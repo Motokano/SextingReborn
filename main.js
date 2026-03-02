@@ -89,6 +89,8 @@ const Engine = {
             if (Engine.state.dominant_foot == null) Engine.state.dominant_foot = "right";
             if (Engine.state.silver == null) Engine.state.silver = 0;
             if (Engine.state.equipment_backup == null) Engine.state.equipment_backup = { registered: false, snapshot: null, belt_snapshot: null, death_type: null, death_time: null, recovery_code: null, recovery_dungeon_id: null, code_used: false, retrievable: false };
+            if (Engine.state.used_recovery_codes == null) Engine.state.used_recovery_codes = [];
+            if (Engine.state.pending_recovery == null) Engine.state.pending_recovery = null;
             CharacterUtils.applyCharacterAttributes(Engine.state, playerDef);
 
             Movement.loadScene(Engine.db.config.startScene, Engine.db.config.startIndex);
