@@ -369,23 +369,29 @@ const ActionDispatcher = {
                 Engine.render();
                 return;
             }
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = '';
-            for (let i = 0; i < 12; i++) {
-                if (i === 4 || i === 8) code += '-';
-                code += chars[Math.floor(Math.random() * chars.length)];
-            }
-            backup.recovery_code = code;
-            backup.retrievable = false;
-            st.equipment_backup = backup;
-            Engine.log(`记档先生在账簿上划了几笔，盖上朱印，撕下一张纸条递给你。「此符一次有效，凭它再入那处，寻得出路后回来找我。」纸条上写着：【${code}】`);
-            Engine.render();
+            (async () => {
+                const seed = crypto.getRandomValues(new Uint8Array(32));
+                const hashBuf = await crypto.subtle.digest('SHA-256', seed);
+                const code = Array.from(new Uint8Array(hashBuf))
+                    .map(b => b.toString(16).padStart(2, '0')).join('');
+                backup.recovery_code = code;
+                backup.code_used = false;
+                backup.retrievable = false;
+                st.equipment_backup = backup;
+                Engine.log(`记档先生在账簿上划了几笔，盖上朱印，撕下一张纸条递给你。「此符一次有效，凭它再入那处，寻得出路后回来找我。」纸条上写着：【${code}】`);
+                Engine.render();
+            })();
             return;
         }
 
         if (action.effect === 'npc_retrieve_dungeon') {
             const st = Engine.state;
             const backup = st.equipment_backup || {};
+            if (backup.recovery_code && !backup.code_used) {
+                Engine.log("记档先生摇摇头。「此符尚未经地牢验证，不可取物。」");
+                Engine.render();
+                return;
+            }
             if (!backup.retrievable || backup.death_type !== 'dungeon') {
                 Engine.log("条件尚未满足。需要在地牢中使用取回代码并找到出口撤出后，才能取回装备。");
                 Engine.render();
