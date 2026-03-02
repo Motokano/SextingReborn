@@ -287,6 +287,131 @@ const ActionDispatcher = {
             return;
         }
 
+        if (action.effect === 'npc_register_equipment') {
+            const st = Engine.state;
+            const backup = st.equipment_backup || {};
+            if (backup.death_type && !backup.retrievable) {
+                Engine.log("你目前有待取回的装备记录，无法重新登记。先处理完上次的记录再来。");
+                Engine.render();
+                return;
+            }
+            const REGISTER_FEE = 50;
+            if ((st.silver || 0) < REGISTER_FEE) {
+                Engine.log(`银两不足。登记费用为 ${REGISTER_FEE} 两，你目前只有 ${st.silver || 0} 两。`);
+                Engine.render();
+                return;
+            }
+            const slots = st.equipment_slots || {};
+            const hasAny = Object.values(slots).some(v => v != null) || (st.belt_quick_contents || []).length > 0;
+            if (!hasAny) {
+                Engine.log("你身上没有穿戴任何装备，无需登记。");
+                Engine.render();
+                return;
+            }
+            st.silver = (st.silver || 0) - REGISTER_FEE;
+            backup.registered = true;
+            backup.snapshot = JSON.parse(JSON.stringify(slots));
+            backup.belt_snapshot = JSON.parse(JSON.stringify(st.belt_quick_contents || []));
+            backup.death_type = null;
+            backup.death_time = null;
+            backup.recovery_code = null;
+            backup.recovery_dungeon_id = null;
+            backup.code_used = false;
+            backup.retrievable = false;
+            st.equipment_backup = backup;
+            Engine.log(`记档先生在账簿上记下你的装备信息。「已记录在案，若有不测，可来找我。」（扣除 ${REGISTER_FEE} 银两，剩余 ${st.silver} 两）`);
+            Engine.render();
+            return;
+        }
+
+        if (action.effect === 'npc_retrieve_field') {
+            const st = Engine.state;
+            const backup = st.equipment_backup || {};
+            if (backup.death_type !== 'field') {
+                Engine.log("你目前没有可通过此途径取回的装备记录。");
+                Engine.render();
+                return;
+            }
+            const WAIT_MS = 30 * 60 * 1000;
+            const elapsed = Date.now() - (backup.death_time || 0);
+            if (elapsed < WAIT_MS) {
+                const remaining = Math.ceil((WAIT_MS - elapsed) / 60000);
+                Engine.log(`还需等待约 ${remaining} 分钟，记档先生才能整理好你的遗物。`);
+                Engine.render();
+                return;
+            }
+            const snapshot = backup.snapshot || {};
+            const SLOT_NAMES = ["头饰", "护甲", "左手", "右手", "腰带", "左脚", "右脚", "左耳环", "右耳环", "项链", "左手戒指", "右手戒指"];
+            if (!st.equipment_slots) st.equipment_slots = {};
+            SLOT_NAMES.forEach(s => { st.equipment_slots[s] = snapshot[s] || null; });
+            st.belt_quick_contents = JSON.parse(JSON.stringify(backup.belt_snapshot || []));
+            backup.registered = false;
+            backup.snapshot = null;
+            backup.belt_snapshot = null;
+            backup.death_type = null;
+            backup.death_time = null;
+            backup.retrievable = false;
+            st.equipment_backup = backup;
+            Engine.log("记档先生从账簿中取出记录，将你的装备一一归还。「请收好，江湖险恶，多加小心。」");
+            Engine.render();
+            return;
+        }
+
+        if (action.effect === 'npc_get_dungeon_code') {
+            const st = Engine.state;
+            const backup = st.equipment_backup || {};
+            if (backup.death_type !== 'dungeon') {
+                Engine.log("你目前没有地牢死亡的装备记录。");
+                Engine.render();
+                return;
+            }
+            if (backup.recovery_code) {
+                Engine.log(`你已持有取回代码：【${backup.recovery_code}】。在重进同一地牢时的门票界面中输入此代码，撤出地牢后再来取回装备。`);
+                Engine.render();
+                return;
+            }
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 7; i++) {
+                if (i === 3) code += '-';
+                code += chars[Math.floor(Math.random() * chars.length)];
+            }
+            backup.recovery_code = code;
+            backup.retrievable = false;
+            st.equipment_backup = backup;
+            Engine.log(`记档先生在账簿上盖章，递给你一张纸条。「取回代码：【${code}】，一次性有效。重进同一地牢时，在门票界面输入此代码，找到出口撤出后再来找我。」`);
+            Engine.render();
+            return;
+        }
+
+        if (action.effect === 'npc_retrieve_dungeon') {
+            const st = Engine.state;
+            const backup = st.equipment_backup || {};
+            if (!backup.retrievable || backup.death_type !== 'dungeon') {
+                Engine.log("条件尚未满足。需要在地牢中使用取回代码并找到出口撤出后，才能取回装备。");
+                Engine.render();
+                return;
+            }
+            const snapshot = backup.snapshot || {};
+            const SLOT_NAMES = ["头饰", "护甲", "左手", "右手", "腰带", "左脚", "右脚", "左耳环", "右耳环", "项链", "左手戒指", "右手戒指"];
+            if (!st.equipment_slots) st.equipment_slots = {};
+            SLOT_NAMES.forEach(s => { st.equipment_slots[s] = snapshot[s] || null; });
+            st.belt_quick_contents = JSON.parse(JSON.stringify(backup.belt_snapshot || []));
+            backup.registered = false;
+            backup.snapshot = null;
+            backup.belt_snapshot = null;
+            backup.death_type = null;
+            backup.death_time = null;
+            backup.recovery_code = null;
+            backup.recovery_dungeon_id = null;
+            backup.code_used = false;
+            backup.retrievable = false;
+            st.equipment_backup = backup;
+            Engine.log("记档先生核对代码，将账簿上记载的装备一件件取出还给你。「此番历练，想必收获颇丰。」");
+            Engine.render();
+            return;
+        }
+
         if (actionId && action.repeatable === false) Engine.flags[actionId] = true;
         Engine.advanceTime((action.turn_cost || 0) * 10);
         if (action.cmd) Engine.run(action.cmd);

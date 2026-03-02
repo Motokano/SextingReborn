@@ -537,5 +537,29 @@
         "cmd": [
             { "type": "remove_farmland" }
         ]
+    },
+    "npc_register_equipment": {
+        "label": "登记当前装备（50银两）",
+        "repeatable": true,
+        "turn_cost": 0,
+        "effect": "npc_register_equipment"
+    },
+    "npc_retrieve_field": {
+        "label": "取回装备（野外身亡）",
+        "repeatable": true,
+        "turn_cost": 0,
+        "effect": "npc_retrieve_field"
+    },
+    "npc_get_dungeon_code": {
+        "label": "申请取回代码（地牢身亡）",
+        "repeatable": true,
+        "turn_cost": 0,
+        "effect": "npc_get_dungeon_code"
+    },
+    "npc_retrieve_dungeon": {
+        "label": "取回地牢装备",
+        "repeatable": true,
+        "turn_cost": 0,
+        "effect": "npc_retrieve_dungeon"
     }
 }

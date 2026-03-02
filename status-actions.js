@@ -68,9 +68,31 @@ const StatusActions = {
             if (p && typeof p.level === 'number') p.level = Math.max(1, p.level - 50);
         });
         st.combat_skill_progress = progress;
+        const moveProgress = st.move_progress || {};
+        Object.keys(moveProgress).forEach(moveId => {
+            const p = moveProgress[moveId];
+            if (p && typeof p.level === 'number') p.level = Math.max(1, p.level - 50);
+        });
+        st.move_progress = moveProgress;
     },
 
     trigger_death(c) {
+        const st = Engine.state;
+        const SLOT_NAMES = ["头饰", "护甲", "左手", "右手", "腰带", "左脚", "右脚", "左耳环", "右耳环", "项链", "左手戒指", "右手戒指"];
+        const backup = st.equipment_backup || {};
+        if (backup.registered) {
+            backup.snapshot = JSON.parse(JSON.stringify(st.equipment_slots || {}));
+            backup.belt_snapshot = JSON.parse(JSON.stringify(st.belt_quick_contents || []));
+            backup.death_type = (st.dungeon && st.dungeon.active) ? 'dungeon' : 'field';
+            backup.death_time = Date.now();
+            backup.recovery_code = null;
+            backup.code_used = false;
+            backup.retrievable = false;
+            backup.registered = false;
+            st.equipment_backup = backup;
+        }
+        if (st.equipment_slots) SLOT_NAMES.forEach(s => { st.equipment_slots[s] = null; });
+        st.belt_quick_contents = [];
         Engine.log("<span style='color:#800'>你已气绝，魂魄离体，恍惚间被引向阴曹...</span>");
         Movement.loadScene('underworld', 5);
     },
