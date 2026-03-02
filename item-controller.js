@@ -8,6 +8,14 @@ const ItemController = {
         if (!item) return;
         const displayName = (UI && UI.getItemDisplayName) ? UI.getItemDisplayName(baseId, Engine.state) : (item.sn || baseId);
         const options = [];
+        if (item.equipment_slot) {
+            const equipped = Engine.state.equipment_slots && Engine.state.equipment_slots[item.equipment_slot];
+            if (equipped === itemId) {
+                options.push({ key: 'unequip', text: '卸下' });
+            } else {
+                options.push({ key: 'equip', text: '装备' });
+            }
+        }
         if (item.effect_id) options.push({ key: 'use', text: '使用' });
         else if (item.action_ids && item.action_ids.length > 0) {
             item.action_ids.forEach(actionId => {
@@ -23,6 +31,16 @@ const ItemController = {
             subtitleEl.style.display = '';
         }
         UI.showChoiceModal(`选择对 ${displayName} 的操作`, options, (actionId) => {
+            if (actionId === 'equip') {
+                Engine.run([{ type: 'equip_item', item_slot_key: itemId }]);
+                Engine.render();
+                return;
+            }
+            if (actionId === 'unequip') {
+                Engine.run([{ type: 'unequip_item', equipment_slot: item.equipment_slot }]);
+                Engine.render();
+                return;
+            }
             if (actionId === 'drop') {
                 Engine.run([{ type: 'drop_to_ground', item_id: itemId, count: 1 }]);
                 Engine.render();

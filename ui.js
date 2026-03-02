@@ -2,7 +2,12 @@ const UI = {
     COMBAT_SKILL_SLOT: {
         basic_sword: '剑法', basic_blade: '刀法', basic_throwing: '暗器', basic_spear: '枪法',
         basic_palm: '掌法', basic_fist: '拳法', basic_leg: '腿法', basic_staff: '棍法',
-        basic_finger: '指法', basic_movement: '身法', basic_internal: '内功', basic_parry: '招架'
+        basic_finger: '指法', basic_movement: '身法', basic_internal: '内功', basic_parry: '招架',
+        basic_sword_thrust: '剑法', 'dugu-jiujian': '剑法', 'daojian-guizhen': '剑法', 'pixie-jian': '剑法',
+        'wuzhan-mei': '剑法', 'zhougong-jian': '剑法', 'xuantie-jian': '剑法', 'tonggui-jian': '剑法',
+        'qixian-wuxingjian': '剑法', 'lunhui-jian': '剑法', 'jinshe-jian': '剑法', 'yuenv-jian': '剑法',
+        'zhuihun-jian': '剑法', 'huifeng-jian': '剑法', 'yunlong-jian': '剑法', 'chuanyue-jian': '剑法',
+        'wuyun-jianfa': '剑法', 'taiji-jian': '剑法', 'jueqing-jian': '剑法', 'luoyan-jian': '剑法'
     },
 
     getOreMeta(itemId) {
@@ -233,6 +238,21 @@ const UI = {
             skillContainer.innerHTML = parts.join('');
         }
 
+        const equipmentSection = document.getElementById('equipment-section');
+        const equipmentContainer = document.getElementById('equipment-slots-container');
+        const equipSlots = state.equipment_slots || {};
+        const inv = state.inventory || {};
+        const hasEquippedAny = Object.values(equipSlots).some(v => v != null);
+        const hasEquippableInInv = Object.keys(inv).some(k => {
+            const bid = (typeof InventoryUtils !== 'undefined' ? InventoryUtils.getBaseItemId(k) : null) || k;
+            const it = (Engine.db.objects && Engine.db.objects[bid]) || (Engine.db.items && Engine.db.items[bid]);
+            return it && it.equipment_slot;
+        });
+        if (equipmentSection) equipmentSection.style.display = (hasEquippedAny || hasEquippableInInv) ? '' : 'none';
+        if (equipmentContainer && (hasEquippedAny || hasEquippableInInv)) {
+            UI.renderEquipmentSlots(equipmentContainer, state);
+        }
+
         const combatSection = document.getElementById('combat-section');
         const combatContainer = document.getElementById('combat-slots-container');
         const combatActiveContainer = document.getElementById('combat-active-container');
@@ -262,9 +282,14 @@ const UI = {
         const names = {
             basic_sword: '基本剑法', basic_blade: '基本刀法', basic_throwing: '基本暗器', basic_spear: '基本枪法',
             basic_palm: '基本掌法', basic_fist: '基本拳法', basic_leg: '基本腿法', basic_staff: '基本棍法',
-            basic_finger: '基本指法', basic_movement: '基本身法', basic_internal: '基本内功', basic_parry: '基本招架'
+            basic_finger: '基本指法', basic_movement: '基本身法', basic_internal: '基本内功', basic_parry: '基本招架',
+            basic_sword_thrust: '基础刺', 'dugu-jiujian': '独孤九剑', 'daojian-guizhen': '刀剑归真', 'pixie-jian': '辟邪剑法',
+            'wuzhan-mei': '五展梅', 'zhougong-jian': '周公剑', 'xuantie-jian': '玄铁剑法', 'tonggui-jian': '同归剑',
+            'qixian-wuxingjian': '七弦无形剑', 'lunhui-jian': '轮回剑', 'jinshe-jian': '金蛇剑法', 'yuenv-jian': '越女剑术',
+            'zhuihun-jian': '追魂夺命剑', 'huifeng-jian': '回风剑法', 'yunlong-jian': '云龙剑', 'chuanyue-jian': '川岳剑法',
+            'wuyun-jianfa': '乌云剑法', 'taiji-jian': '太极剑', 'jueqing-jian': '绝情剑法', 'luoyan-jian': '落雁剑法'
         };
-        return names[skillId] || skillId;
+        return names[skillId] || (Engine.db.moves && Engine.db.moves[skillId] && Engine.db.moves[skillId].sn) || skillId;
     },
     renderCategorySkillBar(skillsObj, nameFn) {
         const skills = skillsObj || {};
@@ -284,6 +309,7 @@ const UI = {
         if (!container) return;
         const slots = state.combat_skill_slots || {};
         const progress = state.combat_skill_progress || {};
+        const moveProgress = state.move_progress || {};
         const potential = Math.min(5000000, state.potential || 0);
         const potentialEl = document.getElementById('combat-potential-display');
         if (potentialEl) {
@@ -293,8 +319,8 @@ const UI = {
         const slotOrder = ['剑法', '刀法', '暗器', '枪法', '掌法', '拳法', '腿法', '棍法', '指法', '身法', '内功', '招架'];
         const unlockedSlots = new Set();
         Object.entries(UI.COMBAT_SKILL_SLOT || {}).forEach(([skillId, slotName]) => {
-            if (!progress[skillId]) return;
-            unlockedSlots.add(slotName);
+            if (progress[skillId]) { unlockedSlots.add(slotName); return; }
+            if (slotName === '剑法' && moveProgress[skillId] && (moveProgress[skillId].level || 0) >= 1) unlockedSlots.add(slotName);
         });
         container.innerHTML = '';
         slotOrder.forEach(slotName => {
@@ -313,12 +339,17 @@ const UI = {
             btn.setAttribute('data-slot', slotName);
             btn.style.flex = '1';
             if (skillId) {
-                const prog = progress[skillId];
+                const prog = progress[skillId] || (slotName === '剑法' ? moveProgress[skillId] : null);
                 const level = prog && prog.level != null ? prog.level : 1;
                 const levelMax = prog && prog.level_max != null ? prog.level_max : 1000;
                 const name = UI.skillName(skillId);
                 const degree = UI.skillDegree(level, levelMax, prog && prog.proficiency);
-                btn.innerHTML = `<span class="slot-name">${slotName}</span><span class="slot-skill">${name} ${degree}</span>`;
+                let text = `${name} ${degree}`;
+                if (slotName === '剑法' && typeof CombatActions !== 'undefined' && CombatActions.getMoveProficiencyPct) {
+                    const pct = CombatActions.getMoveProficiencyPct(skillId, state, Engine.db.moves && Engine.db.moves[skillId]);
+                    text += ' 熟练' + (pct * 100).toFixed(1) + '%';
+                }
+                btn.innerHTML = `<span class="slot-name">${slotName}</span><span class="slot-skill">${text}</span>`;
             } else {
                 btn.innerHTML = `<span class="slot-name">${slotName}</span><span class="slot-empty">空</span>`;
             }
@@ -359,6 +390,53 @@ const UI = {
             }
             container.appendChild(row);
         });
+
+        // Per-limb skill section
+        const LIMB_DISPLAY = { l_arm: '左手', r_arm: '右手', l_leg: '左腿', r_leg: '右腿' };
+        const LIMB_KEYS = ['l_arm', 'r_arm', 'l_leg', 'r_leg'];
+        const limbSlots = state.combat_skill_slots_by_limb || {};
+        const hasAnyLimbSkill = LIMB_KEYS.some(k => { const d = limbSlots[k]; return d && (d.attack || d.parry); });
+        const hasCombatAwareness = typeof Engine !== 'undefined' && Engine.hasCombatAwareness && Engine.hasCombatAwareness(state);
+        if (hasCombatAwareness) {
+            const limbSection = document.createElement('div');
+            limbSection.style.marginTop = '10px';
+            const limbTitle = document.createElement('div');
+            limbTitle.className = 'sub-title';
+            limbTitle.textContent = '肢体技能';
+            limbSection.appendChild(limbTitle);
+            LIMB_KEYS.forEach(limbKey => {
+                const limbData = limbSlots[limbKey] || { attack: null, parry: null };
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.alignItems = 'center';
+                row.style.gap = '4px';
+                row.style.marginBottom = '3px';
+                const label = document.createElement('span');
+                label.textContent = LIMB_DISPLAY[limbKey];
+                label.style.width = '3em';
+                label.style.flexShrink = '0';
+                label.style.fontSize = '12px';
+                row.appendChild(label);
+                [['attack', '攻'], ['parry', '守']].forEach(([slotType, typeLabel]) => {
+                    const skillId = limbData[slotType] || null;
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'combat-slot-btn' + (skillId ? '' : ' combat-slot-empty');
+                    btn.style.flex = '1';
+                    btn.style.fontSize = '11px';
+                    btn.style.padding = '2px 4px';
+                    if (skillId) {
+                        btn.innerHTML = `<span class="slot-name">${typeLabel}</span><span class="slot-skill">${UI.skillName(skillId)}</span>`;
+                    } else {
+                        btn.innerHTML = `<span class="slot-name">${typeLabel}</span><span class="slot-empty">空</span>`;
+                    }
+                    btn.onclick = () => UI.showLimbSkillModal(limbKey, slotType);
+                    row.appendChild(btn);
+                });
+                limbSection.appendChild(row);
+            });
+            container.appendChild(limbSection);
+        }
     },
 
     /** 内功辅助：精力/内力阈值，与打坐同间隔（5 秒）自动执行吐气纳精、血气化劲。选项为描述，不显示具体数值。 */
@@ -439,11 +517,17 @@ const UI = {
         const state = Engine.state;
         const slots = state.combat_skill_slots || {};
         const progress = state.combat_skill_progress || {};
+        const moveProgress = state.move_progress || {};
         const currentSkillId = slots[slotName] || null;
         const options = [];
+        const hasProgress = (skillId) => {
+            if (progress[skillId]) return true;
+            if (slotName === '剑法' && moveProgress[skillId] && (moveProgress[skillId].level || 0) >= 1) return true;
+            return false;
+        };
         Object.entries(UI.COMBAT_SKILL_SLOT).forEach(([skillId, s]) => {
             if (s !== slotName) return;
-            if (!progress[skillId]) return;
+            if (!hasProgress(skillId)) return;
             const name = UI.skillName(skillId);
             options.push({ key: skillId, text: name + (currentSkillId === skillId ? ' (已装备)' : '') });
         });
@@ -462,6 +546,56 @@ const UI = {
             }
             Engine.render();
         }, 'combat-skill');
+    },
+
+    showLimbSkillModal(limbKey, slotType) {
+        const state = Engine.state;
+        const LIMB_DISPLAY = { l_arm: '左手', r_arm: '右手', l_leg: '左腿', r_leg: '右腿' };
+        const limbName = LIMB_DISPLAY[limbKey] || limbKey;
+        const typeLabel = slotType === 'attack' ? '攻击' : '招架';
+        const limbSlots = state.combat_skill_slots_by_limb || {};
+        const limbData = limbSlots[limbKey] || {};
+        const currentSkillId = limbData[slotType] || null;
+        const options = [];
+        if (slotType === 'parry') {
+            const progress = state.combat_skill_progress || {};
+            Object.entries(progress).forEach(([skillId, prog]) => {
+                if (UI.COMBAT_SKILL_SLOT[skillId] === '招架' && prog && (prog.level || 0) >= 1) {
+                    options.push({ key: skillId, text: UI.skillName(skillId) + (currentSkillId === skillId ? ' (已装备)' : '') });
+                }
+            });
+        } else {
+            const moveProgress = state.move_progress || {};
+            Object.entries(moveProgress).forEach(([moveId, prog]) => {
+                if (prog && (prog.level || 0) >= 1) {
+                    options.push({ key: moveId, text: UI.skillName(moveId) + (currentSkillId === moveId ? ' (已装备)' : '') });
+                }
+            });
+            const skillProgress = state.combat_skill_progress || {};
+            Object.entries(skillProgress).forEach(([skillId, prog]) => {
+                const slot = UI.COMBAT_SKILL_SLOT[skillId];
+                if (slot && slot !== '内功' && slot !== '招架' && slot !== '身法' && prog && (prog.level || 0) >= 1) {
+                    if (!options.find(o => o.key === skillId)) {
+                        options.push({ key: skillId, text: UI.skillName(skillId) + (currentSkillId === skillId ? ' (已装备)' : '') });
+                    }
+                }
+            });
+        }
+        if (currentSkillId) options.push({ key: '__unequip__', text: '卸下' });
+        if (options.length === 0) {
+            Engine.log('暂无可分配的技能。');
+            return;
+        }
+        UI.showChoiceModal(`${limbName} · ${typeLabel}`, options, (key) => {
+            if (key === '__unequip__') {
+                Engine.run([{ type: 'set_limb_skill', limb: limbKey, slot: slotType, skill_id: null }]);
+                Engine.log(`已卸下${limbName}${typeLabel}槽位的技能。`);
+            } else {
+                Engine.run([{ type: 'set_limb_skill', limb: limbKey, slot: slotType, skill_id: key }]);
+                Engine.log(`已将${UI.skillName(key)}装备至${limbName}${typeLabel}槽。`);
+            }
+            Engine.render();
+        }, 'limb-skill');
     },
 
     updateCombatPanel() {
@@ -552,17 +686,23 @@ const UI = {
     renderSkillBar(state) {
         const slots = state.combat_skill_slots || {};
         const progress = state.combat_skill_progress || {};
+        const moveProgress = state.move_progress || {};
         const slotOrder = ['剑法', '刀法', '暗器', '枪法', '掌法', '拳法', '腿法', '棍法', '指法', '身法', '内功', '招架'];
         const lines = [];
         slotOrder.forEach(slotName => {
             const skillId = slots[slotName];
             if (skillId) {
-                const prog = progress[skillId];
+                const prog = progress[skillId] || (slotName === '剑法' ? moveProgress[skillId] : null);
                 const level = prog && prog.level != null ? prog.level : 1;
                 const levelMax = prog && prog.level_max != null ? prog.level_max : 1000;
                 const name = UI.skillName(skillId);
                 const degree = UI.skillDegree(level, levelMax, prog && prog.proficiency);
-                lines.push(`<div class="combat-slot" style="line-height:1.6;">${slotName}：${name} ${degree}</div>`);
+                let text = `${slotName}：${name} ${degree}`;
+                if (slotName === '剑法' && typeof CombatActions !== 'undefined' && CombatActions.getMoveProficiencyPct) {
+                    const pct = CombatActions.getMoveProficiencyPct(skillId, state, Engine.db.moves && Engine.db.moves[skillId]);
+                    text += ' 熟练' + (pct * 100).toFixed(1) + '%';
+                }
+                lines.push(`<div class="combat-slot" style="line-height:1.6;">${text}</div>`);
             } else {
                 lines.push(`<div class="combat-slot combat-slot-empty" style="line-height:1.6;">${slotName}：<span class="slot-empty">空</span></div>`);
             }
@@ -613,6 +753,133 @@ const UI = {
         if (pct >= 40) return "尚可";
         return "无负担";
     },
+    renderEquipmentSlots(container, state) {
+        if (!container) return;
+        const equipSlots = state.equipment_slots || {};
+        const SLOT_NAMES = ["头饰", "护甲", "左手", "右手", "腰带", "左脚", "右脚", "左耳环", "右耳环", "项链", "左手戒指", "右手戒指"];
+        container.innerHTML = '';
+        SLOT_NAMES.forEach(slotName => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:6px;';
+
+            const label = document.createElement('span');
+            label.textContent = slotName;
+            label.style.cssText = 'width:3.5em;flex-shrink:0;font-size:12px;color:#aaa;text-align:right;';
+
+            const btn = document.createElement('button');
+            btn.className = 'action-brick';
+            btn.style.flex = '1';
+
+            const currentKey = equipSlots[slotName] || null;
+            if (currentKey) {
+                const baseId = (typeof InventoryUtils !== 'undefined' ? InventoryUtils.getBaseItemId(currentKey) : null) || currentKey;
+                const item = (Engine.db.objects && Engine.db.objects[baseId]) || (Engine.db.items && Engine.db.items[baseId]);
+                btn.textContent = item ? item.sn : currentKey;
+                btn.title = item ? (item.fn || item.sn) : currentKey;
+                btn.onclick = () => {
+                    UI.showChoiceModal(slotName + '：' + (item ? item.sn : currentKey), [
+                        { key: 'unequip', text: '卸下' },
+                        { key: 'cancel', text: '取消' }
+                    ], choice => {
+                        if (choice === 'unequip') {
+                            Engine.run([{ type: 'unequip_item', equipment_slot: slotName }]);
+                            Engine.render();
+                        }
+                    }, 'manual');
+                };
+            } else {
+                btn.textContent = '（空）';
+                btn.style.color = '#666';
+                btn.onclick = () => {
+                    const inv = state.inventory || {};
+                    const candidates = [];
+                    Object.entries(inv).forEach(([k, cnt]) => {
+                        if (!cnt) return;
+                        const bid = (typeof InventoryUtils !== 'undefined' ? InventoryUtils.getBaseItemId(k) : null) || k;
+                        const it = (Engine.db.objects && Engine.db.objects[bid]) || (Engine.db.items && Engine.db.items[bid]);
+                        if (it && it.equipment_slot === slotName) {
+                            candidates.push({ key: k, text: it.sn + (cnt > 1 ? ' x' + cnt : '') });
+                        }
+                    });
+                    if (candidates.length === 0) {
+                        Engine.log('背包中没有可装备到' + slotName + '槽的物品。');
+                        return;
+                    }
+                    candidates.push({ key: 'cancel', text: '取消' });
+                    UI.showChoiceModal('选择要装备到「' + slotName + '」的物品', candidates, choice => {
+                        if (choice && choice !== 'cancel') {
+                            Engine.run([{ type: 'equip_item', item_slot_key: choice }]);
+                            Engine.render();
+                        }
+                    }, 'manual');
+                };
+            }
+
+            row.appendChild(label);
+            row.appendChild(btn);
+            container.appendChild(row);
+        });
+
+        var beltKey = equipSlots['腰带'];
+        if (beltKey) {
+            var baseId = (typeof InventoryUtils !== 'undefined' ? InventoryUtils.getBaseItemId(beltKey) : null) || beltKey;
+            var beltItem = (Engine.db.objects && Engine.db.objects[baseId]) || (Engine.db.items && Engine.db.items[baseId]);
+            var quickSlots = beltItem && beltItem.quick_slots != null ? Math.max(0, parseInt(beltItem.quick_slots, 10)) : 0;
+            if (quickSlots > 0) {
+                var beltTitle = document.createElement('div');
+                beltTitle.style.cssText = 'font-size:12px;color:#888;margin:8px 0 4px 0;';
+                beltTitle.textContent = '腰带快捷栏（战斗中可用）';
+                container.appendChild(beltTitle);
+                var beltRow = document.createElement('div');
+                beltRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;';
+                var contents = state.belt_quick_contents || [];
+                for (var i = 0; i < quickSlots; i++) {
+                    var entry = contents[i];
+                    var cell = document.createElement('button');
+                    cell.className = 'action-brick';
+                    cell.style.minWidth = '60px';
+                    if (entry && entry.baseId) {
+                        var obj = (Engine.db.objects && Engine.db.objects[entry.baseId]) || (Engine.db.items && Engine.db.items[entry.baseId]);
+                        cell.textContent = obj ? obj.sn + (entry.count > 1 ? ' x' + entry.count : '') : entry.baseId;
+                        cell.title = '点击取出';
+                        cell.onclick = (function(idx) {
+                            return function() {
+                                Engine.run([{ type: 'take_from_belt_slot', belt_index: idx }]);
+                                Engine.render();
+                            };
+                        })(i);
+                    } else {
+                        cell.textContent = '空';
+                        cell.style.color = '#666';
+                        cell.onclick = (function(idx) {
+                            return function() {
+                                var inv = state.inventory || {};
+                                var list = [];
+                                Object.keys(inv).forEach(function(k) {
+                                    var c = inv[k];
+                                    if (!c) return;
+                                    var bid = (typeof InventoryUtils !== 'undefined' ? InventoryUtils.getBaseItemId(k) : null) || k;
+                                    var it = (Engine.db.objects && Engine.db.objects[bid]) || (Engine.db.items && Engine.db.items[bid]);
+                                    if (it) list.push({ key: k, text: it.sn + (c > 1 ? ' x' + c : '') });
+                                });
+                                if (list.length === 0) { Engine.log('背包为空。'); return; }
+                                list.push({ key: 'cancel', text: '取消' });
+                                UI.showChoiceModal('放入腰带第' + (idx + 1) + '格', list, function(choice) {
+                                    if (choice && choice !== 'cancel') {
+                                        Engine.run([{ type: 'put_into_belt_slot', belt_index: idx, item_slot_key: choice, count: 1 }]);
+                                        Engine.render();
+                                    }
+                                }, 'manual');
+                            };
+                        })(i);
+                    }
+                    beltRow.appendChild(cell);
+                }
+                container.appendChild(beltRow);
+            }
+        }
+    },
+
     renderInventory(state) {
         const container = document.getElementById('inventory-list');
         const weightDisplay = document.getElementById('inventory-weight');

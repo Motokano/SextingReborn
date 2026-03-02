@@ -1,0 +1,65 @@
+{
+  "description": "七种哲学属性在 [-1, 1] 下按内功档位缩放后的加成。档位越高加成幅度越大；公式中的系数为「5档基准」，实际生效 = 系数 × tier_strength[档位]。",
+  "value_range": { "min": -1, "max": 1 },
+  "tier_strength": {
+    "1": 0.3,
+    "2": 0.45,
+    "3": 0.6,
+    "4": 0.75,
+    "5": 1.0,
+    "6": 1.25,
+    "7": 1.55,
+    "8": 2.0
+  },
+  "philosophy_effects": {
+    "yin_yang": {
+      "poles": { "low": "阴", "high": "阳" },
+      "effects": [
+        { "stat": "neili_recovery_mult", "formula": "1 - 0.26 * value", "desc": "阴：内力回复；阳：内力回复减" },
+        { "stat": "damage_mult", "formula": "1 + 0.22 * value", "desc": "阳：伤害；阴：伤害减" }
+      ]
+    },
+    "gang_rou": {
+      "poles": { "low": "柔", "high": "刚" },
+      "effects": [
+        { "stat": "resist_add", "formula": "-0.14 * value", "desc": "柔：抗性加；刚：抗性减" },
+        { "stat": "damage_mult", "formula": "1 + 0.18 * value", "desc": "刚：伤害；柔：伤害减" }
+      ]
+    },
+    "dong_jing": {
+      "poles": { "low": "静", "high": "动" },
+      "effects": [
+        { "stat": "speed_mult", "formula": "1 + 0.22 * value", "desc": "动：速度；静：速度减" },
+        { "stat": "neili_to_shield_ratio_mult", "formula": "1 - 0.18 * value", "desc": "静：内力转护盾；动：内力转护盾减" }
+      ]
+    },
+    "gong_shou": {
+      "poles": { "low": "守", "high": "攻" },
+      "effects": [
+        { "stat": "damage_mult", "formula": "1 + 0.28 * value", "desc": "攻：伤害；守：伤害减" },
+        { "stat": "shield_ratio_mult", "formula": "1 - 0.22 * value", "desc": "守：护盾比例；攻：护盾比例减" }
+      ]
+    },
+    "kuai_man": {
+      "poles": { "low": "慢", "high": "快" },
+      "effects": [
+        { "stat": "speed_mult", "formula": "1 + 0.18 * value", "desc": "快：速度；慢：速度减" },
+        { "stat": "power_per_hit_mult", "formula": "1 - 0.18 * value", "desc": "慢：单招威力；快：单招威力减" }
+      ]
+    },
+    "hou_bo": {
+      "poles": { "low": "薄", "high": "厚" },
+      "effects": [
+        { "stat": "neili_max_mult", "formula": "1 + 0.22 * value", "desc": "厚：内力上限；薄：内力上限减" },
+        { "stat": "crit_bonus_add", "formula": "-0.12 * value", "desc": "薄：暴击率；厚：暴击率减" }
+      ]
+    },
+    "ju_san": {
+      "poles": { "low": "散", "high": "聚" },
+      "effects": [
+        { "stat": "damage_mult", "formula": "1 + 0.16 * value", "desc": "聚：伤害；散：伤害减" },
+        { "stat": "hit_rate_bonus_add", "formula": "0.1 * value", "desc": "聚：命中；散：命中减" }
+      ]
+    }
+  }
+}

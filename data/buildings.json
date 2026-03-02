@@ -6,6 +6,14 @@
     "object_id": "time_pole",
     "blueprint_id": "blueprint_time_pole"
   },
+  "wooden_dummy": {
+    "id": "wooden_dummy",
+    "sn": "木桩",
+    "materials": { "pine_log": 4, "stone": 2 },
+    "object_id": "wooden_dummy",
+    "blueprint_id": "blueprint_wooden_dummy",
+    "practice_dummy": true
+  },
   "storage_box": {
     "id": "storage_box",
     "sn": "仓库",

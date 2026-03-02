@@ -1,0 +1,8 @@
+{
+  "description": "内功装备时的威力计算。威力值用于：(1) 出手威力加成系数；(2) 运功护体的内力盾基础值（经除数和上限控制，避免护盾碾压肢体血量）。",
+  "power_to_coef": "value / 100",
+  "power_to_coef_comment": "威力值 100 → 加成系数 1.0；出手威力 = 基本攻击 × (该系数 + 招式 power_coef)。",
+  "guard_shield_base_divisor": 1.5625,
+  "guard_shield_base_cap": 600,
+  "guard_shield_base_comment": "内力盾基础值 = min(威力值/divisor, cap)。750威力、无其他加成时 = 750/1.5625 = 480 ≈ 总血量(400)×1.2。"
+}

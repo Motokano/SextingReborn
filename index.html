@@ -64,6 +64,12 @@
                             <div id="skill-categories-container"></div>
                         </div>
                     </div>
+                    <div class="menu-section" id="equipment-section" style="display:none;">
+                        <button type="button" class="menu-title panel-toggle" aria-expanded="false" data-target="equipment-content"><span class="toggle-icon">▶</span> 装备</button>
+                        <div id="equipment-content" class="collapsible">
+                            <div id="equipment-slots-container"></div>
+                        </div>
+                    </div>
                     <div class="menu-section" id="combat-section" style="display:none;">
                         <button type="button" class="menu-title panel-toggle" aria-expanded="false" data-target="combat-content"><span class="toggle-icon">▶</span> 战斗</button>
                         <div id="combat-content" class="collapsible">
@@ -198,6 +204,7 @@
     <script src="menu-controller.js"></script>
     <script src="item-controller.js"></script>
     <script src="action-dispatcher.js"></script>
+    <script src="equipment-actions.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

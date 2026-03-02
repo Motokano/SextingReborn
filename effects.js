@@ -97,7 +97,7 @@ const Effects = {
                 Engine.log("没有需要治疗的部位。");
                 return;
             }
-            const options = healable.map(l => ({ key: l.key, text: `${LIMB_NAMES[l.key] || l.key} (${l.hp.toFixed(0)}/${l.max})` }));
+            const options = healable.map(l => ({ key: l.key, text: LIMB_NAMES[l.key] || l.key }));
             if (typeof UI !== 'undefined' && UI.showChoiceModal) {
                 UI.showChoiceModal("选择治疗部位", options, limbKey => {
                     healOne(limbKey);

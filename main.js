@@ -12,7 +12,7 @@ const Engine = {
     GROUND_SLOTS: 8,
 
     async init() {
-        const files = ['config', 'scenes', 'npcs', 'buffs', 'objects', 'actions', 'races', 'character_attributes', 'materials', 'forage', 'recipes', 'buildings', 'crafting_skills', 'moves', 'internal_arts', 'enemies'];
+        const files = ['config', 'scenes', 'npcs', 'buffs', 'objects', 'actions', 'races', 'character_attributes', 'materials', 'forage', 'recipes', 'buildings', 'crafting_skills', 'moves', 'internal_arts', 'internal_arts_power_config', 'philosophy_bonuses', 'neigong_tier_philosophy', 'enemies'];
         try {
             const results = await Promise.all(files.map(async f => {
                 const r = await fetch(`./data/${f}.json?v=${Date.now()}`);
@@ -31,6 +31,9 @@ const Engine = {
             Engine.state = JSON.parse(JSON.stringify(playerRace.base_stats));
             if (!Engine.state.buffs) Engine.state.buffs = [];
             if (Engine.state.combat_skill_slots == null) Engine.state.combat_skill_slots = { "剑法": null, "刀法": null, "暗器": null, "枪法": null, "掌法": null, "拳法": null, "腿法": null, "棍法": null, "指法": null, "身法": null, "内功": null, "招架": null };
+            if (Engine.state.combat_skill_slots_by_limb == null) {
+                Engine.state.combat_skill_slots_by_limb = { l_arm: { attack: null, parry: null }, r_arm: { attack: null, parry: null }, l_leg: { attack: null, parry: null }, r_leg: { attack: null, parry: null } };
+            }
             if (Engine.state.combat_awareness == null) Engine.state.combat_awareness = false;
             if (Engine.state.survival_skills == null) Engine.state.survival_skills = {};
             if (Engine.state.production_skills == null) Engine.state.production_skills = {};
@@ -50,7 +53,7 @@ const Engine = {
             if (Engine.state.battle_exp == null) Engine.state.battle_exp = 0;
             if (Engine.state.move_progress == null) Engine.state.move_progress = {};
             if (Engine.state.neili_lower == null) Engine.state.neili_lower = 0;
-            if (Engine.state.guard_shield == null) Engine.state.guard_shield = {};
+            if (Engine.state.guard_shield == null) Engine.state.guard_shield = 0;
             if (Engine.state.meditating == null) Engine.state.meditating = false;
             if (Engine.state.auto_exhale_energy_threshold == null) Engine.state.auto_exhale_energy_threshold = null;
             if (Engine.state.auto_limb_to_neili_threshold == null) Engine.state.auto_limb_to_neili_threshold = null;
@@ -66,6 +69,24 @@ const Engine = {
             if (Engine.state.inventory_locked == null) Engine.state.inventory_locked = {};
             if (Engine.state.container_locked == null) Engine.state.container_locked = {};
             if (Engine.state.unlocked_buildings == null) Engine.state.unlocked_buildings = {};
+            const EQUIPMENT_SLOT_NAMES = ["头饰", "护甲", "左手", "右手", "腰带", "左脚", "右脚", "左耳环", "右耳环", "项链", "左手戒指", "右手戒指"];
+            if (Engine.state.equipment_slots == null) {
+                Engine.state.equipment_slots = {};
+                EQUIPMENT_SLOT_NAMES.forEach(s => { Engine.state.equipment_slots[s] = null; });
+            } else {
+                const oldToNew = { "武器": "右手", "防具": "护甲", "饰品": "项链" };
+                Object.keys(oldToNew).forEach(oldKey => {
+                    if (Engine.state.equipment_slots[oldKey] != null) {
+                        const newKey = oldToNew[oldKey];
+                        if (!Engine.state.equipment_slots[newKey]) Engine.state.equipment_slots[newKey] = Engine.state.equipment_slots[oldKey];
+                        Engine.state.equipment_slots[oldKey] = null;
+                    }
+                });
+                EQUIPMENT_SLOT_NAMES.forEach(s => { if (!(s in Engine.state.equipment_slots)) Engine.state.equipment_slots[s] = null; });
+            }
+            if (Engine.state.belt_quick_contents == null) Engine.state.belt_quick_contents = [];
+            if (Engine.state.dominant_hand == null) Engine.state.dominant_hand = "right";
+            if (Engine.state.dominant_foot == null) Engine.state.dominant_foot = "right";
             CharacterUtils.applyCharacterAttributes(Engine.state, playerDef);
 
             Movement.loadScene(Engine.db.config.startScene, Engine.db.config.startIndex);
@@ -432,8 +453,8 @@ const Engine = {
             const neiliDesc = cur >= st.neili_max * 0.8 ? "内力充盈" : cur >= st.neili_max * 0.4 ? "内力尚可" : cur > 0 ? "内力所剩无几" : "内力已空";
             parts.push(neiliDesc + "。");
         }
-        if (st.guard_shield && Object.keys(st.guard_shield).length > 0) {
-            const totalShield = Object.values(st.guard_shield).reduce((s, v) => s + (v || 0), 0);
+        if (st.guard_shield != null && (typeof st.guard_shield === 'number' ? st.guard_shield > 0 : Object.keys(st.guard_shield).length > 0)) {
+            const totalShield = typeof st.guard_shield === 'number' ? st.guard_shield : Object.values(st.guard_shield).reduce((s, v) => s + (v || 0), 0);
             if (totalShield > 0) parts.push("护体真气尚在，仍可抵挡些许伤害。");
         }
 
@@ -686,7 +707,8 @@ Engine.runHandlers = Object.assign(
     typeof SkillActions !== 'undefined' ? SkillActions : {},
     typeof BuffActions !== 'undefined' ? BuffActions : {},
     typeof LanguageActions !== 'undefined' ? LanguageActions : {},
-    typeof CombatRunHandlers !== 'undefined' ? CombatRunHandlers : {}
+    typeof CombatRunHandlers !== 'undefined' ? CombatRunHandlers : {},
+    typeof EquipmentActions !== 'undefined' ? EquipmentActions : {}
 );
 
 window.onload = () => Engine.init();

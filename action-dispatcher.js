@@ -25,12 +25,50 @@ const ActionDispatcher = {
                 Engine.log("没有需要治疗的部位。");
                 return;
             }
-            const options = healableLimbs.map(l => ({ key: l.key, text: `${limbMap[l.key]} (${l.hp.toFixed(0)}/${l.max})` }));
+            const options = healableLimbs.map(l => ({ key: l.key, text: limbMap[l.key] }));
             UI.showChoiceModal("选择治疗部位", options, (limbKey) => {
                 Engine.advanceTime((action.turn_cost || 0) * 10);
                 Engine.applyLimbDamage(limbKey, action.heal_amount || 30);
                 Engine.run([{ type: 'remove_from_inventory', item_id: context.itemId, count: 1 }]);
                 Engine.log(`你使用了${action.label}，治疗了<span class="log-limb">${limbMap[limbKey]}</span>。`);
+                Engine.render();
+            });
+            return;
+        }
+
+        if (action.effect === 'practice_move') {
+            const st = Engine.state;
+            if (Engine.curId !== 'home' || !Engine.cur || !Engine.cur.grid) {
+                Engine.log("需要在家才能对木桩练招。");
+                Engine.render();
+                return;
+            }
+            const hasDummy = Engine.cur.grid.some(cell => cell && cell.object_id === 'wooden_dummy');
+            if (!hasDummy) {
+                Engine.log("需要在家建造木桩后才能对木桩练招。");
+                Engine.render();
+                return;
+            }
+            const moveProgress = st.move_progress || {};
+            const moves = Engine.db.moves || {};
+            const options = [];
+            Object.keys(moveProgress).forEach(moveId => {
+                const prog = moveProgress[moveId];
+                if (prog && (prog.level || 0) >= 1) {
+                    const def = moves[moveId] || {};
+                    const name = def.sn || moveId;
+                    const pct = (typeof CombatActions !== 'undefined' && CombatActions.getMoveProficiencyPct) ? (CombatActions.getMoveProficiencyPct(moveId, st, def) * 100).toFixed(1) : '0';
+                    options.push({ key: moveId, text: name + '（熟练 ' + pct + '%）' });
+                }
+            });
+            if (options.length === 0) {
+                Engine.log("你还没有学会任何可练的招式。");
+                Engine.render();
+                return;
+            }
+            UI.showChoiceModal("选择要练的招式", options, (moveId) => {
+                Engine.advanceTime((action.turn_cost || 1) * 10);
+                Engine.run([{ type: 'practice_move_on_dummy', move_id: moveId }]);
                 Engine.render();
             });
             return;

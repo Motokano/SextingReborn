@@ -1,6 +1,8 @@
 {
   "basic_internal": {
     "sn": "基础内功",
+    "tier": 1,
+    "power": 0,
     "yin_yang": 0,
     "gang_rou": 0,
     "dong_jing": 0,
@@ -12,6 +14,7 @@
     "resist_slash": 0,
     "resist_blunt": 0,
     "neili_to_shield_ratio": 0.5,
-    "neili_to_energy_ratio": 10
+    "neili_to_energy_ratio": 10,
+    "guard_resist_bonus": 0
   }
 }

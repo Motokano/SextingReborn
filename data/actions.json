@@ -22,6 +22,12 @@
             { "type": "check_body_text" }
         ]
     },
+    "practice_on_dummy": {
+        "label": "对木桩练招",
+        "repeatable": true,
+        "turn_cost": 1,
+        "effect": "practice_move"
+    },
     "meditate": {
         "label": "打坐吐纳",
         "repeatable": true,

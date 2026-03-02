@@ -16,6 +16,18 @@ const CombatEngine = {
     getDefaultMoveId(state) {
         const moves = Engine.db.moves || {};
         const progress = state.move_progress || {};
+        // Prefer per-limb attack slot for dominant hand
+        const dominantHand = state.dominant_hand || 'right';
+        const dominantLimb = dominantHand === 'left' ? 'l_arm' : 'r_arm';
+        const byLimb = state.combat_skill_slots_by_limb || {};
+        const limbAttack = byLimb[dominantLimb] && byLimb[dominantLimb].attack;
+        if (limbAttack && moves[limbAttack]) return limbAttack;
+        // Fall back to global 剑法 slot, then any learned move
+        const slotSword = state.combat_skill_slots && state.combat_skill_slots['剑法'];
+        if (slotSword && moves[slotSword] && (moves[slotSword].slot === '剑法')) {
+            const prog = progress[slotSword];
+            if (prog && (prog.level || 0) >= 1) return slotSword;
+        }
         for (const moveId of Object.keys(moves)) {
             const prog = progress[moveId];
             if (prog && (prog.level || 0) >= 1) return moveId;
@@ -212,6 +224,7 @@ const CombatEngine = {
         const st = Engine.state;
         const moves = Engine.db.moves || {};
         const moveDef = moves[moveId] || {};
+        if (typeof CombatActions.addMoveUseCount === 'function') CombatActions.addMoveUseCount(moveId);
         const hitRate = CombatActions.getHitRate(st, targetEnemy.state);
         if (Math.random() >= hitRate) {
             CombatEngine.logCombat("<span class='log-combat'>你的攻击落空。</span>");
@@ -226,7 +239,24 @@ const CombatEngine = {
         const str = (st.str_innate || 0) + (st.str_acq || 0);
         const moveProg = (st.move_progress && st.move_progress[moveId]) || {};
         const lv = moveProg.level || 1;
-        const raw = (str + 5) * (moveDef.power_coef || 1) * (1 + lv * 0.01);
+        const levelMax = moveProg.level_max != null ? moveProg.level_max : (moveDef.level_max != null ? moveDef.level_max : 1000);
+        const baseAttack = (str + 5) * (1 + lv * 0.01);
+        const equipmentMult = (st.equipment_damage_mult != null) ? Number(st.equipment_damage_mult) : 1;
+        const neiliCheng = Number(moveDef.power_coef) || 1;
+        const arts = (Engine.db && Engine.db.internal_arts) ? Engine.db.internal_arts : {};
+        const neigongId = (st.combat_skill_slots && st.combat_skill_slots['内功']) || 'basic_internal';
+        const neigongDef = arts[neigongId] || {};
+        const neigongPower = Number(neigongDef.power) || 0;
+        const rawMovePower = Number(moveDef.power) || 0;
+        const powerLevelFactor = (typeof CombatActions.getMovePowerLevelFactor === 'function') ? CombatActions.getMovePowerLevelFactor(lv, levelMax) : 1;
+        const proficiencyPct = (typeof CombatActions.getMoveProficiencyPct === 'function') ? CombatActions.getMoveProficiencyPct(moveId, st, moveDef) : 0;
+        const profBonus = 1 + proficiencyPct;
+        const movePower = rawMovePower * powerLevelFactor * profBonus;
+        const philosophyMult = (typeof CombatActions.getPhilosophyDamageMult === 'function') ? CombatActions.getPhilosophyDamageMult(neigongDef) : 1;
+        const powerTerm = movePower + neigongPower * philosophyMult * profBonus;
+        const envMult = (typeof CombatActions.getEnvironmentMult === 'function') ? CombatActions.getEnvironmentMult(st, moveId, moveDef) : 1;
+        const battleExpMult = (typeof CombatActions.getBattleExpDamageMult === 'function') ? CombatActions.getBattleExpDamageMult(st) : 1;
+        const raw = (baseAttack * equipmentMult) * neiliCheng * (1 + powerTerm / 100) * envMult * battleExpMult;
         const crit = (st.luck === -1) ? false : (Math.random() < 0.1);
         const finalRaw = raw * (crit ? 1.5 : 1);
         CombatActions.applyDamageToState(targetEnemy.state, limb, finalRaw, moveDef.damage_type || 'blunt');

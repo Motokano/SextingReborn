@@ -1,0 +1,22 @@
+{
+  "description": "内功档位(1-8)对应的哲学属性标签，档位越高种类越多。7档与8档均为全部7种，8档可作圆满/强度区分。",
+  "tier_philosophy_keys": {
+    "1": ["yin_yang"],
+    "2": ["yin_yang", "gang_rou"],
+    "3": ["yin_yang", "gang_rou", "dong_jing"],
+    "4": ["yin_yang", "gang_rou", "dong_jing", "gong_shou"],
+    "5": ["yin_yang", "gang_rou", "dong_jing", "gong_shou", "kuai_man"],
+    "6": ["yin_yang", "gang_rou", "dong_jing", "gong_shou", "kuai_man", "hou_bo"],
+    "7": ["yin_yang", "gang_rou", "dong_jing", "gong_shou", "kuai_man", "hou_bo", "ju_san"],
+    "8": ["yin_yang", "gang_rou", "dong_jing", "gong_shou", "kuai_man", "hou_bo", "ju_san"]
+  },
+  "philosophy_labels": {
+    "yin_yang": "阴阳",
+    "gang_rou": "刚柔",
+    "dong_jing": "动静",
+    "gong_shou": "攻守",
+    "kuai_man": "快慢",
+    "hou_bo": "厚薄",
+    "ju_san": "聚散"
+  }
+}

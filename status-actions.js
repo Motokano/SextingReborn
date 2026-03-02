@@ -57,7 +57,11 @@ const StatusActions = {
         if (st.limbs) Object.keys(st.limbs).forEach(k => { st.limbs[k] = 1; });
         st.neili = 0;
         st.neili_max = Math.max(0, Math.floor((st.neili_max || 0) / 2));
-        if (st.guard_shield) Object.keys(st.guard_shield).forEach(k => { st.guard_shield[k] = 0; });
+        if (st.guard_shield != null) {
+            if (typeof st.guard_shield === 'number') st.guard_shield = 0;
+            else Object.keys(st.guard_shield).forEach(k => { st.guard_shield[k] = 0; });
+        }
+        if (st.guard_resist_bonus != null) st.guard_resist_bonus = 0;
         const progress = st.combat_skill_progress || {};
         Object.keys(progress).forEach(skillId => {
             const p = progress[skillId];
