@@ -98,9 +98,14 @@ const CombatEngine = {
         } else if (result === 'flee') {
             CombatEngine.logCombat("<span class='log-combat'>你脱身而退。</span>");
         }
+        // 地牢内战斗结束后的额外处理（如普通敌人房逃跑重生/击杀清除）
+        if (Engine.state.dungeon && Engine.state.dungeon.active && typeof DungeonManager !== 'undefined' && typeof DungeonManager.onCombatEndInDungeon === 'function') {
+            DungeonManager.onCombatEndInDungeon(result);
+        }
         if (typeof UI !== 'undefined' && UI.updateCombatPanel) UI.updateCombatPanel();
         if (typeof UI !== 'undefined' && UI.closeCombatModal) UI.closeCombatModal();
         if (typeof Engine.render === 'function') Engine.render();
+        if (result === 'win' && Engine.state.dungeon && Engine.state.dungeon.active && typeof DungeonUI !== 'undefined' && DungeonUI.onCombatEnd) DungeonUI.onCombatEnd();
     },
 
     startRoundTimer() {

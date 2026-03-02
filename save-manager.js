@@ -8,9 +8,10 @@
  */
 const SaveManager = (() => {
     const LS_META = 'wys_meta';   // { username, salt_hex }  明文
-    const LS_SAVE = 'wys_save';   // { iv_hex, data_hex }     密文
+    const LS_SAVE = 'wys_save';   // { iv_hex, data_hex }     密文（仅手动存档写入）
+    const LS_SESSION = 'wys_session'; // 会话存档（明文），用于启动时无密码恢复与自动存档
 
-    let _key = null;              // 会话期间的 CryptoKey，注销时清除
+    let _key = null;              // 会话期间的 CryptoKey，仅在手动物理存档时设置
     let _saveTimer = null;        // 自动存档防抖 timer
 
     /* ── 工具函数 ───────────────────────────────────────────── */
@@ -69,7 +70,16 @@ const SaveManager = (() => {
         return null; // 有账户但尚无存档（刚注册）
     }
 
-    /** 立即将当前 Engine 状态加密写入 localStorage */
+    /** 从会话存档（明文）读取，用于启动时无密码恢复。无存档或解析失败返回 null。 */
+    function loadSession() {
+        try {
+            const raw = localStorage.getItem(LS_SESSION);
+            if (!raw) return null;
+            return JSON.parse(raw);
+        } catch (_) { return null; }
+    }
+
+    /** 立即将当前 Engine 状态加密写入 localStorage（仅当 _key 已设置时，即手动存档后） */
     async function save() {
         if (!_key || typeof Engine === 'undefined' || !Engine.state) return;
         const blob = {
@@ -85,13 +95,32 @@ const SaveManager = (() => {
         };
         const enc = await _encrypt(_key, JSON.stringify(blob));
         localStorage.setItem(LS_SAVE, JSON.stringify(enc));
+        try {
+            localStorage.setItem(LS_SESSION, JSON.stringify(blob));
+        } catch (_) {}
     }
 
-    /** render() 调用此函数；防抖 2 秒，避免高频写入 */
+    /** render() 调用；防抖 2 秒，写入会话存档（明文），无需密码。 */
     function scheduleSave() {
-        if (!_key) return;
+        if (typeof Engine === 'undefined' || !Engine.state) return;
         clearTimeout(_saveTimer);
-        _saveTimer = setTimeout(() => save(), 2000);
+        _saveTimer = setTimeout(() => {
+            const blob = {
+                version: 1,
+                state: Engine.state,
+                time: Engine.time,
+                flags: Engine.flags,
+                npcStates: Engine.npcStates,
+                curId: Engine.curId,
+                pIdx: Engine.pIdx,
+                lastDecayDay: Engine.lastDecayDay,
+                dehydrationAccum: Engine.dehydrationAccum,
+            };
+            try {
+                localStorage.setItem(LS_SESSION, JSON.stringify(blob));
+            } catch (_) {}
+            if (_key) save(); // 若已登录过（手动存档过），同时写入加密存档
+        }, 2000);
     }
 
     /** 导出加密存档文件（含 meta + 密文） */
@@ -353,5 +382,123 @@ const SaveManager = (() => {
         }
     }
 
-    return { hasSave, getMeta, createAccount, login, save, scheduleSave, exportSave, importSave, logout, showLoginScreen };
+    /**
+     * 仅在手动物理存档时调用：弹出账号/密码对话框，保存后加密写入 LS_SAVE 并更新会话存档。
+     * 无账号时需创建；已有账号时输入密码即可保存或导出备份。
+     */
+    function showManualSaveDialog() {
+        _injectStyles();
+        const hasExisting = hasSave();
+        const meta = getMeta();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'save-overlay';
+        overlay.innerHTML = `
+<div class="save-dialog">
+    <h1 class="save-title">保存存档</h1>
+    <p class="save-subtitle" style="margin-bottom:8px;">${hasExisting ? '输入密码以加密保存' : '首次保存请创建账号（用户名与密码）'}</p>
+
+    <div id="sv-manual-login" ${hasExisting ? '' : 'style="display:none"'}>
+        <input type="password" id="sv-manual-pw" class="save-input" placeholder="密码" autocomplete="current-password">
+        <div class="save-error" id="sv-manual-err"></div>
+        <button id="sv-manual-save-btn" class="save-btn save-btn--primary">保存</button>
+        <button id="sv-manual-export-btn" class="save-btn save-btn--secondary">导出备份</button>
+    </div>
+    <div id="sv-manual-create" ${hasExisting ? 'style="display:none"' : ''}>
+        <input type="text" id="sv-manual-uname" class="save-input" placeholder="用户名" autocomplete="username">
+        <input type="password" id="sv-manual-newpw" class="save-input" placeholder="密码" autocomplete="new-password">
+        <input type="password" id="sv-manual-cfpw" class="save-input" placeholder="确认密码" autocomplete="new-password">
+        <div class="save-error" id="sv-manual-create-err"></div>
+        <button id="sv-manual-create-btn" class="save-btn save-btn--primary">创建并保存</button>
+        <div class="save-divider"></div>
+        <p class="save-hint">或导入已有存档：</p>
+        <div class="save-file-row">
+            <label class="save-file-label" id="sv-manual-file-label" for="sv-manual-file-input">选择文件…</label>
+            <input type="file" id="sv-manual-file-input" class="save-file-input-hidden" accept=".json">
+        </div>
+        <input type="password" id="sv-manual-import-pw" class="save-input" placeholder="存档密码" style="display:none" autocomplete="current-password">
+        <button id="sv-manual-import-btn" class="save-btn save-btn--secondary" style="display:none">导入</button>
+        <div class="save-error" id="sv-manual-import-err"></div>
+    </div>
+
+    <button id="sv-manual-cancel" class="save-btn save-btn--ghost">取消</button>
+</div>`;
+        document.body.appendChild(overlay);
+
+        const errEl = id => document.getElementById(id);
+        const close = () => overlay.remove();
+
+        errEl('sv-manual-cancel').addEventListener('click', close);
+
+        if (hasExisting) {
+            errEl('sv-manual-save-btn').addEventListener('click', async () => {
+                const pw = errEl('sv-manual-pw').value;
+                errEl('sv-manual-err').textContent = '';
+                if (!pw) { errEl('sv-manual-err').textContent = '请输入密码'; return; }
+                try {
+                    await login(pw);
+                    await save();
+                    close();
+                } catch (_) {
+                    errEl('sv-manual-err').textContent = '密码错误';
+                }
+            });
+            errEl('sv-manual-export-btn').addEventListener('click', async () => {
+                const pw = errEl('sv-manual-pw').value;
+                errEl('sv-manual-err').textContent = '';
+                if (!pw) { errEl('sv-manual-err').textContent = '请输入密码后导出'; return; }
+                try {
+                    await login(pw);
+                    await exportSave();
+                    errEl('sv-manual-err').textContent = '';
+                    errEl('sv-manual-err').style.color = '#8a8';
+                    errEl('sv-manual-err').textContent = '已导出备份';
+                } catch (_) {
+                    errEl('sv-manual-err').textContent = '密码错误，无法导出';
+                }
+            });
+        } else {
+            errEl('sv-manual-create-btn').addEventListener('click', async () => {
+                const uname = errEl('sv-manual-uname').value.trim();
+                const pw = errEl('sv-manual-newpw').value;
+                const cf = errEl('sv-manual-cfpw').value;
+                errEl('sv-manual-create-err').textContent = '';
+                if (!uname) { errEl('sv-manual-create-err').textContent = '请输入用户名'; return; }
+                if (!pw) { errEl('sv-manual-create-err').textContent = '请输入密码'; return; }
+                if (pw !== cf) { errEl('sv-manual-create-err').textContent = '两次密码不一致'; return; }
+                try {
+                    await createAccount(uname, pw);
+                    await save();
+                    close();
+                } catch (e) {
+                    errEl('sv-manual-create-err').textContent = e.message || '创建失败';
+                }
+            });
+            const fileInput = overlay.querySelector('#sv-manual-file-input');
+            const importPw = errEl('sv-manual-import-pw');
+            const importBtn = errEl('sv-manual-import-btn');
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    overlay.querySelector('#sv-manual-file-label').textContent = fileInput.files[0].name;
+                    importPw.style.display = '';
+                    importBtn.style.display = '';
+                }
+            });
+            importBtn.addEventListener('click', async () => {
+                const file = fileInput.files[0];
+                const pw = importPw.value;
+                errEl('sv-manual-import-err').textContent = '';
+                if (!file || !pw) { errEl('sv-manual-import-err').textContent = '请选择文件并输入密码'; return; }
+                try {
+                    const { saveData } = await importSave(file, pw);
+                    close();
+                    Engine.startGame(saveData);
+                } catch (_) {
+                    errEl('sv-manual-import-err').textContent = '导入失败：文件或密码错误';
+                }
+            });
+        }
+    }
+
+    return { hasSave, getMeta, createAccount, login, save, scheduleSave, exportSave, importSave, logout, showLoginScreen, loadSession, showManualSaveDialog };
 })();

@@ -31,6 +31,22 @@ async function _sha256hex(str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return _toHex(new Uint8Array(buf));
 }
+/** 凭符文设置 pending_recovery 并登记已使用。供地牢入口与记档先生共用。 */
+async function _applyRecoveryCode(code) {
+    const st = Engine.state;
+    const codeHash = await _sha256hex(code);
+    const usedCodes = st.used_recovery_codes || [];
+    if (usedCodes.includes(codeHash)) return { ok: false, error: '此符已有记录在案，不可重复凭用。' };
+    try {
+        const { s: snapshot, b: beltSnapshot } = await _decryptSnapshot(code);
+        usedCodes.push(codeHash);
+        st.used_recovery_codes = usedCodes;
+        st.pending_recovery = { snapshot, belt_snapshot: beltSnapshot, code_hash: codeHash, retrievable: false };
+        return { ok: true };
+    } catch (_) {
+        return { ok: false, error: '此符残缺或有误，无法辨认。' };
+    }
+}
 /* ─────────────────────────────────────────────────────────── */
 const ActionDispatcher = {
     perform(actionOrId, context = {}) {
@@ -416,24 +432,10 @@ const ActionDispatcher = {
             const code = (window.prompt('将符文抄录于此：') || '').trim();
             if (!code) return;
             (async () => {
-                try {
-                    const codeHash = await _sha256hex(code);
-                    const usedCodes = st.used_recovery_codes || [];
-                    if (usedCodes.includes(codeHash)) {
-                        Engine.log("记档先生看了看账簿，摇摇头。「此符已有记录在案，不可重复凭用。」");
-                        Engine.render();
-                        return;
-                    }
-                    const { s: snapshot, b: beltSnapshot } = await _decryptSnapshot(code);
-                    usedCodes.push(codeHash);
-                    st.used_recovery_codes = usedCodes;
-                    st.pending_recovery = { snapshot, belt_snapshot: beltSnapshot, code_hash: codeHash, retrievable: false };
-                    Engine.log("记档先生验核符文，抬头点了点头。「此符有效。凭它入牢一次，寻得出路后再来取物。」");
-                    Engine.render();
-                } catch (_) {
-                    Engine.log("记档先生眯眼端详良久，最终摇了摇头。「此符残缺或有误，无法辨认。」");
-                    Engine.render();
-                }
+                const result = await _applyRecoveryCode(code);
+                if (result.ok) Engine.log("记档先生验核符文，抬头点了点头。「此符有效。凭它入牢一次，寻得出路后再来取物。」");
+                else Engine.log("记档先生眯眼端详良久，最终摇了摇头。「" + result.error + "」");
+                Engine.render();
             })();
             return;
         }
@@ -466,6 +468,24 @@ const ActionDispatcher = {
             st.pending_recovery = null;
             Engine.log("记档先生核对符印，在账簿上勾销一行，从柜后取出一个包裹交到你手中。「物归原主。」");
             Engine.render();
+            return;
+        }
+
+        if (action.effect === 'dungeon_enter') {
+            const code = (window.prompt('输入符文（可选，留空直接进入地牢）：') || '').trim();
+            (async () => {
+                if (code) {
+                    const result = await _applyRecoveryCode(code);
+                    if (!result.ok) {
+                        Engine.log(result.error || '符文无效。');
+                        Engine.render();
+                        return;
+                    }
+                }
+                const ticket = context.ticket || { level: 1, type: 'default' };
+                if (typeof DungeonManager !== 'undefined') DungeonManager.enterDungeon(ticket, Engine.curId, Engine.pIdx);
+                Engine.render();
+            })();
             return;
         }
 

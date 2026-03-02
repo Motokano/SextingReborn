@@ -32,6 +32,13 @@
     "effect_id": "heal_limb",
     "effect_params": { "heal": 20, "time_cost": 30 }
   },
+  "dungeon_ticket": {
+    "sn": "地牢门票",
+    "fn": "一张印着暗纹的门票，似乎可用于进入某处地牢。",
+    "weight": 0.01,
+    "tags": ["misc"],
+    "stack_limit": 99
+  },
   "storage_box": {
     "sn": "仓库",
     "tags": ["building", "container"],
@@ -1421,6 +1428,9 @@
     "tags": ["weapon", "equipment"],
     "equipment_slot": "右手",
     "weapon_tags": ["剑", "锐利"],
+    "weapon_type": "sword",
+    "material": "iron",
+    "style": "long",
     "stack_limit": 1
   },
   "bronze_sword": {
@@ -1430,6 +1440,9 @@
     "tags": ["weapon", "equipment"],
     "equipment_slot": "右手",
     "weapon_tags": ["剑", "锐利"],
+    "weapon_type": "sword",
+    "material": "bronze",
+    "style": "long",
     "stack_limit": 1
   },
   "iron_dao": {
@@ -1439,6 +1452,9 @@
     "tags": ["weapon", "equipment"],
     "equipment_slot": "右手",
     "weapon_tags": ["刀"],
+    "weapon_type": "blade",
+    "material": "iron",
+    "style": "single",
     "stack_limit": 1
   },
   "iron_spear": {
@@ -1457,6 +1473,30 @@
     "tags": ["weapon", "equipment"],
     "equipment_slot": "右手",
     "weapon_tags": ["棍"],
+    "stack_limit": 1
+  },
+  "steel_sword": {
+    "sn": "钢剑",
+    "fn": "百炼精钢所铸长剑，剑身笔直，剑锋尚利。",
+    "weight": 1.65,
+    "tags": ["weapon", "equipment"],
+    "equipment_slot": "右手",
+    "weapon_tags": ["剑", "锐利"],
+    "weapon_type": "sword",
+    "material": "steel",
+    "style": "long",
+    "stack_limit": 1
+  },
+  "wooden_sword": {
+    "sn": "木剑",
+    "fn": "硬木削制长剑，剑身笔直，剑锋尚利。多用于练习。",
+    "weight": 0.98,
+    "tags": ["weapon", "equipment"],
+    "equipment_slot": "右手",
+    "weapon_tags": ["剑", "锐利"],
+    "weapon_type": "sword",
+    "material": "wood",
+    "style": "long",
     "stack_limit": 1
   },
 
@@ -1537,6 +1577,66 @@
     "tags": ["equipment", "belt"],
     "equipment_slot": "腰带",
     "quick_slots": 6,
+    "stack_limit": 1
+  },
+
+  "short_sword": {
+    "sn": "短剑",
+    "fn": "剑身较短，轻利便于在狭窄处挥动。",
+    "weight": 1.0,
+    "tags": ["weapon", "equipment"],
+    "equipment_slot": "右手",
+    "weapon_tags": ["剑", "锐利"],
+    "weapon_type": "sword",
+    "material": "iron",
+    "style": "short",
+    "stack_limit": 1
+  },
+  "hatchet": {
+    "sn": "手斧",
+    "fn": "铁质手斧，劈砍有力。",
+    "weight": 1.2,
+    "tags": ["weapon", "equipment"],
+    "equipment_slot": "右手",
+    "weapon_tags": ["刀"],
+    "weapon_type": "blade",
+    "material": "iron",
+    "style": "hatchet",
+    "stack_limit": 1
+  },
+  "chain_coat": {
+    "sn": "链甲",
+    "fn": "环锁甲，防护优于皮甲。",
+    "weight": 3.0,
+    "tags": ["armor", "equipment"],
+    "equipment_slot": "护甲",
+    "defense": 8,
+    "stack_limit": 1
+  },
+  "silver_ring": {
+    "sn": "银戒",
+    "fn": "一枚旧银戒指，戴在指上略感凉意。",
+    "weight": 0.05,
+    "tags": ["accessory", "equipment"],
+    "equipment_slot": "右手戒指",
+    "stack_limit": 1
+  },
+  "headband": {
+    "sn": "头带",
+    "fn": "结实的布质头带，可束发并略护额部。",
+    "weight": 0.1,
+    "tags": ["armor", "equipment"],
+    "equipment_slot": "头饰",
+    "defense": 0,
+    "stack_limit": 1
+  },
+  "adventurer_belt": {
+    "sn": "探险腰带",
+    "fn": "结实的皮质腰带，可多挂几件随身之物。",
+    "weight": 0.3,
+    "tags": ["equipment", "belt"],
+    "equipment_slot": "腰带",
+    "quick_slots": 4,
     "stack_limit": 1
   }
 }

@@ -562,6 +562,12 @@
         "turn_cost": 0,
         "effect": "npc_enter_recovery_code"
     },
+    "dungeon_enter": {
+        "label": "进入地牢",
+        "repeatable": true,
+        "turn_cost": 0,
+        "effect": "dungeon_enter"
+    },
     "npc_retrieve_dungeon": {
         "label": "取回地牢物品",
         "repeatable": true,

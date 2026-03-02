@@ -78,6 +78,10 @@ const StatusActions = {
 
     trigger_death(c) {
         const st = Engine.state;
+        if (st.dungeon && st.dungeon.active) {
+            if (typeof DungeonManager !== 'undefined' && DungeonManager.restoreSnapshot) DungeonManager.restoreSnapshot();
+            st.dungeon = null;
+        }
         const SLOT_NAMES = ["头饰", "护甲", "左手", "右手", "腰带", "左脚", "右脚", "左耳环", "右耳环", "项链", "左手戒指", "右手戒指"];
         const backup = st.equipment_backup || {};
         if (backup.registered) {

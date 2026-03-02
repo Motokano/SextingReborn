@@ -150,6 +150,10 @@ const Movement = {
     },
 
     click(i) {
+        if (Engine.curId === 'dungeon' && Engine.state.dungeon && Engine.state.dungeon.active) {
+            Movement._dungeonClick(i);
+            return;
+        }
         const c = Engine.cur.grid[i];
         const d = Movement.dist(Engine.pIdx, i);
         if (d === 1) {
@@ -171,5 +175,46 @@ const Movement = {
             if (Engine.describeTile) Engine.describeTile(c, ref);
             Engine.render();
         } else if (d === 0) Engine.render();
+    },
+
+    _dungeonClick(i) {
+        const d = Movement.dist(Engine.pIdx, i);
+        const c = Engine.cur.grid[i];
+        const dungeon = Engine.state.dungeon;
+        if (!c || !c.dungeon_cell || !dungeon) return;
+        if (d === 0) { Engine.render(); return; }
+        if (d !== 1) return;
+        if (Engine.state.upgrading_skill_id) return;
+        if (c.dungeon_leave) {
+            if (typeof DungeonManager !== 'undefined') DungeonManager.exitDungeon();
+            return;
+        }
+        let legMult = 1;
+        if (Engine.state.limbs.l_leg <= 0 && Engine.state.limbs.r_leg <= 0) legMult = 3;
+        else if (Engine.state.limbs.l_leg <= 0 || Engine.state.limbs.r_leg <= 0) legMult = 2;
+        Engine.pIdx = i;
+        if (dungeon.pIdx != null) dungeon.pIdx = i;
+        if (dungeon.exploredRooms && c.dungeon_room_index != null) dungeon.exploredRooms[c.dungeon_room_index] = true;
+        const timeCost = Math.max(1, Math.floor(10 * legMult * (Engine.state.move_time_mult || 1)));
+        Movement.advanceTime(timeCost);
+        // 每次玩家在地牢移动一格时，推进当前房间的敌人行动
+        if (typeof DungeonManager !== 'undefined' && typeof DungeonManager.advanceEnemies === 'function') {
+            DungeonManager.advanceEnemies();
+        }
+        const roomIndex = c.dungeon_room_index;
+        const triggered = dungeon.roomContentTriggered || {};
+        const room = dungeon.rooms && roomIndex != null ? dungeon.rooms[roomIndex] : null;
+        // 普通战斗房间的战斗由地图上的敌人追击触发，不再通过房间内容直接开战
+        if (c.dungeon_content_type === 'content' && roomIndex != null && room && room.type !== 'combat' && !triggered[roomIndex]) {
+            triggered[roomIndex] = true;
+            const room = dungeon.rooms[roomIndex];
+            if (room && typeof DungeonUI !== 'undefined' && DungeonUI.triggerRoomContent) {
+                DungeonUI.triggerRoomContent(room);
+            } else {
+                Engine.render();
+            }
+        } else {
+            Engine.render();
+        }
     }
 };

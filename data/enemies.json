@@ -32,5 +32,24 @@
     "drops": {},
     "potential_gain": 80,
     "battle_exp_gain": 200
+  },
+  "dungeon_swordsman": {
+    "id": "dungeon_swordsman",
+    "sn": "地牢剑客",
+    "tags": ["人类"],
+    "limbs": { "head": 35, "chest": 75, "stomach": 50, "l_arm": 60, "r_arm": 60, "l_leg": 60, "r_leg": 60 },
+    "maxLimbs": { "head": 35, "chest": 75, "stomach": 50, "l_arm": 60, "r_arm": 60, "l_leg": 60, "r_leg": 60 },
+    "reflex_innate": 11,
+    "reflex_acq": 4,
+    "sinew_innate": 10,
+    "flex_innate": 10,
+    "combat_skill_progress": { "basic_parry": { "level": 12 }, "basic_movement": { "level": 10 } },
+    "move_id": "luoyan-jian",
+    "damage_type": "slashing",
+    "power_base": 11,
+    "equipment_slots": { "右手": "iron_sword" },
+    "drops": {},
+    "potential_gain": 100,
+    "battle_exp_gain": 200
   }
 }

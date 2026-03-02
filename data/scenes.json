@@ -21,6 +21,9 @@
       {"object_id":"berry_bush"},{"object_id":"crop_patch"},{"object_id":"herb_patch"},{"object_id":"workbench"},{"object_id":"storage_box","inventory":{
         "blueprint_time_pole":1,
         "blueprint_smelter":1,
+        "dungeon_ticket":1,
+        "cloth_robe":1,
+        "iron_sword":1,
         "iron_ore":20,
         "black_iron_ore":20,
         "yellow_copper_ore":20,
@@ -85,7 +88,7 @@
     "grid": [
       {"object_id":"pine_tree"},{"object_id":"birch_tree"},{"object_id":"oak_tree"},{"sn":"北路","acts":[{"label":"前进","cmd":[{"type":"move","target":"lake","entry":59}]}]},{"object_id":"ash_tree"},{"object_id":"cedar_tree"},{"object_id":"balsa_tree"},{"object_id":"ironwood_tree"},
       {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"object_id":"pine_tree"},
-      {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},
+      {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null","sn":"地牢入口","action_ids":["dungeon_enter"]},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},
       {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},
       {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"object_id":"game_trail"},{"object_id":"campfire"},{"object_id":"wild_wolf"},{"type":"null"},{"type":"tree","sn":"树"},
       {"type":"tree","sn":"树"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"null"},{"type":"tree","sn":"树"},

@@ -12,7 +12,7 @@ const Engine = {
     GROUND_SLOTS: 8,
 
     async init() {
-        const files = ['config', 'scenes', 'npcs', 'buffs', 'objects', 'actions', 'races', 'character_attributes', 'materials', 'forage', 'recipes', 'buildings', 'crafting_skills', 'moves', 'internal_arts', 'internal_arts_power_config', 'philosophy_bonuses', 'neigong_tier_philosophy', 'enemies'];
+        const files = ['config', 'scenes', 'npcs', 'buffs', 'objects', 'actions', 'races', 'character_attributes', 'materials', 'forage', 'recipes', 'buildings', 'crafting_skills', 'moves', 'internal_arts', 'internal_arts_power_config', 'philosophy_bonuses', 'neigong_tier_philosophy', 'enemies', 'dungeon', 'weapon_attributes'];
         try {
             const results = await Promise.all(files.map(async f => {
                 const r = await fetch(`./data/${f}.json?v=${Date.now()}`);
@@ -23,7 +23,10 @@ const Engine = {
             Engine.pID = Object.keys(Engine.db.npcs).find(k => Engine.db.npcs[k].is_player);
             if (!Engine.pID) throw new Error("No player character found in npcs.json");
         } catch (e) { console.error(e); return; }
-        SaveManager.showLoginScreen();
+        const sessionData = SaveManager.loadSession && SaveManager.loadSession();
+        Engine.startGame(sessionData || null);
+        const saveBtn = document.getElementById('manual-save-btn');
+        if (saveBtn && SaveManager.showManualSaveDialog) saveBtn.addEventListener('click', () => SaveManager.showManualSaveDialog());
     },
 
     /** 登录后由 SaveManager 调用。savedData 为解密存档对象，null 表示全新游戏。 */
@@ -121,6 +124,7 @@ const Engine = {
             Engine.startMeditateTick();
             Engine.startUpgradeTick();
             Engine.render();
+            if (Engine.state.dungeon && Engine.state.dungeon.active && typeof DungeonManager !== 'undefined' && DungeonManager.loadDungeonRoom) DungeonManager.loadDungeonRoom();
         } catch (e) { console.error(e); }
     },
 
@@ -343,22 +347,30 @@ const Engine = {
         const cols = (Engine.cur && Engine.cur.cols) || 8;
         g.style.gridTemplateColumns = `repeat(${cols}, 64px)`;
         g.innerHTML = "";
+        const isDungeon = Engine.curId === 'dungeon' && Engine.state.dungeon && Engine.state.dungeon.active;
+        const dungeonExploredRooms = isDungeon && Engine.state.dungeon.exploredRooms ? Engine.state.dungeon.exploredRooms : null;
         Engine.cur.grid.forEach((c, i) => {
             const isP = (i === Engine.pIdx);
             const refObj = c.object_id ? Engine.db.objects[c.object_id] : null;
             const groundTotal = (c.groundInventory && Object.keys(c.groundInventory).length) ? Object.values(c.groundInventory).reduce((a, n) => a + n, 0) : 0;
             let cellLabel = refObj ? UI.getObjectDisplayName(refObj, Engine.state) : (c.sn || "");
-            if (refObj && refObj.tags && refObj.tags.includes('tree')) cellLabel = '树';
-            if (Engine.curId === 'home' && c.farmland) {
-                const cropInfo = Engine.state.home_crops && Engine.state.home_crops[String(i)];
-                if (cropInfo) {
-                    const cropObj = Engine.db.objects && Engine.db.objects[cropInfo.crop_id];
-                    cellLabel = (cropObj && cropObj.sn) ? cropObj.sn + '田' : '麦田';
-                } else cellLabel = '农田';
+            const roomUnexplored = isDungeon && dungeonExploredRooms && c.dungeon_room_index != null && !dungeonExploredRooms[c.dungeon_room_index];
+            if (roomUnexplored) {
+                cellLabel = "？";
+            } else {
+                if (refObj && refObj.tags && refObj.tags.includes('tree')) cellLabel = '树';
+                if (Engine.curId === 'home' && c.farmland) {
+                    const cropInfo = Engine.state.home_crops && Engine.state.home_crops[String(i)];
+                    if (cropInfo) {
+                        const cropObj = Engine.db.objects && Engine.db.objects[cropInfo.crop_id];
+                        cellLabel = (cropObj && cropObj.sn) ? cropObj.sn + '田' : '麦田';
+                    } else cellLabel = '农田';
+                }
             }
-            if (groundTotal > 0 && !cellLabel) cellLabel = "物品";
+            if (groundTotal > 0 && !cellLabel && !roomUnexplored) cellLabel = "物品";
             const btn = document.createElement('div');
             btn.className = `btn ${c.type || (refObj ? refObj.type : '')} ${c.blocking || (refObj && refObj.blocking) ? 'blocking' : ''} ${isP ? 'player-token' : ''}`;
+            if (roomUnexplored) btn.classList.add('dungeon-unexplored');
             const suffix = (groundTotal > 0 ? ` (${groundTotal})` : "");
             if (isP && cellLabel) {
                 btn.innerHTML = "我<br>" + cellLabel.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + suffix;

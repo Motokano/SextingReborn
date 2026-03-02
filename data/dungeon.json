@@ -1,0 +1,35 @@
+{
+  "room_count_range": [6, 10],
+  "map_cols": 8,
+  "map_rows": 8,
+  "grid_room_cols": 3,
+  "grid_room_rows": 2,
+  "room_types": {
+    "combat": { "weight": 30, "label": "战斗" },
+    "treasure": { "weight": 15, "label": "宝藏" },
+    "rest": { "weight": 12, "label": "休息" },
+    "event": { "weight": 15, "label": "事件" },
+    "shop": { "weight": 10, "label": "商店" },
+    "trap": { "weight": 10, "label": "陷阱" },
+    "boss": { "weight": 1, "label": "首领" }
+  },
+  "enemy_pools": {
+    "default": { "ids": ["wolf", "bandit", "dungeon_swordsman"], "count_range": [1, 2] },
+    "boss": { "ids": ["bandit"], "count_range": [1, 1] }
+  },
+  "treasure_pool": ["apple", "bandage", "stone", "short_sword", "hatchet", "chain_coat", "silver_ring", "headband", "adventurer_belt", "leather_armor", "iron_sword", "jade_pendant"],
+  "treasure_pick_count": 3,
+  "shop_pool": [
+    { "item_id": "bandage", "price": 15 },
+    { "item_id": "apple", "price": 5 }
+  ],
+  "trap_damage_ratio": 0.15,
+  "trap_avoid_neili_cost": 20,
+  "rest_limb_ratio": 0.3,
+  "rest_energy": 20,
+  "rest_neili": 30,
+  "event_messages": [
+    { "desc": "你发现墙上刻着模糊的字迹。", "choices": [{ "text": "略过", "effect": "none" }, { "text": "细看", "effect": "log", "log": "似乎是一段残缺的心法口诀，难以辨认。" }] },
+    { "desc": "地上有一具枯骨。", "choices": [{ "text": "离开", "effect": "none" }, { "text": "搜查", "effect": "log", "log": "除了一身破衣外别无他物。" }] }
+  ]
+}
