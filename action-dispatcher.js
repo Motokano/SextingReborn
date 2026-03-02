@@ -335,8 +335,7 @@ const ActionDispatcher = {
             const WAIT_MS = 30 * 60 * 1000;
             const elapsed = Date.now() - (backup.death_time || 0);
             if (elapsed < WAIT_MS) {
-                const remaining = Math.ceil((WAIT_MS - elapsed) / 60000);
-                Engine.log(`还需等待约 ${remaining} 分钟，记档先生才能整理好你的遗物。`);
+                Engine.log("记档先生翻了翻账簿，摆摆手道：「时机未到，稍后再来。」");
                 Engine.render();
                 return;
             }
@@ -366,20 +365,20 @@ const ActionDispatcher = {
                 return;
             }
             if (backup.recovery_code) {
-                Engine.log(`你已持有取回代码：【${backup.recovery_code}】。在重进同一地牢时的门票界面中输入此代码，撤出地牢后再来取回装备。`);
+                Engine.log(`记档先生从袖中取出一张已盖章的纸条递给你。纸条上写着：【${backup.recovery_code}】`);
                 Engine.render();
                 return;
             }
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
-            for (let i = 0; i < 7; i++) {
-                if (i === 3) code += '-';
+            for (let i = 0; i < 12; i++) {
+                if (i === 4 || i === 8) code += '-';
                 code += chars[Math.floor(Math.random() * chars.length)];
             }
             backup.recovery_code = code;
             backup.retrievable = false;
             st.equipment_backup = backup;
-            Engine.log(`记档先生在账簿上盖章，递给你一张纸条。「取回代码：【${code}】，一次性有效。重进同一地牢时，在门票界面输入此代码，找到出口撤出后再来找我。」`);
+            Engine.log(`记档先生在账簿上划了几笔，盖上朱印，撕下一张纸条递给你。「此符一次有效，凭它再入那处，寻得出路后回来找我。」纸条上写着：【${code}】`);
             Engine.render();
             return;
         }
@@ -407,7 +406,7 @@ const ActionDispatcher = {
             backup.code_used = false;
             backup.retrievable = false;
             st.equipment_backup = backup;
-            Engine.log("记档先生核对代码，将账簿上记载的装备一件件取出还给你。「此番历练，想必收获颇丰。」");
+            Engine.log("记档先生核对符印，在账簿上勾销一行，从柜后取出一个包裹交到你手中。「物归原主。」");
             Engine.render();
             return;
         }
