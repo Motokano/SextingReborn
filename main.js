@@ -20,15 +20,33 @@ const Engine = {
                 return r.json();
             }));
             files.forEach((f, i) => Engine.db[f] = results[i]);
-
             Engine.pID = Object.keys(Engine.db.npcs).find(k => Engine.db.npcs[k].is_player);
             if (!Engine.pID) throw new Error("No player character found in npcs.json");
+        } catch (e) { console.error(e); return; }
+        SaveManager.showLoginScreen();
+    },
 
+    /** 登录后由 SaveManager 调用。savedData 为解密存档对象，null 表示全新游戏。 */
+    startGame(savedData) {
+        try {
             const playerDef = Engine.db.npcs[Engine.pID];
             const playerRace = Engine.db.races.find(r => r.id === playerDef.race);
             if (!playerRace) throw new Error(`Race '${playerDef.race}' for player not found in races.json`);
 
-            Engine.state = JSON.parse(JSON.stringify(playerRace.base_stats));
+            if (savedData) {
+                // 从存档恢复
+                Engine.state = savedData.state;
+                Engine.time = savedData.time || Engine.time;
+                Engine.flags = savedData.flags || {};
+                Engine.npcStates = savedData.npcStates || {};
+                Engine.lastDecayDay = savedData.lastDecayDay || 0;
+                Engine.dehydrationAccum = savedData.dehydrationAccum || 0;
+            } else {
+                // 全新游戏
+                Engine.state = JSON.parse(JSON.stringify(playerRace.base_stats));
+            }
+
+            // 补全所有新增字段（存档兼容性保证）
             if (!Engine.state.buffs) Engine.state.buffs = [];
             if (Engine.state.combat_skill_slots == null) Engine.state.combat_skill_slots = { "剑法": null, "刀法": null, "暗器": null, "枪法": null, "掌法": null, "拳法": null, "腿法": null, "棍法": null, "指法": null, "身法": null, "内功": null, "招架": null };
             if (Engine.state.combat_skill_slots_by_limb == null) {
@@ -91,14 +109,18 @@ const Engine = {
             if (Engine.state.equipment_backup == null) Engine.state.equipment_backup = { registered: false, snapshot: null, belt_snapshot: null, death_type: null, death_time: null, recovery_code: null, recovery_dungeon_id: null, code_used: false, retrievable: false };
             if (Engine.state.used_recovery_codes == null) Engine.state.used_recovery_codes = [];
             if (Engine.state.pending_recovery == null) Engine.state.pending_recovery = null;
+
             CharacterUtils.applyCharacterAttributes(Engine.state, playerDef);
 
-            Movement.loadScene(Engine.db.config.startScene, Engine.db.config.startIndex);
+            const sceneId = (savedData && savedData.curId) ? savedData.curId : Engine.db.config.startScene;
+            const sceneIdx = (savedData && savedData.pIdx != null) ? savedData.pIdx : Engine.db.config.startIndex;
+            Movement.loadScene(sceneId, sceneIdx);
             Engine.lastDecayDay = Engine.time.month * 31 + Engine.time.day;
             Engine.ensureTodayAlmanac();
             Movement.setupKeyboardControls();
             Engine.startMeditateTick();
             Engine.startUpgradeTick();
+            Engine.render();
         } catch (e) { console.error(e); }
     },
 
@@ -314,6 +336,7 @@ const Engine = {
     },
 
     render() {
+        SaveManager.scheduleSave();
         UI.updateStatus(Engine.time, Engine.cur.name);
         document.getElementById('scene-desc').innerText = Engine.cur.desc;
         const g = document.getElementById('action-grid');
